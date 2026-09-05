@@ -13,8 +13,14 @@ L'amico fisico di Matteo lavora indipendentemente: condivide informazioni e stru
 3. [Proposta di metodo sperimentale](docs/03-metodo-sperimentale.md).
 4. [Fasi, stato e prossime decisioni](docs/roadmap.md).
 5. [Fonti, premi e rettifiche](docs/fonti-e-verifiche.md).
+6. [ScrollScout e piano di verifica](docs/05-scrollscout-e-piano-di-verifica.md).
+7. [Ricerca sulla community e registro dei contributi](docs/06-ricerca-community.md).
+
+Per la prossima attività pratica: [prima sessione guidata](docs/04-prima-sessione.md), con un esempio ufficiale da esplorare nel browser. Disponibili anche un PC fisso da 32 GB dichiarato da Matteo e il Mac M3 Pro del socio; la destinazione del calcolo GPU sarà scelta dopo l'inventario e un confronto su un piccolo campione.
 
 La prima meta è riprodurre una procedura nota e comprenderne i limiti. La scelta fra First Letters e Progress Prizes resta da consolidare. Vincere è l'obiettivo del progetto, non un esito garantito dal funzionamento del software.
+
+Account Kaggle e telefono verificati; primo notebook e inferenza ancora da eseguire. L'inventario dettagliato del fisso arriverà al suo prossimo utilizzo e non blocca il setup Kaggle dal portatile. La ricerca comprende contributi pubblici di altri partecipanti oltre agli aggiornamenti di Francesco: prima selezione di 11 risorse documentata, nessuna nuova pipeline replicata.
 
 ## Organizzazione
 

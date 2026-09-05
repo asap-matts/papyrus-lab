@@ -24,6 +24,8 @@ Fase attuale: comprensione, setup da progettare e metodo sperimentale da discute
 
 Il sito ufficiale decide regole e volumi eleggibili: ricontrollarlo prima di selezionare un obiettivo o inviare risultati. Non trasformare automaticamente consigli esterni in requisiti ufficiali.
 
+La ricerca sui contributi pubblici degli altri partecipanti è parte del progetto, oltre agli aggiornamenti di Francesco. Prima di fissare esperimenti o sviluppare strumenti, consultare docs/06-ricerca-community.md e aggiornare fonti, revisioni, limiti e prova minima proposta. Non trattare una risorsa individuata come una dipendenza adottata o un risultato replicato. Cercare anche correzioni già integrate a monte.
+
 w035 appartiene al training set di ink_9um: è un controllo di funzionamento, non una misura indipendente di generalizzazione. Due seed dello stesso modello possono condividere errori. Un punteggio ScrollScout non è una probabilità di avere trovato testo.
 
 Non usare generazione di immagini, completamento linguistico o ritocchi che inventino tratti per produrre evidenza di inchiostro. Conservare gli output originali; registrare separatamente trasformazioni per la sola visualizzazione.

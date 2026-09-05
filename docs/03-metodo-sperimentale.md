@@ -14,6 +14,8 @@ La distinzione relativa a w035 è dichiarata nel [tutorial ufficiale](https://sc
 
 ## Costruire il confronto prima di ottimizzare
 
+Prima di fissare la baseline consultare il [registro della community](06-ricerca-community.md): valutazione per regioni, integrità dei dati, riproducibilità e controlli geometrici possono riusare contributi esistenti. Collegare ogni idea candidata all'ID della fonte e alla prova che ne misurerà il vantaggio.
+
 1. Identificare un piccolo gruppo di esempi con annotazioni attendibili e registrarne origine, scala e regioni fisiche. Una zona senza annotazioni può essere sconosciuta, non necessariamente priva di inchiostro.
 2. Distinguere dati di sviluppo e dati finali di verifica. Conservare separatamente regioni realmente escluse dal training di tutti i checkpoint valutati, controllando i manifest ufficiali. Se non riusciamo a dimostrarlo, chiamare la prova controllo operativo e non benchmark indipendente.
 3. Evitare che crop vicini, scansioni dello stesso tratto o patch sovrapposte finiscano in gruppi diversi. Preferire divisioni per segmento o rotolo e verificare le coordinate; per il training prevedere anche distanza fra regioni rispetto al campo osservato dal modello.

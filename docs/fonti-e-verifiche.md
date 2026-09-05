@@ -11,6 +11,7 @@ Consultazione: 5 settembre 2026. Sono appunti di avvio; verificare regole e disp
 - [Ink detection](https://scrollprize.org/tutorial5).
 - [Catalogo dati](https://scrollprize.org/data_browser).
 - [Codice villa](https://github.com/ScrollPrize/villa).
+- [Catalogo ufficiale dei contributi della community](https://scrollprize.org/community_projects); prima selezione e revisioni nel [registro di ricerca](06-ricerca-community.md).
 - [Checkpoint ink_9um](https://huggingface.co/scrollprize/ink_9um).
 - [Kaggle Notebooks](https://www.kaggle.com/docs/notebooks) e [quota GPU](https://www.kaggle.com/docs/efficient-gpu-usage).
 
@@ -35,3 +36,5 @@ La pagina dei Progress Prizes mostra ancora il 31 agosto 2026 come prossima scad
 Nella conversazione preliminare è stato esaminato il commit d9be23361e159962394a76591aa543850c4a1d75. Il tentativo locale di test non è stato completato: prima mancavano il pacchetto e scipy, poi l'installazione isolata delle dipendenze è stata interrotta. Errori riportati: `ModuleNotFoundError: No module named 'scrollscout'`, quindi `No module named 'scipy'`; la verifica finale dell'ambiente isolato segnalava anche numpy e pytest mancanti. Questi sono problemi dell'ambiente di prova, non un fallimento scientifico del metodo. Non importiamo quel checkout nel progetto né dichiariamo i test superati.
 
 Le affermazioni private dell'amico su analisi non ancora pubblicate restano informazioni da chiarire con lui; non si presumono priorità, esclusività o diritto di pubblicazione.
+
+Nel consolidamento del 5 settembre è stato controllato anche ScrollScout al commit `29656e3b8455572dded5ed4a13ddfa974dac1a5e`: README e pesi predefiniti del codice non coincidono completamente. La [nota ScrollScout](05-scrollscout-e-piano-di-verifica.md) distingue versioni, score e controlli corretti. È una revisione documentale e parziale del codice, senza una nuova esecuzione dei test esterni.

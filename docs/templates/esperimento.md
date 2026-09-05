@@ -7,6 +7,7 @@ Stato: proposto / in corso / completato / interrotto.
 - ID, autore, data:
 - Ipotesi:
 - Baseline e singola modifica:
+- Contributo esterno di riferimento: ID Rxx dal registro community, fonte, revisione e vantaggio dichiarato da verificare:
 - Budget massimo (tempo umano, GPU, spazio, eventuale costo):
 - Condizione di arresto:
 - Criterio per accettare o respingere l'ipotesi:
