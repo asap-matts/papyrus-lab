@@ -6,7 +6,7 @@ Fonte comune per Codex e Claude Code. Leggere prima README.md e docs/roadmap.md.
 
 Il team è Matteo e il suo socio (Mac M3 Pro). L'amico fisico è un interlocutore esterno indipendente. Non assegnargli ruoli, quote o obblighi. Non presumere che Matteo abbia già VC3D o competenze di segmentazione.
 
-Fase attuale: comprensione, setup da progettare e metodo sperimentale da discutere. L'avvio documentale non autorizza implicitamente campagne GPU, training, spese o submission. Il bootstrap e la prima sincronizzazione GitHub sono stati richiesti esplicitamente nella conversazione del 5 settembre 2026.
+Fase attuale: procedura operativa in bozza e preflight Kaggle completato; E00 non è stato eseguito e il metodo sperimentale va revisionato prima dell'esecuzione. L'avvio documentale non autorizza implicitamente campagne GPU, training, spese o submission. Il bootstrap e la prima sincronizzazione GitHub sono stati richiesti esplicitamente nella conversazione del 5 settembre 2026.
 
 ## Metodo
 
@@ -14,6 +14,7 @@ Fase attuale: comprensione, setup da progettare e metodo sperimentale da discute
 - Separare fatti ufficiali, risultati esterni, ipotesi del team e misure replicate.
 - Non presentare una scelta proposta come approvata.
 - Un solo writer per cartella. Il socio usa un clone proprio; agenti paralleli richiedono isolamento e incarichi espliciti.
+- Claude e Codex non hanno ruoli permanenti in PapyrusLab. Scegliere per ogni attività chi organizza, esegue o revisiona in base a contesto, importanza, indipendenza utile e budget disponibile; registrare la scelta nel piano o nella revisione.
 - Non leggere contenuti di .env, token o credenziali. Non pubblicare segreti o conversazioni private.
 - Commit, push, merge, PR e deploy richiedono richiesta esplicita; l'autorizzazione al bootstrap non vale per tutte le modifiche future.
 - Operazioni distruttive solo con conferma. Conservare risultati negativi e spiegare gli esperimenti interrotti.
@@ -34,4 +35,4 @@ Non usare generazione di immagini, completamento linguistico o ritocchi che inve
 
 Per ora il repository contiene solo documenti: verificare link relativi, git diff --check, file tracciati e assenza di file voluminosi/riservati. Non esistono ancora build o test scientifici da dichiarare superati.
 
-I futuri piani eseguibili andranno in docs/plans/AAAA-MM-GG-argomento.md con commit di partenza, perimetro, ordine, controlli e condizione di arresto. Verificare il commit prima di eseguirli e fermarsi se il piano non corrisponde allo stato reale. docs/roadmap.md e docs/03-metodo-sperimentale.md sono proposte di percorso, non contratti di implementazione già approvati.
+La procedura canonica è `docs/07-procedura-operativa.md`. I futuri piani eseguibili andranno in docs/plans/AAAA-MM-GG-argomento.md con commit di partenza, perimetro, ordine, controlli e condizione di arresto. Verificare il commit prima di eseguirli e fermarsi se il piano non corrisponde allo stato reale. docs/roadmap.md e docs/03-metodo-sperimentale.md sono proposte di percorso, non contratti di implementazione già approvati.

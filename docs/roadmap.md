@@ -9,7 +9,7 @@ Aggiornamento: 5 settembre 2026.
 - La sequenza richiesta è: comprendere, definire il setup, progettare i test, implementare ed eseguire.
 - Creare una cartella locale e sincronizzare un repository GitHub è autorizzato per l'avvio.
 - Matteo ha richiesto anche il consolidamento e il commit/push di tutti gli aggiornamenti documentali correnti, inclusa la ricerca sui contributi pubblici oltre a Francesco.
-- La verifica telefonica Kaggle è completata e confermata nel browser. Matteo fornirà le specifiche dettagliate del fisso quando lo utilizzerà; il setup Kaggle procede dal portatile.
+- La verifica telefonica Kaggle è completata e confermata nel browser. Un preflight privato ha verificato due Tesla T4 e CUDA tramite PyTorch, poi la sessione è stata fermata. Matteo fornirà le specifiche dettagliate del fisso quando lo utilizzerà.
 
 ## Impostazioni iniziali modificabili
 
@@ -24,8 +24,8 @@ Aggiornamento: 5 settembre 2026.
 |---|---|---|
 | F0 — Avvio | Completata e verificata | Repository privato e primo commit locale/remoto coincidenti |
 | F1 — Comprensione | In corso; prima sessione guidata preparata | Entrambi distinguono scansione, mesh, render, previsione e prova |
-| F2 — Setup minimo | Account Kaggle e telefono verificati; nessuna GPU ancora eseguita; inventario hardware parziale | Un campione visualizzato e un piccolo notebook eseguibile |
-| F3 — Progettazione dei test | Prima bozza disponibile | Campioni, baseline, controlli, budget, metriche e stop definiti |
+| F2 — Setup minimo | Notebook Kaggle privato eseguito su due Tesla T4; pipeline e campione non ancora provati; inventario hardware parziale | Un campione noto visualizzato e inferenza minima verificata |
+| F3 — Progettazione dei test | Procedura operativa canonica in bozza; revisione e piano E00 mancanti | Campioni, baseline, controlli, budget, metriche e stop definiti |
 | R — Ricerca community | Prima selezione di 11 risorse, revisioni e prove proposte registrate | Soluzioni esistenti valutate prima di ogni esperimento o nuovo strumento |
 | F4 — Implementazione minima | Non avviata | Script/notebook ripetibile per E00–E02 |
 | F5 — Ottimizzazione | Non avviata | Confronti documentati, esiti positivi e negativi |
@@ -35,14 +35,14 @@ Prima delle campagne di ottimizzazione completare F3. Il setup può comprendere 
 
 ## Prossima sessione
 
-Seguire la [prima sessione guidata](04-prima-sessione.md), la [ricerca community](06-ricerca-community.md) e il [setup Kaggle](02-strumenti-e-setup.md#primo-accesso-a-kaggle). Il [piano di verifica di ScrollScout](05-scrollscout-e-piano-di-verifica.md) è uno dei filoni di confronto.
+La [procedura operativa canonica](07-procedura-operativa.md) traduce il metodo scientifico in gate, artefatti, criteri di arresto e combinazioni possibili fra due agenti, senza assegnare ruoli permanenti. Sottoporla a revisione incrociata read-only, consolidare i finding accettati e pubblicarla su un commit pulito. Il [piano di verifica di ScrollScout](05-scrollscout-e-piano-di-verifica.md) resta uno dei filoni di confronto.
 
-1. Scrivere il primo piano eseguibile sulla documentazione consolidata: campione già renderizzato, checkpoint e software esatti, output atteso, limite di tempo/spazio e criterio di arresto per E00.
-2. Preparare un notebook privato inizialmente su CPU, poi verificare l'assegnazione GPU e completare il controllo noto. Il contatore Kaggle osservato mostra 00:00 su 30 ore GPU e 20 ore TPU; disponibilità dell'acceleratore e funzionamento del modello restano da provare.
+1. Revisionare il [dossier E00](08-dossier-input-e00.md), che propone w035 e congela le revisioni candidate; risolvere acquisizione della sola label e installazione minima. Dopo la revisione della procedura, scrivere il primo piano eseguibile sul nuovo commit di base.
+2. Usare il notebook privato già collaudato per completare il controllo noto. Il [preflight](reports/2026-09-05-kaggle-preflight.md) ha verificato due Tesla T4, PyTorch e CUDA; disponibilità dell'acceleratore non equivale ancora al funzionamento del modello Vesuvius.
 3. Salvare istruzioni, parametri e risultati; predisporre la ripetizione del socio e il confronto indipendente E02 usando la ricerca già raccolta.
 4. Quando disponibili, rilevare modello NVIDIA, CPU, sistema operativo e spazio libero del fisso; poi RAM e spazio del Mac. Servirà l'username GitHub del socio per un invito esplicitamente richiesto. Questi dati non bloccano i primi due passi.
 
-Nessun acceleratore è stato attivato, né sono stati effettuati inviti, registrazione Discord, installazione VC3D o submission. Non è stato impostato un monitoraggio automatico della community: il registro verrà usato nelle sessioni di ricerca e quando arrivano nuovi aggiornamenti.
+L'acceleratore Kaggle è stato attivato soltanto per il preflight e poi fermato. Non sono stati effettuati inviti, registrazione Discord, installazione VC3D o submission. Non è stato impostato un monitoraggio automatico della community: il registro verrà usato nelle sessioni di ricerca e quando arrivano nuovi aggiornamenti.
 
 ## Consolidamento documentale del 5 settembre 2026
 
@@ -58,4 +58,4 @@ La pubblicazione viene verificata nella sessione confrontando HEAD con main remo
 - Git ignore: verificato per esempi di dati, checkpoint, file .env, ambiente Python e output.
 - Primo commit: 11 file di documentazione e configurazione Git, nessun dataset o modello.
 - Albero di lavoro pulito dopo il primo push. Questo verbale viene pubblicato in un successivo commit documentale, la cui sincronizzazione è verificata nella sessione di avvio.
-- Setup scientifico e test GPU non eseguiti; nessuna spesa sostenuta per calcolo, nessun collaboratore invitato.
+- Setup scientifico ed E00 non eseguiti. Il successivo preflight tecnico GPU è documentato separatamente; nessuna spesa sostenuta per calcolo, nessun collaboratore invitato.

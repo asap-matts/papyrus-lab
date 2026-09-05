@@ -4,7 +4,7 @@ Proposta iniziale, non installazione completata. Inventario del 5 settembre 2026
 
 Matteo dispone anche di un PC fisso, dichiarato con 32 GB di RAM, GPU NVIDIA da circa 6 GB di memoria video, CPU probabilmente Intel i7 multicore e SSD NVMe da 1 TB. Modelli esatti, sistema operativo e spazio effettivamente libero non sono ancora verificati. La capacità nominale del disco non equivale allo spazio disponibile. Non è stato configurato alcun accesso remoto.
 
-Account Kaggle e verifica telefonica completati da Matteo: il 5 settembre 2026 il browser mostra Phone verification: Verified e consumo 00:00 su 30 ore GPU e 20 ore TPU. L'assegnazione effettiva di una GPU e il funzionamento di PyTorch restano da provare nel primo notebook. Prima prova dei modelli proposta su Kaggle; il fisso è candidato alla preparazione e conservazione dei dati. I circa 6 GB di VRAM potrebbero consentire inferenze ridotte, da misurare dopo il primo riferimento riuscito. Matteo fornirà l'inventario quando userà il fisso; questo non blocca la preparazione su Kaggle dal portatile.
+Account Kaggle e verifica telefonica completati da Matteo: il 5 settembre 2026 il browser ha mostrato Phone verification: Verified e consumo iniziale 00:00 su 30 ore GPU e 20 ore TPU. Il successivo [preflight Kaggle](reports/2026-09-05-kaggle-preflight.md) ha assegnato due Tesla T4 da 14,56 GiB rilevati ciascuna e PyTorch 2.10.0 ha riconosciuto CUDA 12.8. La sessione è stata fermata subito dopo la prova. Prima inferenza dei modelli ancora da eseguire su Kaggle; il fisso è candidato alla preparazione e conservazione dei dati. I circa 6 GB di VRAM potrebbero consentire inferenze ridotte, da misurare dopo il primo riferimento riuscito. Matteo fornirà l'inventario quando userà il fisso; questo non blocca la preparazione su Kaggle dal portatile.
 
 ## Dove fare cosa
 
@@ -37,7 +37,7 @@ La GPU Apple può accelerare software predisposto tramite Metal/MPS, ma questo n
 | Portatile attuale | Documenti, codice, esame di immagini e piccoli campioni | Prestazioni di VC3D su un campione |
 | Fisso 32 GB, NVIDIA circa 6 GB, NVMe 1 TB | Preparazione dati, geometria e conservazione dei dati; possibile inferenza ridotta | Modelli esatti, driver, spazio libero e tempo per campione |
 | Mac M3 Pro | Visualizzazione, controllo indipendente e analisi | Memoria, spazio e prestazioni reali |
-| Kaggle GPU | Prima inferenza del modello, poi confronto con il fisso | Telefono verificato; assegnazione GPU e funzionamento ancora da provare |
+| Kaggle GPU | Prima inferenza del modello, poi confronto con il fisso | Preflight riuscito su due Tesla T4; compatibilità della pipeline e inferenza ancora da provare |
 
 Le macchine non sommano automaticamente potenza o memoria. Distribuiremo inizialmente prove indipendenti, ciascuna con input, configurazione e risultati identificabili. Una coda di lavori remoti e un server condiviso potranno essere utili dopo aver stabilizzato una singola esecuzione.
 
@@ -60,7 +60,7 @@ Il fisso evita le quote di sessione di Kaggle, ma occupa la macchina e consuma e
 1. Leggere la guida introduttiva e concordare il primo esperimento.
 2. Account Kaggle di Matteo verificato. Restano gli account del socio e Discord; invitare il socio al repository quando Matteo indica l'account corretto e richiede l'invito.
 3. Sul Mac scegliere una cartella di sviluppo fuori da iCloud Drive e clonare il repository. Ogni persona mantiene la propria copia; GitHub scambia i commit.
-4. Preparare la prima inferenza su Kaggle con un campione già renderizzato; fissare versione di villa e checkpoint, verificare l'accesso alla GPU e salvare gli output. Riprodurre un controllo noto prima di cercare testo nuovo. Questo passaggio può iniziare senza aspettare il clone del socio o VC3D.
+4. Preparare la prima inferenza su Kaggle con un campione già renderizzato; l'accesso GPU è verificato, ma occorre ancora fissare versione di villa e checkpoint e salvare gli output. Riprodurre un controllo noto prima di cercare testo nuovo. Questo passaggio può iniziare senza aspettare il clone del socio o VC3D.
 5. Installare in seguito una release identificabile di VC3D per il lavoro sulle superfici, annotando versione e piattaforma; aprire un campione piccolo. Registrare tempi, memoria e spazio.
 6. Successivamente ripetere il campione sul fisso con un carico compatibile con i circa 6 GB dichiarati. Per Windows la guida ufficiale suggerisce WSL2 per questa pipeline; l'installazione andrà verificata sul fisso.
 
@@ -87,7 +87,7 @@ Il repository ignora data/, cache/, checkpoints/, runs/ e outputs/. Non salvare 
 
 1. Aprire il [sito Kaggle](https://www.kaggle.com/). L'account e il login sono già stati verificati nella sessione del 5 settembre 2026.
 2. Verifica telefonica già completata personalmente da Matteo e confermata nell'interfaccia. Non riportare password o codici SMS nei documenti del progetto.
-3. Aprire un nuovo notebook Python da Code / New Notebook. Un notebook è una pagina con blocchi di codice eseguibili su un computer remoto. Verificare che resti privato.
-4. Lasciare inizialmente Accelerator su None: prima controllare quali GPU sono disponibili e la quota assegnata, poi preparare la prova. L'attivazione GPU avverrà quando saremo pronti a eseguirla.
+3. È stato creato il notebook Python privato `papyruslab-e00-preflight`. Un notebook è una pagina con blocchi di codice eseguibili su un computer remoto.
+4. Nel preflight è stato selezionato `GPU T4 x2`, PyTorch ha rilevato entrambe le GPU e la sessione è stata poi arrestata. La configurazione può restare selezionata senza consumare quota quando la sessione è spenta; controllare comunque il contatore e lo stato prima di ogni esecuzione.
 
-La verifica telefonica è conclusa. La distinta verifica d'identità Persona non è stata avviata: la pagina la collega alle competizioni che la richiedono. L'accesso GPU effettivo verrà verificato nel notebook. Nessuna sessione GPU è stata avviata durante il consolidamento documentale.
+La verifica telefonica è conclusa. La distinta verifica d'identità Persona non è stata avviata: la pagina la collega alle competizioni che la richiedono. L'accesso GPU effettivo è verificato nel solo preflight; la pipeline Vesuvius non lo è. Risultati e limiti sono nel [rapporto dedicato](reports/2026-09-05-kaggle-preflight.md).
