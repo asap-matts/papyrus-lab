@@ -1,0 +1,41 @@
+# Local credentials and machine settings
+.env
+.env.*
+*.pem
+*.key
+credentials*.json
+secrets/
+.local/
+
+# Environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Rebuildable or large research artifacts; record URLs/hashes in reports
+data/
+cache/
+checkpoints/
+runs/
+outputs/
+work/
+vendor/
+*.zarr/
+*.tifxyz/
+*.tif
+*.tiff
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.zip
+*.7z
