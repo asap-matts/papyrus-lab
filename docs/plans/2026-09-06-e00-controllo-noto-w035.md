@@ -100,6 +100,8 @@ python scripts/kaggle_e00.py wait   seed43
 python scripts/kaggle_e00.py output seed43
 ```
 
+**Registro dei tentativi GPU (stesso ID `E00-R01`, numero di tentativo crescente, come da [docs/07 §4](../07-procedura-operativa.md)):** tentativo 1 di `seed42` (versione Kaggle 1, 6 settembre 2026, 13:31–13:41 UTC, ~10 minuti di quota) fallito per errore tecnico dopo 3 secondi di inferenza: `ModuleNotFoundError: No module named 'nrrd'` — `koine_machines` importa `vesuvius` solo quando costruisce il modello, e il preflight importava soltanto l'entry point. Correzione: il passo 3 importa tutti i moduli usati a run time e il passo 5 **costruisce il modello dal checkpoint su CPU** (`configure_model`) prima di qualunque GPU. Il tentativo 2 riparte dopo un preflight che supera anche questi controlli.
+
 Un run che si ferma per un'asserzione risulta `error` in `wait`; il log della cella fallita è comunque scaricabile con `output` (Kaggle conserva l'output parziale) e dice a quale passo e perché. È un'esecuzione completata con arresto documentato (§7).
 
 | Run | Acceleratore | Celle | Corrisponde ai passi |

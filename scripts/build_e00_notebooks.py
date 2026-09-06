@@ -151,32 +151,43 @@ def locked_version(dist):
     m = re.search(r'\[\[package\]\]\nname = "' + re.escape(dist.lower()) + r'"\nversion = "([^"]+)"', lock)
     return m.group(1) if m else None
 
-ALIAS = {"cv2": "opencv-contrib-python-headless", "PIL": "pillow", "yaml": "pyyaml",
+ALIAS = {"cv2": "opencv-contrib-python-headless", "PIL": "pillow", "yaml": "pyyaml", "nrrd": "pynrrd",
          "cc3d": "connected-components-3d", "skimage": "scikit-image", "sklearn": "scikit-learn"}
 added, numpy_downgraded = [], False
-for attempt in range(12):
-    r = sh([PY, "-c", "import koine_machines.inference.infer"])
-    if r.returncode == 0:
-        break
-    err = r.stderr
-    m = re.search(r"No module named '([^'.]+)", err)
-    if m:
-        mod = m.group(1)
-        assert re.fullmatch(r"[A-Za-z0-9_]+", mod), f"STOP: nome di modulo inatteso {mod!r}"
-        cands = ([ALIAS[mod]] if mod in ALIAS else []) + [mod, mod.replace("_", "-")]
-        dist = next((c for c in cands if locked_version(c)), None)
-        assert dist, f"STOP: modulo mancante '{mod}' non presente in uv.lock:\n" + err[-2000:]
-        ver = locked_version(dist)
-        r2 = pip(f"{dist}=={ver}")
-        assert r2.returncode == 0, f"STOP: pip install {dist}=={ver} fallita\n" + r2.stderr[-3000:]
-        added.append({"module": mod, "dist": dist, "version": ver}); print("aggiunto", dist, ver)
-    elif "numpy" in err.lower() and not numpy_downgraded:
-        # unica eccezione ammessa dal piano: NumPy piu' recente di 2.2
-        r2 = pip("numpy<=2.2"); assert r2.returncode == 0, r2.stderr[-3000:]
-        numpy_downgraded = True; added.append({"module": "numpy", "dist": "numpy", "version": "<=2.2 (eccezione piano)"})
-    else:
-        raise AssertionError("STOP: import fallito per motivo diverso da modulo mancante:\n" + err[-3000:])
-assert r.returncode == 0, "STOP: import ancora fallito dopo i tentativi ammessi"
+
+def ensure_import(modname):
+    """Importa modname nel Python di sistema; per ogni modulo mancante installa (--no-deps) la versione del lock."""
+    global numpy_downgraded
+    for attempt in range(12):
+        r = sh([PY, "-c", f"import {modname}"])
+        if r.returncode == 0:
+            return
+        err = r.stderr
+        m = re.search(r"No module named '([^'.]+)", err)
+        if m:
+            mod = m.group(1)
+            assert re.fullmatch(r"[A-Za-z0-9_]+", mod), f"STOP: nome di modulo inatteso {mod!r}"
+            cands = ([ALIAS[mod]] if mod in ALIAS else []) + [mod, mod.replace("_", "-")]
+            dist = next((c for c in cands if locked_version(c)), None)
+            assert dist, f"STOP: modulo mancante '{mod}' non presente in uv.lock:\n" + err[-2000:]
+            ver = locked_version(dist)
+            r2 = pip(f"{dist}=={ver}")
+            assert r2.returncode == 0, f"STOP: pip install {dist}=={ver} fallita\n" + r2.stderr[-3000:]
+            added.append({"module": mod, "dist": dist, "version": ver}); print("aggiunto", dist, ver, "per", modname)
+        elif "numpy" in err.lower() and not numpy_downgraded:
+            # unica eccezione ammessa dal piano: NumPy piu' recente di 2.2
+            r2 = pip("numpy<=2.2"); assert r2.returncode == 0, r2.stderr[-3000:]
+            numpy_downgraded = True; added.append({"module": "numpy", "dist": "numpy", "version": "<=2.2 (eccezione piano)"})
+        else:
+            raise AssertionError(f"STOP: import di {modname} fallito per motivo diverso da modulo mancante:\n" + err[-3000:])
+    raise AssertionError(f"STOP: import di {modname} ancora fallito dopo i tentativi ammessi")
+
+# Il run seed42 v1 (6 settembre 2026) e' fallito perche' koine_machines importa `vesuvius` solo quando costruisce
+# il modello, e `vesuvius` richiede `nrrd`: l'import del solo entry point non basta. Si importano tutti i moduli
+# realmente usati a run time.
+for modname in ["koine_machines.inference.infer", "vesuvius", "vesuvius.models.build.build_network_from_config",
+                "koine_machines.models.make_model"]:
+    ensure_import(modname)
 assert len(added) <= 10, f"STOP: {len(added)} pacchetti aggiunti, oltre il limite di dieci del piano"
 
 torch_after = torch_version()
@@ -343,6 +354,30 @@ assert tuple(lab.shape) == (28, 5820, 5240) and tuple(msk.shape) == (28, 5820, 5
 counts = {"n_supervisionati": int((msk[14] > 0).sum()), "n_inchiostro": int(((lab[14] > 0) & (msk[14] > 0)).sum())}
 print(counts); json.dump(counts, open(f"{WORK}/logs/label_counts.json", "w"), indent=1)
 assert counts["n_supervisionati"] > 0 and counts["n_inchiostro"] > 0, "STOP: label o maschera vuote al piano Z=14"
+"""
+
+CELL_6B_MODEL_CPU_PY = """# Passo 5 (segue) — prova minima senza GPU: costruire il modello dal checkpoint seed42 esattamente come fa infer.py.
+# Eseguita in un SOTTOPROCESSO Python, come l'inferenza vera: il kernel del notebook e' partito prima di `pip install -e`
+# e non vede i pacchetti installati in modalita' editable (preflight v6 del 6 settembre 2026).
+import subprocess, sys, json
+code = r'''
+import argparse, json, torch
+from koine_machines.inference import infer as kinfer
+args = argparse.Namespace(checkpoint="__CKPT__", amp_dtype="auto", model_type="auto", metadata_json=None)
+cm = kinfer.configure_model(args)            # carica il payload su CPU e ricostruisce la rete da checkpoint['config']
+info = {"in_chans": int(cm.in_chans), "amp_dtype": str(cm.amp_dtype),
+        "n_params": int(sum(p.numel() for p in cm.model.parameters())),
+        "model_class": type(cm.model).__name__, "preprocessing": str(cm.preprocessing)[:200]}
+print("MODEL_BUILD_JSON=" + json.dumps(info))
+'''.replace("__CKPT__", f"{HEAVY}/checkpoints/ink_9um/hybrid_3d2d-seed42/step-075000.pth")
+r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+print(r.stdout[-1500:]); print(r.stderr[-1500:])
+assert r.returncode == 0, "STOP: costruzione del modello su CPU fallita (vedi stderr sopra)"
+info = json.loads(r.stdout.split("MODEL_BUILD_JSON=")[1].splitlines()[0])
+json.dump(info, open(f"{WORK}/logs/model_build_cpu.json", "w"), indent=1)
+assert info["in_chans"] == 17, "STOP: il checkpoint non dichiara 17 slice in ingresso"
+assert "float16" in info["amp_dtype"], f"STOP: AMP dtype inatteso {info['amp_dtype']} (atteso float16 da mixed_precision=fp16)"
+print("modello costruito su CPU:", info)
 """
 
 CELL_7_INFER_BASH = r"""%%bash
@@ -514,6 +549,7 @@ def build(mode: str) -> tuple[dict, dict]:
         ("markdown", CELL_INTRO_MD), ("code", CELL_CONST_PY), ("code", CELL_1_ENV_BASH), ("code", CELL_2_NET_PY),
         ("code", CELL_3_CHECKOUT_BASH), ("code", CELL_4_INSTALL_PY), ("code", CELL_5_DOWNLOADS_BASH),
         ("code", CELL_5A_LABEL_DATASET_PY), ("code", CELL_5B_LABEL_PY), ("code", CELL_5C_DISK_BASH), ("code", CELL_6_PROBE_PY),
+        ("code", CELL_6B_MODEL_CPU_PY),
     ]
     if mode == "seed43":
         cells.insert(2, ("code", CELL_0_GUARD_SEED43_PY))     # prima di qualunque setup o download
@@ -552,8 +588,11 @@ def main() -> None:
         notebook, meta = build(mode)
         folder = root / "kaggle" / f"{RUN_ID}-{mode}"
         folder.mkdir(parents=True, exist_ok=True)
-        (folder / meta["code_file"]).write_text(json.dumps(notebook, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
-        (folder / "kernel-metadata.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
+        # LF esplicito: file identici su Windows e Linux, nessuna normalizzazione da parte di Git
+        with open(folder / meta["code_file"], "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(json.dumps(notebook, indent=1, ensure_ascii=False) + "\n")
+        with open(folder / "kernel-metadata.json", "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(json.dumps(meta, indent=2) + "\n")
         print(f"{folder.relative_to(root)}: {len(notebook['cells'])} celle, gpu={meta['enable_gpu']}")
 
 
