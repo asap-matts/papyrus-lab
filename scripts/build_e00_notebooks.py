@@ -263,8 +263,13 @@ def check_label_tree(dest, source_desc):
     za = open(f"{dest}/w035_inklabels.zarr/0/.zarray").read(); open(f"{WORK}/logs/label_zarray.json", "w").write(za)
     print(f"label verificata: file={n} byte={b} tree_sha256={tsha} ({source_desc})"); print(za)
 inputs = sorted(os.listdir("/kaggle/input")) if os.path.isdir("/kaggle/input") else []
-manifests = glob.glob("/kaggle/input/*/manifest.json") + glob.glob("/kaggle/input/*/*/manifest.json")
+# Il percorso di montaggio dei dataset cambia con il tipo di sessione (6 settembre 2026): /kaggle/input/<slug>/ nel run
+# CPU, /kaggle/input/datasets/<utente>/<slug>/ nei run GPU. Nei run seed42 e seed43 il manifest cercato a profondita'
+# fissa non veniva trovato e scattava il ripiego (252 s e 1007 s). Si cerca in modo ricorsivo e si prende il manifest
+# che sta accanto alla cartella w035_labels.
 roots = glob.glob("/kaggle/input/**/w035/w035_inklabels.zarr/0/.zarray", recursive=True)
+manifests = [m for m in glob.glob("/kaggle/input/**/manifest.json", recursive=True)
+             if os.path.isdir(os.path.join(os.path.dirname(m), "w035_labels"))]
 print("montato in /kaggle/input:", inputs, "| manifest:", manifests, "| label:", roots)
 if manifests and roots:
     manifest = json.load(open(manifests[0]))
