@@ -54,7 +54,7 @@ uvx --from huggingface_hub hf buckets sync \
   ./data/labels/w035
 ```
 
-Prima con `--dry-run` (stampa il piano senza trasferire; documentato per entrambe le direzioni), poi senza. `hf buckets cp` **non** serve: copia un solo file quando è coinvolto un percorso locale.
+Prima con `--dry-run` (stampa il piano senza trasferire; documentato per entrambe le direzioni), poi senza. `hf buckets cp` **non** serve: copia un solo file quando è coinvolto un percorso locale. **Esito reale (6 settembre 2026, run `preflight` v2 su Kaggle):** `hf buckets sync` sui 5.128 file non ha prodotto progresso per circa 28 minuti ed è stato cancellato dal limite di sessione; il piano E00 usa quindi il download diretto e parallelo dei file elencati dall'API del bucket, con verifica di conteggio e byte. Il comando `sync` resta quello ufficiale per sincronizzazioni grandi; per una label piccola e frammentata non è adatto.
 
 Attenzione ai nomi: il README del dataset avverte che i nomi `pherc0139-wNNN` della famiglia `aligned` **non seguono la numerazione pubblica** (`pherc0139-w016` è il segmento pubblico `w029`; `pherc0139-w028` è `w044`). Per w035 il nome coincide, ma per caso. Non dedurre mai l'identità di un segmento dal numero.
 
@@ -78,7 +78,8 @@ Il secondo è la fusione e rifattorizzazione del primo nel pacchetto `vesuvius`:
 | `ScrollPrize/villa`, branch `merge-ink-pipelines` | `3ea17f54a9b3d5fd1aaf73e1d2c8386dbaa9f30e` |
 | `scrollprize/ink_9um` (Hugging Face) | `7109667e2607db1b90c37c8b09cb876ea7fe7bb1` |
 | Python del preflight | `3.12.13` |
-| PyTorch del preflight | `2.10.0+cu128` |
+| PyTorch del preflight GPU (5 settembre) | `2.10.0+cu128` |
+| PyTorch dell'immagine Kaggle **senza** acceleratore (misurato il 6 settembre, run `preflight` v1) | `2.10.0+cpu` — le due immagini differiscono; i run CPU verificano l'installazione, non la build CUDA |
 | CUDA del preflight | `12.8` |
 
 ### Installazione su Kaggle

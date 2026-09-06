@@ -3,7 +3,7 @@
 **Scritto da:** Claude Code (writer, su incarico di Matteo) · **Esecutore previsto:** Matteo sul notebook Kaggle, assistito da Claude · **Revisore del piano:** Codex, sola lettura (un giro, 6 settembre 2026, 13 finding integrati) · **Revisore dell'esito:** Codex, sola lettura
 **Data:** 2026-09-06 · **Branch PapyrusLab:** `main` · **Base documentale:** `d430456` (commit che contiene procedura e dossier corretti) · **Branch villa:** `merge-ink-pipelines` @ `3ea17f54a9b3d5fd1aaf73e1d2c8386dbaa9f30e`
 
-> Questo piano è congelato in un commit dedicato, successivo a `d430456`, con messaggio `docs: freeze E00 execution plan (R01)`.
+> Questo piano è congelato in un commit dedicato, successivo a `d430456`, con messaggio `docs: adapt E00 plan to Kaggle API runs (R01)` (la prima versione, `docs: freeze E00 execution plan (R01)`, prevedeva l'esecuzione manuale cella per cella; su richiesta di Matteo l'esecuzione è automatizzata via API Kaggle, vedi §4).
 > Verifica prima di iniziare, dalla cartella del repository:
 > `git status --short` deve essere **vuoto** e `git log -1 --format=%s` deve restituire esattamente quel messaggio.
 > Se una delle due condizioni non vale, **fermati**: stai leggendo un piano non congelato o uno stato diverso.
@@ -43,6 +43,7 @@ Su Kaggle un **notebook** è una pagina di celle eseguibili su un computer remot
 - **Il seed 43 si esegue solo se il seed 42 supera i gate A e B** — è informativo e costa GPU: non si spende budget per confrontare due seed se la catena non è collegata.
 - **Tetto di spazio 10 GB (misurato su una radice unica), tetto GPU 30 minuti per tentativo con timeout automatico, nessuna spesa** — decisioni di Matteo del 6 settembre 2026.
 - **Il socio non partecipa** — ripeterà a E01 dalle sole istruzioni salvate; se vedesse l'esito, la ripetizione non proverebbe che le istruzioni bastano.
+- **Esecuzione automatizzata via API Kaggle, non cella per cella** — decisione di Matteo del 6 settembre 2026: le persone fanno solo ciò che richiede una persona (autenticazione, approvazione dei run GPU, arbitrato). I notebook sono **generati** da `scripts/build_e00_notebooks.py` a partire dai passi di questo piano, con ogni condizione di arresto scritta come asserzione; `scripts/kaggle_e00.py` li carica, li esegue (`kaggle kernels push`), ne segue lo stato e ne scarica gli output. Conseguenze: (a) un run esegue tutte le celle senza pause, quindi la GPU non può accendersi a metà: si usano **tre run separati** (`preflight` senza acceleratore, `seed42` e `seed43` su T4), ognuno dei quali rifà i passi 1–6 perché l'ambiente Kaggle si azzera; (b) la persistenza (passo 6) si verifica scaricando l'output del run `preflight`; (c) il tetto dei 30 minuti di inferenza resta dentro il notebook (`timeout 1800`) e in più la piattaforma impone un limite di sessione (`-t`: 1800 s al preflight, 3600 s ai run GPU); (d) il run `seed43` legge l'output del run `seed42` montato come sorgente (`kernel_sources`), quindi il confronto fra seed non dipende da file locali.
 
 ### Vincoli
 
@@ -62,9 +63,11 @@ Su Kaggle un **notebook** è una pagina di celle eseguibili su un computer remot
 |---|---|
 | `docs/reports/2026-09-XX-e00-r01.md` | Scheda dell'esperimento compilata da `docs/templates/esperimento.md`, con esito, metriche, tempi, deviazioni |
 | `docs/reports/2026-09-XX-e00-r01-manifest.json` | Manifest: commit, revisioni, hash di checkpoint e output, comando esatto, versioni, tempi (file piccolo) |
-| `notebooks/e00-r01.ipynb` | Copia ripulita del notebook Kaggle, **senza** output voluminosi |
+| `scripts/build_e00_notebooks.py` | Generatore dei tre notebook (già scritto; unica fonte delle celle) |
+| `scripts/kaggle_e00.py` | Pilota dei run: `push`, `status`, `wait`, `output` (già scritto) |
+| `kaggle/e00-r01-{preflight,seed42,seed43}/` | Notebook generati e `kernel-metadata.json` — **non modificare a mano**: rigenerare con lo script |
 
-Su Kaggle (fuori da Git): radice unica `/kaggle/working/e00/` con `villa/`, `checkpoints/`, `labels/`, `out/`, `logs/`, `tmp/`, `cache/`. Sul fisso (fuori da Git, cartella ignorata): `C:\dev\papyrus-lab\runs\E00-R01\`.
+Su Kaggle (fuori da Git): output persistiti in `/kaggle/working/e00/{out,logs}`; file pesanti (checkout di villa, checkpoint, label, cache, temporanei) in `/tmp/e00`, non persistiti; la guardia dei 10 GB misura entrambe le radici. Sul fisso (fuori da Git, cartella ignorata): `C:\dev\papyrus-lab\runs\E00-R01\<run>\`.
 
 ### File da NON toccare
 
@@ -78,16 +81,42 @@ Su Kaggle (fuori da Git): radice unica `/kaggle/working/e00/` con `villa/`, `che
 
 ## 4. Passi
 
-Notebook Kaggle nuovo e privato: `papyruslab-e00-r01`. Fino al passo 7 la sessione gira **senza acceleratore** (impostazione "None"). Se attivare l'acceleratore al passo 7 riavvia la sessione, i passi 1–6 vanno rieseguiti: sono a costo zero di quota e ogni cella è scritta per essere rieseguibile.
+### Come si esegue (automatizzato)
+
+I passi 1–11 qui sotto descrivono ciò che i notebook generati fanno; non si eseguono a mano. **Dove un frammento di comando qui sotto e il generatore differiscono, fa fede il generatore** (`scripts/build_e00_notebooks.py`), in particolare: le radici sono `WORK=/kaggle/working/e00` per output e log (persistiti) e `HEAVY=/tmp/e00` per codice, checkpoint, label e cache (non persistiti), non un'unica `/kaggle/working/e00`; `SHA256SUMS` è calcolato con `find out logs -type f` ricorsivo; la persistenza si verifica con `output preflight`, non con un file di prova manuale; la seconda GPU è resa invisibile con `CUDA_VISIBLE_DEVICES=0` e il suo mancato uso è **misurato** campionando la memoria durante l'inferenza; un gate B non superato rende il run `error` dopo aver persistito metriche e hash; il run `seed43` verifica il gate del 42 nella **prima** cella e il pilota rifiuta il push se manca l'esito del 42; la label è verificata per **contenuto** (hash dell'albero: percorsi + SHA-256 di ogni file) e non solo per dimensioni. Questi punti integrano la revisione Codex del 6 settembre 2026 sui notebook (8 finding, F1–F8, tutti accettati). Sul fisso, PowerShell, dalla cartella del repository (`kaggle auth login` già fatto una volta):
+
+```powershell
+python scripts/build_e00_notebooks.py                 # rigenera kaggle/ (deve dare diff vuoto se nulla è cambiato)
+python scripts/kaggle_e00.py push   preflight         # run 1: passi 1–6, senza GPU, timeout piattaforma 1800 s
+python scripts/kaggle_e00.py wait   preflight         # attende; atteso: complete
+python scripts/kaggle_e00.py output preflight         # scarica in runs/E00-R01/preflight e verifica SHA256SUMS (= passo 6)
+# --- STOP: approvazione esplicita di Matteo per la quota GPU ---
+python scripts/kaggle_e00.py push   seed42            # run 2: passi 1–8 su T4, timeout piattaforma 3600 s
+python scripts/kaggle_e00.py wait   seed42
+python scripts/kaggle_e00.py output seed42            # leggere runs/E00-R01/seed42/e00/out/metrics_seed42.json → gate_B
+# --- solo se gate_B = superato, e con nuova approvazione ---
+python scripts/kaggle_e00.py push   seed43            # run 3: passi 1–9 su T4; monta l'output di seed42
+python scripts/kaggle_e00.py wait   seed43
+python scripts/kaggle_e00.py output seed43
+```
+
+Un run che si ferma per un'asserzione risulta `error` in `wait`; il log della cella fallita è comunque scaricabile con `output` (Kaggle conserva l'output parziale) e dice a quale passo e perché. È un'esecuzione completata con arresto documentato (§7).
+
+| Run | Acceleratore | Celle | Corrisponde ai passi |
+|---|---|---|---|
+| `preflight` | nessuno | ambiente, rete, checkout, installazione, download e hash, lettura remota, hash finali | 1–6 (il 6 è il download dell'output) |
+| `seed42` | T4 (allocazione doppia, uso singolo) | come sopra + inferenza seed 42, controlli sul log, metriche | 1–8 |
+| `seed43` | T4 | come sopra con seed 43 + confronto con `seed42` | 1–9 |
 
 ### Passo 0 — Base verificata (sul fisso, PowerShell)
 
 ```powershell
 Set-Location C:\dev\papyrus-lab
 git status --short            # atteso: nessun output
-git log -1 --format=%s        # atteso: docs: freeze E00 execution plan (R01)
+git log -1 --format=%s        # atteso: docs: adapt E00 plan to Kaggle API runs (R01)
+python scripts/build_e00_notebooks.py; git status --short   # atteso: nessun output (i notebook nel repo sono quelli generati)
 ```
-**Fatto quando:** entrambe le condizioni valgono. Annotare `git rev-parse --short HEAD` nel manifest come `commit_papyruslab`.
+**Fatto quando:** tutte le condizioni valgono. Annotare `git rev-parse --short HEAD` nel manifest come `commit_papyruslab`.
 
 ### Passo 1 — Radice unica, ambiente e rete (GPU spenta)
 
@@ -116,8 +145,8 @@ for url in [ZARR + "/0/.zarray",
             "https://huggingface.co/api/buckets/scrollprize/datasets"]:
     with urllib.request.urlopen(url, timeout=30) as r: print(r.status, url[:70])
 ```
-**Fatto quando:** `env.sh` esiste; `torch` è `2.10.0+cu128`; le tre richieste restituiscono `200`; `cuda_available` è `False` (GPU spenta, atteso).
-**Fermarsi se** `torch` non è `2.10.0+cu128`: Kaggle ha cambiato immagine dopo il preflight del 5 settembre; il dossier va aggiornato prima di continuare.
+**Fatto quando:** `env.sh` esiste; le tre richieste restituiscono `200`; `torch` è la build attesa per il run: **`2.10.0+cpu` nel run `preflight`** (immagine Kaggle senza acceleratore, misurato il 6 settembre 2026 al primo tentativo, versione 1 del notebook, fermato proprio da questa asserzione) e **`2.10.0+cu128` nei run GPU**; `cuda_available` è `False` nel preflight e `True` nei run GPU.
+**Fermarsi se** `torch` non è la build attesa: Kaggle ha cambiato immagine; il dossier va aggiornato prima di continuare. Conseguenza da tenere presente: il preflight collauda l'installazione sull'immagine CPU, che non è byte per byte quella GPU; il metodo `--no-deps` non tocca PyTorch, quindi la differenza è attesa e innocua, ma l'elenco dei pacchetti aggiunti va riletto nel log del primo run GPU.
 
 ### Passo 2 — Checkout parziale di villa al commit congelato
 
@@ -172,16 +201,7 @@ Atteso, **esattamente**:
 e635558ae6a1a807a7e5ec1e83adfd45bc3c0ac53883ea43f1d4e085d62a9cab  …seed42/step-075000.pth   (138360039 byte)
 2aeaa85a35ef28d7bc7bf3e848c4a6a91385e9132710927fdba41133c4ecb28f  …seed43/step-075000.pth   (138360231 byte)
 ```
-Poi la label, prima in prova e poi davvero:
-```bash
-source /kaggle/working/e00/env.sh && cd $E00
-PREFIX=hf://buckets/scrollprize/datasets/ink_9um/labels/native9-scrollprizeorg-21slices/w035
-hf buckets sync $PREFIX labels/w035 --dry-run | tail -3
-hf buckets sync $PREFIX labels/w035 | tail -2
-echo "file=$(find labels/w035 -type f | wc -l) byte=$(find labels/w035 -type f -printf '%s\n' | awk '{s+=$1} END{print s}')" | tee logs/label_count.txt
-cat labels/w035/w035_inklabels.zarr/0/.zarray | tr -d ' \n'; echo
-disk_check "dopo i download"
-```
+Poi la label. **Deviazione registrata il 6 settembre 2026:** il comando ufficiale `hf buckets sync <prefisso> labels/w035` (documentato dal tutorial per l'intero dataset) è stato provato nel run `preflight` v2 e, sui 5.128 file piccoli della label, non ha prodotto alcun progresso per circa 28 minuti finché la piattaforma ha cancellato il run al limite di 1800 s. Si usa invece il **download diretto e parallelo** dei file elencati dall'API del bucket (`/api/buckets/scrollprize/datasets/tree/<prefisso>`, con paginazione), scaricati da `/buckets/scrollprize/datasets/resolve/<path>` con 24 thread e nuovi tentativi in caso di errori transitori; la cella è `CELL_5B_LABEL_PY` nel generatore. L'elenco dell'API è la stessa fonte con cui la label è stata misurata: il notebook si ferma se conteggio o byte elencati differiscono da `5128 / 737833`, e di nuovo se il conteggio locale dopo il download differisce. Poiché anche il download diretto richiede circa 8 minuti (misurato in locale: latenza per richiesta, non banda), la label è stata scaricata una volta con questo metodo, verificata, e pubblicata come **dataset Kaggle privato** `matteopontesilli/papyruslab-w035-labels` (`w035_labels.tar`, SHA-256 `0ba09a5353d39e0ed67e74f57f1555632503daf9f898bf322e48d5001125e8f0`, più `manifest.json` con l'elenco dell'API), costruito da `scripts/build_w035_label_dataset.py`. Kaggle estrae il tar al caricamento, quindi il dataset espone direttamente `w035_labels/w035/…` (file `.zattrs`/`.zarray` compresi) e `manifest.json`. Ogni run monta il dataset e verifica **file per file** che percorsi e dimensioni coincidano con il manifest (cioè con l'elenco dell'API), poi ricontrolla conteggio e byte dopo la copia; il download diretto resta come ripiego automatico se il dataset non è montato, con pochi thread perché Hugging Face limita le richieste anonime parallele (HTTP 429 osservato dal run `preflight` v3). Catena di provenienza: API → download verificato → tar con hash `0ba09a53…` → dataset (estratto da Kaggle) → verifica per file nel run.
 **Fatto quando:** i due SHA-256 coincidono; `label_count.txt` riporta **esattamente** `file=5128 byte=737833` (somma dei soli file, misurata via API il 6 settembre 2026); `.zarray` mostra `"shape":[28,5820,5240]` e `"dtype":"|u1"`.
 **Fermarsi se:** un hash non coincide (non usare quel file, non riprovare con un altro step); oppure conteggio o byte della label differiscono **anche di uno**: il dataset a monte è cambiato dopo la misura, e il riferimento va ricontrollato prima di misurare qualunque cosa contro di esso.
 
@@ -203,12 +223,12 @@ print(lab.shape, msk.shape, counts); json.dump(counts, open("/kaggle/working/e00
 
 ### Passo 6 — Prova di persistenza degli output (GPU spenta)
 
-**Cosa:** verificare, prima di spendere GPU, che un file prodotto nel notebook sopravviva alla sessione e arrivi sul fisso.
+**Cosa:** verificare, prima di spendere GPU, che un file prodotto nel notebook sopravviva alla sessione e arrivi sul fisso. **In modalità automatizzata** questo passo è `python scripts/kaggle_e00.py output preflight`: scarica l'output del run `preflight` e verifica `SHA256SUMS`; se stampa `differenze: 0`, il passo è superato e quanto segue in questa sezione non serve.
 **Come:** `%%bash`:
 ```bash
 source /kaggle/working/e00/env.sh && echo "persistenza $(date -u +%FT%TZ)" > $E00/out/persistence_test.txt && sha256sum $E00/out/persistence_test.txt | tee $E00/logs/persistence_test.sha256
 ```
-Poi in Kaggle: *File → Save Version → Quick Save*, con "Save output for this version" attivo. Aprire la versione salvata, sezione *Output*, scaricare `e00/out/persistence_test.txt` sul fisso in `C:\dev\papyrus-lab\runs\E00-R01\out\`. Sul fisso, PowerShell:
+Solo come ripiego manuale, se l'API non fosse disponibile: in Kaggle *File → Save Version → Quick Save* con "Save output for this version" attivo; aprire la versione salvata, sezione *Output*, scaricare `e00/out/SHA256SUMS` e `e00/logs/run_info.txt` sul fisso in `C:\dev\papyrus-lab\runs\E00-R01\preflight\e00\` e confrontare l'hash di `run_info.txt` con la riga corrispondente di `SHA256SUMS` (il notebook non crea un file di prova separato). Sul fisso, PowerShell:
 ```powershell
 Set-Location C:\dev\papyrus-lab\runs\E00-R01
 (Get-FileHash out\persistence_test.txt -Algorithm SHA256).Hash.ToLower()
@@ -306,7 +326,7 @@ print(cmp); json.dump(cmp, open(f"{E00}/out/compare_seeds.json", "w"), indent=1)
 ```bash
 source /kaggle/working/e00/env.sh && cd $E00 && sha256sum out/* logs/* > out/SHA256SUMS && cat out/SHA256SUMS && disk_check "finale"
 ```
-Poi *File → Save Version → Quick Save* con "Save output" attivo (come al passo 6). Scaricare l'intero output `e00/out/` e `e00/logs/` sul fisso in `C:\dev\papyrus-lab\runs\E00-R01\` (che conterrà `out\` e `logs\`). Spegnere la sessione e annotare la quota GPU residua mostrata da Kaggle. Sul fisso, PowerShell:
+In modalità automatizzata gli output di un run terminato sono già persistiti da Kaggle: `python scripts/kaggle_e00.py output <run>` li scarica in `C:\dev\papyrus-lab\runs\E00-R01\<run>\` e verifica `SHA256SUMS` (atteso `differenze: 0`). Annotare la quota GPU residua mostrata da Kaggle. Ripiego manuale, se l'API non fosse disponibile — *File → Save Version → Quick Save* con "Save output" attivo, download dell'output, poi sul fisso in PowerShell:
 ```powershell
 Set-Location C:\dev\papyrus-lab\runs\E00-R01
 $bad = 0
@@ -321,7 +341,7 @@ Scrivere `docs/reports/2026-09-XX-e00-r01-manifest.json` con: `commit_papyruslab
 
 ### Passo 11 — Scheda dell'esperimento
 
-Compilare `docs/reports/2026-09-XX-e00-r01.md` da `docs/templates/esperimento.md`, con verdetto secondo il §5 (o arresto documentato con passo e causa), deviazioni (installazione `--no-deps`, pacchetti aggiunti, allocazione doppia T4 con uso singolo), tempi, esiti negativi e prove interrotte. Concludere con una decisione: promuovere (→ E01), ripetere (`E00-R02`, con piano corretto), modificare, sospendere. Copiare il notebook ripulito in `notebooks/e00-r01.ipynb` (menu *Edit → Clear all outputs* prima dell'esportazione). Consegnare a Codex per la revisione dell'esito in sola lettura. **Nessun commit** finché Matteo non lo chiede.
+Compilare `docs/reports/2026-09-XX-e00-r01.md` da `docs/templates/esperimento.md`, con verdetto secondo il §5 (o arresto documentato con passo e causa), deviazioni (installazione `--no-deps`, pacchetti aggiunti, allocazione doppia T4 con uso singolo), tempi, esiti negativi e prove interrotte. Concludere con una decisione: promuovere (→ E01), ripetere (`E00-R02`, con piano corretto), modificare, sospendere. I notebook eseguiti sono già nel repository in `kaggle/` (generati, senza output); nel manifest indicare il numero di versione Kaggle di ogni run (stampato da `push`). Consegnare a Codex per la revisione dell'esito in sola lettura. **Nessun commit** finché Matteo non lo chiede.
 
 ---
 
@@ -347,16 +367,16 @@ Si distinguono due cose: **esecuzione completata** (il piano è stato seguito fi
 
 Esecuzione completata quando, nell'ordine, sul fisso in PowerShell:
 ```powershell
-Set-Location C:\dev\papyrus-lab\runs\E00-R01
-Test-Path out\SHA256SUMS                                         # atteso: True, e "differenze: 0" al passo 10
-Test-Path out\metrics_seed42.json                                # atteso: True (anche in caso di stop dopo il passo 8; False è ammesso solo con stop documentato ai passi 1–7)
 Set-Location C:\dev\papyrus-lab
-git status --short                                               # atteso: solo docs/reports/…e00-r01*.md/.json e notebooks/e00-r01.ipynb
+python scripts/kaggle_e00.py output preflight                    # atteso: "differenze: 0"
+python scripts/kaggle_e00.py output seed42                       # atteso: "differenze: 0" (o stop documentato ai passi 1–7 nel log scaricato)
+Test-Path runs\E00-R01\seed42\e00\out\metrics_seed42.json        # atteso: True (False ammesso solo con stop documentato prima del passo 8)
+git status --short                                               # atteso: solo docs/reports/…e00-r01*.md/.json
 git ls-files | Select-String -Pattern '\.(tif|tiff|pth|zarr)$'   # atteso: nessun output
 ```
 E00 superato quando, in più:
 ```powershell
-Get-Content runs\E00-R01\out\metrics_seed42.json | ConvertFrom-Json | Select-Object gate_B, orientamento_ok, originale
+Get-Content runs\E00-R01\seed42\e00\out\metrics_seed42.json | ConvertFrom-Json | Select-Object gate_B, orientamento_ok, originale
 # atteso per "superato": gate_B = superato, orientamento_ok = True, originale >= 0.90
 ```
 

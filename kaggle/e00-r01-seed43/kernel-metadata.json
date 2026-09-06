@@ -1,0 +1,19 @@
+{
+  "id": "matteopontesilli/papyruslab-e00-r01-seed43",
+  "title": "papyruslab-e00-r01-seed43",
+  "code_file": "papyruslab-e00-r01-seed43.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [
+    "matteopontesilli/papyruslab-w035-labels"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [
+    "matteopontesilli/papyruslab-e00-r01-seed42"
+  ],
+  "model_sources": [],
+  "machine_shape": "NvidiaTeslaT4"
+}
