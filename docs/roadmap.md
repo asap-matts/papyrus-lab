@@ -38,7 +38,7 @@ Prima delle campagne di ottimizzazione completare F3. Il setup può comprendere 
 
 La [procedura operativa canonica](07-procedura-operativa.md) è stata revisionata in due giri read-only il 6 settembre 2026 ([rapporto](reports/2026-09-06-revisione-procedura-e00.md)): 23 finding, nessun P0, correzioni accettate e integrate. Il [dossier E00](08-dossier-input-e00.md) è stato verificato su fonti primarie e contiene le decisioni prese, il comando candidato e il criterio di esito proposto. Il [piano di verifica di ScrollScout](05-scrollscout-e-piano-di-verifica.md) resta uno dei filoni di confronto.
 
-1. Commit documentale delle correzioni (su richiesta esplicita di Matteo). Sul commit risultante, scrivere `docs/plans/2026-09-XX-e00.md` con prerequisiti, criterio di esito e comando congelati; revisione read-only del piano da parte di Codex.
+1. Commit documentale delle correzioni eseguito (`d430456`). Sul quel commit è scritto il [piano E00](plans/2026-09-06-e00-controllo-noto-w035.md) con prerequisiti, criterio di esito e comando congelati; revisione read-only del piano da parte di Codex, poi commit del piano su richiesta.
 2. Prerequisiti senza GPU: installazione sul Python di Kaggle provata, Internet del notebook verificato, label scaricata, hash dei checkpoint controllati, destinazione degli output decisa.
 3. E00 su una Tesla T4 con il notebook privato; il [preflight](reports/2026-09-05-kaggle-preflight.md) ha verificato l'acceleratore, non il modello.
 4. Salvare istruzioni, parametri e risultati; predisporre la ripetizione del socio (E01) e il confronto E02. Servono ancora RAM e spazio del Mac e l'username GitHub del socio per un invito esplicitamente richiesto. Un preflight della GTX 1060 del fisso è un'attività separata.
