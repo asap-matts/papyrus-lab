@@ -235,6 +235,12 @@ Arresto obbligatorio: `tree_sha256` della label diverso; hash di un checkpoint d
 
 ---
 
+## Esito (aggiunto dopo l'esecuzione)
+
+**E01-R01 eseguito e superato il 6 settembre 2026** dal socio (`micheleghisa`) con Codex: gate A e B superati, AUROC seed 42 identica a E00 fino all'ultima cifra, **TIFF identici bit per bit** a quelli di E00 per entrambi i seed, 10 min 53 s di quota GPU, nessun retry GPU. Scheda: [docs/reports/2026-09-06-e01-r01.md](../reports/2026-09-06-e01-r01.md); manifest accanto. Branch `e01-socio` fuso in `main` in fast-forward da Matteo dopo revisione read-only di Claude. **Gate G2 raggiunto.**
+
+Gli otto ostacoli registrati nella scheda riguardano tutti l'avvio locale su Mac (Python di sistema 3.9, PATH di Homebrew, PEP 668 su `pip --user`, messaggio di `pip` soppresso, verifica dell'autenticazione ambigua, pagina di callback del login, `403` transitorio del dataset, `429` di Hugging Face nel preflight v1). Sono stati integrati in `scripts/e01_bootstrap_mac.sh` versione 2 (branch subito dopo il clone, ricerca di un Python ≥ 3.11 anche in Homebrew, gestione PEP 668, errori di `pip` visibili, distinzione fra "nessun notebook" e "non autenticato", nota sulla pagina di callback). Il `429` sul download dei checkpoint resta gestito dal retry del run, come previsto dal piano.
+
 ## 9. Al termine
 
 - [ ] Passi 0–7 eseguiti, oppure arresto documentato al passo N
