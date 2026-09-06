@@ -1,0 +1,246 @@
+{
+  "experiment": "E01",
+  "run_id": "E01-R01",
+  "date_utc": "2026-09-06",
+  "plan": "docs/plans/2026-09-06-e01-ripetizione-socio.md",
+  "operator": "partner",
+  "executor": "Codex",
+  "kaggle_username": "micheleghisa",
+  "commit_papyruslab_at_run": "314d687e55549e730328c06a836f4c9ef2029b16",
+  "commit_villa": "3ea17f54a9b3d5fd1aaf73e1d2c8386dbaa9f30e",
+  "villa_branch": "merge-ink-pipelines",
+  "hf_model_repo": "scrollprize/ink_9um",
+  "hf_model_revision": "7109667e2607db1b90c37c8b09cb876ea7fe7bb1",
+  "local_environment": {
+    "platform": "macOS, partner Mac",
+    "git": "2.50.1 (Apple Git-155)",
+    "python_initial": "3.9.6",
+    "python_used": "3.12.14 (Homebrew python@3.12)",
+    "kaggle_cli": "2.2.4",
+    "python_path_prefix": "/opt/homebrew/opt/python@3.12/libexec/bin",
+    "bootstrap_pip_override": "PIP_BREAK_SYSTEM_PACKAGES=1 for one bootstrap invocation; pip retained --user"
+  },
+  "input": {
+    "segment": "PHerc0139/segments/20260317000000-w035_2026031718",
+    "surface_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260317000000-w035_2026031718/surface-volumes/9.362um-1.2m-113keV-volume-20250728140407.zarr",
+    "level": 0,
+    "shape_zyx": [28, 5820, 5240],
+    "dtype": "uint8",
+    "scale_um": 9.362,
+    "role": "known control; present in the ink_9um training set in two representations"
+  },
+  "label": {
+    "source_prefix": "hf://buckets/scrollprize/datasets/ink_9um/labels/native9-scrollprizeorg-21slices/w035/",
+    "served_from": "private Kaggle dataset micheleghisa/papyruslab-w035-labels",
+    "local_build_seconds": 254,
+    "files": 5128,
+    "bytes": 737833,
+    "tar_bytes": 5263360,
+    "tar_sha256": "0ba09a5353d39e0ed67e74f57f1555632503daf9f898bf322e48d5001125e8f0",
+    "tree_sha256": "09037f1d0ccc008c5f619b2a4f41a554d1abf50739fd02469a9a2fb799731f27",
+    "kaggle_manifest_sha256": "33e79b2452a375fa312d2838dbe573de73d481d445a1bb924b05a4df4a4351e5",
+    "annotated_plane_z": 14,
+    "n_supervised_pixels": 1071121,
+    "n_ink_pixels": 334035
+  },
+  "checkpoints": {
+    "seed42": {
+      "path": "hybrid_3d2d-seed42/step-075000.pth",
+      "bytes": 138360039,
+      "sha256": "e635558ae6a1a807a7e5ec1e83adfd45bc3c0ac53883ea43f1d4e085d62a9cab"
+    },
+    "seed43": {
+      "path": "hybrid_3d2d-seed43/step-075000.pth",
+      "bytes": 138360231,
+      "sha256": "2aeaa85a35ef28d7bc7bf3e848c4a6a91385e9132710927fdba41133c4ecb28f"
+    }
+  },
+  "kaggle_environment": {
+    "platform": "Linux-6.12.90+-x86_64-with-glibc2.35",
+    "python": "3.12.13",
+    "torch": "2.10.0+cu128",
+    "torchvision": "0.25.0+cu128",
+    "cuda_device_count_allocated": 2,
+    "cuda_visible_devices": "0",
+    "gpu_allocated": "2 x Tesla T4 15360 MiB",
+    "gpu_used": "one Tesla T4",
+    "driver": "580.159.04",
+    "install_method": "system Python; pip install --no-deps from sparse villa checkout; uv run not used",
+    "added_packages": [
+      {"dist": "asciitree", "version": "0.3.3"},
+      {"dist": "pynrrd", "version": "1.1.3"},
+      {"dist": "imagecodecs", "version": "2026.3.6"}
+    ],
+    "pip_versions": {
+      "aiohttp": "3.13.5",
+      "albumentations": "2.0.8",
+      "einops": "0.8.2",
+      "fsspec": "2025.3.0",
+      "huggingface_hub": "1.11.0",
+      "koine_machines": "0.1.0 (editable, /tmp/e00/villa/ink-detection)",
+      "numcodecs": "0.15.1",
+      "numpy": "2.0.2",
+      "s3fs": "0.4.2",
+      "scipy": "1.16.3",
+      "tifffile": "2026.4.11",
+      "timm": "1.0.26",
+      "vesuvius": "0.2.4 (editable, /tmp/e00/villa/vesuvius)",
+      "zarr": "2.18.7"
+    }
+  },
+  "inference_config_from_log": {
+    "roi_size": 128,
+    "stride": 64,
+    "overlap": 0.5,
+    "blend_mode": "hann",
+    "in_chans": 17,
+    "layer_indices": [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22],
+    "layer_order": "forward",
+    "tta": "disabled",
+    "compile": false,
+    "amp_dtype": "float16",
+    "preprocessing": "tifxyz_robust",
+    "occupancy_scan_level": 3,
+    "nonempty_coverage_pct": 82.132,
+    "patches": 6458
+  },
+  "runs": {
+    "preflight": {
+      "kaggle_kernel": "micheleghisa/papyruslab-e01-r01-preflight",
+      "attempts": [
+        {
+          "version": 1,
+          "start_utc": "2026-09-06T16:39:17Z",
+          "result": "error",
+          "error_line": "httpx.HTTPStatusError: Client error '429 Too Many Requests' for url 'https://huggingface.co/api/models/scrollprize/ink_9um/revision/7109667e2607db1b90c37c8b09cb876ea7fe7bb1'",
+          "retry_after_seconds": 209,
+          "artifacts_local": "runs/E01-R01/preflight/20260906T164115Z/"
+        },
+        {
+          "version": 2,
+          "start_utc": "2026-09-06T16:45:09Z",
+          "end_utc": "2026-09-06T16:47:34Z",
+          "session_seconds": 145,
+          "result": "complete",
+          "verified_files": 14,
+          "sha256_differences": 0,
+          "required_missing": 0,
+          "artifacts_local": "runs/E01-R01/preflight/20260906T164812Z/"
+        }
+      ]
+    },
+    "seed42": {
+      "kaggle_kernel": "micheleghisa/papyruslab-e01-r01-seed42",
+      "version": 1,
+      "start_utc": "2026-09-06T16:50:40Z",
+      "end_utc": "2026-09-06T16:56:04Z",
+      "session_seconds": 324,
+      "inference_and_write_seconds": 205,
+      "exit_code": 0,
+      "result": "complete",
+      "verified_files": 23,
+      "sha256_differences": 0,
+      "required_missing": 0,
+      "gpu_peak_mib": {"0": 383, "1": 3},
+      "disk_peak_bytes": 360544819,
+      "tif_bytes": 14058408,
+      "tif_sha256": "a0cc3f53ff5affde473b88b55087378376cc3743f9cbc9e62152c21079733c38",
+      "metrics_sha256": "62c2d8581a8be40a0d10aace3b6b99c14aee6d272ea270be50fb1c3b0e14506e",
+      "log_sha256": "e6ed3753a3a65d7191e99cf2da275a296978b62e8073fea702d9f0cc0b9b083b",
+      "artifacts_local": "runs/E01-R01/seed42/20260906T165643Z/"
+    },
+    "seed43": {
+      "kaggle_kernel": "micheleghisa/papyruslab-e01-r01-seed43",
+      "version": 1,
+      "seed42_output_source": "private Kaggle dataset micheleghisa/papyruslab-e01-r01-seed42-out",
+      "start_utc": "2026-09-06T17:02:02Z",
+      "end_utc": "2026-09-06T17:07:31Z",
+      "session_seconds": 329,
+      "inference_and_write_seconds": 212,
+      "exit_code": 0,
+      "result": "complete",
+      "verified_files": 24,
+      "sha256_differences": 0,
+      "required_missing": 0,
+      "gpu_peak_mib": {"0": 383, "1": 3},
+      "disk_peak_bytes": 360611710,
+      "tif_bytes": 14128920,
+      "tif_sha256": "72fabca911ca12008bf313396abe1eef728958893986f54d85112cd5423ec8e5",
+      "metrics_sha256": "a2baa43f3165d487d11e8245a90558d3f33d2f5ad55b042d0c5d772f14e7910a",
+      "compare_sha256": "18e64473e197c88a7229b6f62d6179b4630b2a1d76e743ee9998865d61c91355",
+      "log_sha256": "726079c118fc0c3cdb6e6b73da3daf9729b95df82174b7e2d78f7bad9e66fb88",
+      "artifacts_local": "runs/E01-R01/seed43/20260906T170757Z/"
+    }
+  },
+  "gate_A": {
+    "result": "superato",
+    "elements": [
+      "villa commit exact",
+      "checkpoint SHA-256 and byte sizes exact",
+      "label 5128 files / 737833 bytes / tree SHA-256 exact",
+      "layer indices 6-22",
+      "in_chans 17",
+      "seed42 exit_code 0",
+      "seed42 TIFF shape 5820x5240 and dtype uint8"
+    ]
+  },
+  "metrics_seed42": {
+    "auroc_original": 0.99907859176232,
+    "auroc_rot180": 0.5319418364520899,
+    "auroc_flipY": 0.5397187179196468,
+    "auroc_flipX": 0.5764798188340526,
+    "orientation_ok": true,
+    "median_ink": 200.0,
+    "median_background": 57.0,
+    "gate_B": "superato"
+  },
+  "metrics_seed43": {
+    "auroc_original": 0.9982515614702061,
+    "auroc_rot180": 0.5114786217448567,
+    "auroc_flipY": 0.5371853447674287,
+    "auroc_flipX": 0.5805425458608258,
+    "orientation_ok": true,
+    "median_ink": 200.0,
+    "median_background": 58.0,
+    "gate_B": "superato"
+  },
+  "seed_comparison_on_supervised_pixels": {
+    "spearman": 0.9168450565668599,
+    "delta_auroc_43_minus_42": -0.0008270302921138395,
+    "n_pixels": 1071121,
+    "note": "agreement, not independence: same architecture, data and recipe"
+  },
+  "comparison_with_e00": {
+    "e00_seed42_auroc": 0.99907859176232,
+    "e01_seed42_auroc": 0.99907859176232,
+    "absolute_difference_exact": 0.0,
+    "absolute_difference_from_preregistered_rounded_target_0_99908": 0.00000140823768,
+    "tolerance": 0.005,
+    "within_tolerance": true,
+    "transformed_aurocs_all_below_0_65": true,
+    "seed42_tif_bit_identical": true,
+    "seed43_metrics_identical": true,
+    "seed43_tif_bit_identical": true
+  },
+  "gpu_quota": {
+    "gpu_runs": 2,
+    "gpu_retries": 0,
+    "seed42_session_seconds": 324,
+    "seed43_session_seconds": 329,
+    "total_observed_session_seconds": 653,
+    "total_observed_session_minutes": 10.8833333333,
+    "preflight_gpu_minutes": 0
+  },
+  "ambiguities_and_obstacles": [
+    "The initial clone was on main instead of e01-socio and required an explicit partner instruction before switching.",
+    "The Mac exposed Python 3.9.6, below the bootstrap requirement, but the plan did not include a command for upgrading an existing old Python.",
+    "After installing Homebrew Python 3.12, PATH still selected /usr/bin/python3; commands required a temporary Homebrew libexec PATH prefix.",
+    "Homebrew Python enforced PEP 668 and rejected the bootstrap's pip install --user; one bootstrap invocation required PIP_BREAK_SYSTEM_PACKAGES=1 while retaining --user.",
+    "The browser displayed ERR_CONNECTION_REFUSED after OAuth even though the CLI had already received the callback and confirmed the login.",
+    "kaggle kernels list --mine --page-size 3 printed Not found with exit code 0, which the bootstrap treated as authenticated.",
+    "The first dataset status request returned 403 Forbidden; the prescribed retry returned ready.",
+    "Preflight v1 failed on an external Hugging Face 429 rate limit; v2 succeeded after the requested 209-second wait."
+  ],
+  "artifacts_local": "runs/E01-R01/{preflight,seed42,seed43}/<timestamp>/ (ignored by Git)",
+  "verdict": "E01 superato: E00 reproduced by a second operator with a different Kaggle account and agent; G2 reached; no evidence of generalization."
+}
