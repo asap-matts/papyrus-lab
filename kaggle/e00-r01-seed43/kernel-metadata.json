@@ -8,7 +8,8 @@
   "enable_gpu": true,
   "enable_internet": true,
   "dataset_sources": [
-    "matteopontesilli/papyruslab-w035-labels"
+    "matteopontesilli/papyruslab-w035-labels",
+    "matteopontesilli/papyruslab-e00-r01-seed42-out"
   ],
   "competition_sources": [],
   "kernel_sources": [

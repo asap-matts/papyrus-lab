@@ -508,28 +508,37 @@ if res["gate_B"] != "superato":
     print("E00 NON SUPERATO su questo run: non eseguire il seed 43. Conservare tutto e compilare la scheda.")
 '''
 
-CELL_9_COMPARE_PY = """# Passo 9 — confronto con il run seed42, montato come sorgente in /kaggle/input
+CELL_9_COMPARE_PY = """# Passo 9 — confronto con il run seed42 (file verificati dalla guardia iniziale: SRC42, TIF42, r42)
 import json, numpy as np, tifffile, zarr, os
 from scipy.stats import spearmanr
-SRC = "/kaggle/input/papyruslab-e00-r01-seed42/e00/out"
-assert os.path.exists(f"{SRC}/metrics_seed42.json"), "STOP: output del run seed42 non montato come kernel_source"
-r42 = json.load(open(f"{SRC}/metrics_seed42.json")); r43 = json.load(open(f"{WORK}/out/metrics_seed43.json"))
-assert r42["gate_B"] == "superato", "STOP: il run seed42 non ha superato il gate B; il seed 43 non andava eseguito"
+r43 = json.load(open(f"{WORK}/out/metrics_seed43.json"))
 msk = zarr.open(f"{HEAVY}/labels/w035/w035_supervision_mask.zarr", mode="r")["0"][14] > 0
-p42 = tifffile.imread(f"{SRC}/w035_seed42_step075000.tif")[msk]
+p42 = tifffile.imread(TIF42)[msk]
 p43 = tifffile.imread(f"{WORK}/out/w035_seed43_step075000.tif")[msk]
 cmp = {"spearman": float(spearmanr(p42, p43).statistic), "delta_auroc_43_meno_42": r43["originale"] - r42["originale"],
        "sha256_tif_seed42": r42["sha256_tif"], "sha256_tif_seed43": r43["sha256_tif"]}
 print(json.dumps(cmp, indent=1)); json.dump(cmp, open(f"{WORK}/out/compare_seeds.json", "w"), indent=1)
 """
 
-CELL_0_GUARD_SEED43_PY = """# Guardia iniziale del run seed43: il seed 42 deve avere superato il gate B, PRIMA di spendere GPU
-import json, os
-SRC = "/kaggle/input/papyruslab-e00-r01-seed42/e00/out"
-assert os.path.exists(f"{SRC}/metrics_seed42.json"), "STOP: output del run seed42 non montato come kernel_source"
-r42 = json.load(open(f"{SRC}/metrics_seed42.json"))
+CELL_0_GUARD_SEED43_PY = """# Guardia iniziale del run seed43: il seed 42 deve avere superato il gate B, PRIMA di spendere GPU.
+# L'output del seed42 e' montato come dataset Kaggle (matteopontesilli/papyruslab-e00-r01-seed42-out) e, in aggiunta,
+# come kernel_source; il primo tentativo (6 settembre 2026) ha mostrato che il solo kernel_source non espone il percorso
+# atteso, quindi i file si cercano ovunque sotto /kaggle/input e il TIFF trovato deve avere lo SHA-256 registrato nelle metriche.
+import json, os, glob, hashlib
+for root, dirs, files in os.walk("/kaggle/input"):
+    depth = root.count("/") - 2
+    if depth <= 3:
+        print("  " * depth + os.path.basename(root) + "/", "(", len(files), "file )")
+hits = glob.glob("/kaggle/input/**/metrics_seed42.json", recursive=True)
+assert hits, "STOP: metrics_seed42.json non trovato sotto /kaggle/input (dataset seed42-out non montato)"
+SRC42 = os.path.dirname(hits[0])
+r42 = json.load(open(hits[0]))
 assert r42.get("gate_B") == "superato", f"STOP: il run seed42 non ha superato il gate B ({r42.get('gate_B')}): il seed 43 non va eseguito"
-print("guardia seed43: seed42 gate_B =", r42["gate_B"], "| AUROC", r42.get("originale"))
+TIF42 = os.path.join(SRC42, "w035_seed42_step075000.tif")
+assert os.path.exists(TIF42), f"STOP: TIFF del seed42 assente accanto a {hits[0]}"
+sha42 = hashlib.sha256(open(TIF42, "rb").read()).hexdigest()
+assert sha42 == r42["sha256_tif"], f"STOP: SHA-256 del TIFF seed42 montato ({sha42}) diverso da quello registrato ({r42['sha256_tif']})"
+print("guardia seed43 superata: seed42 gate_B =", r42["gate_B"], "| AUROC", r42.get("originale"), "| TIFF verificato in", SRC42)
 """
 
 CELL_11_VERDICT_PY = """# Verdetto del run: dopo aver persistito metriche e hash, un gate B non superato rende il run 'error'
@@ -594,7 +603,8 @@ def build(mode: str) -> tuple[dict, dict]:
         "id": f"{KAGGLE_USER}/{slug}", "title": slug, "code_file": f"{slug}.ipynb",
         "language": "python", "kernel_type": "notebook", "is_private": True,
         "enable_gpu": gpu, "enable_internet": True,
-        "dataset_sources": [LABEL_DATASET], "competition_sources": [],
+        "dataset_sources": [LABEL_DATASET] + ([f"{KAGGLE_USER}/papyruslab-{RUN_ID}-seed42-out"] if mode == "seed43" else []),
+        "competition_sources": [],
         "kernel_sources": [f"{KAGGLE_USER}/papyruslab-{RUN_ID}-seed42"] if mode == "seed43" else [],
         "model_sources": [],
     }
