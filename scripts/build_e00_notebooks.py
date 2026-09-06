@@ -10,16 +10,20 @@ Every stop condition of the plan is an assertion or an `exit 1`: a failed check 
 and the log says where. Heavy files live under /tmp/e00 (not persisted); outputs and logs under
 /kaggle/working/e00 (persisted as kernel output).
 
-Usage: python scripts/build_e00_notebooks.py   -> writes kaggle/e00-r01-<mode>/
+Usage:
+  python scripts/build_e00_notebooks.py                                  -> kaggle/e00-r01-<mode>/ (Matteo's account)
+  python scripts/build_e00_notebooks.py --user <kaggle-user> --run-id e01-r01   -> kaggle/e01-r01-<mode>/ (E01, the partner's account)
+The Kaggle user only changes kernel ids and dataset ids; every scientific constant stays the same.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import uuid
 from pathlib import Path
 
-KAGGLE_USER = "matteopontesilli"
-RUN_ID = "e00-r01"
+KAGGLE_USER = "matteopontesilli"    # default; overridden by --user
+RUN_ID = "e00-r01"                  # default; overridden by --run-id
 PLAN = "docs/plans/2026-09-06-e00-controllo-noto-w035.md"
 
 ZARR_URL = (
@@ -34,7 +38,7 @@ LABEL_FILES = 5128
 LABEL_BYTES = 737833
 # Private Kaggle dataset built by scripts/build_w035_label_dataset.py from the bucket API listing
 # (2026-09-06). Mounted read-only in every run; the tar hash is re-checked before extraction.
-LABEL_DATASET = f"{KAGGLE_USER}/papyruslab-w035-labels"
+LABEL_DATASET_SLUG = "papyruslab-w035-labels"          # under the running user's account: <user>/papyruslab-w035-labels
 LABEL_TAR_SHA256 = "0ba09a5353d39e0ed67e74f57f1555632503daf9f898bf322e48d5001125e8f0"
 # Content hash of the label tree (sorted 'relpath\nsha256(file)\n' lines), printed by
 # scripts/build_w035_label_dataset.py. Re-checked in every run, both on the dataset path and on the
@@ -577,7 +581,7 @@ def nb_cell(kind: str, source: str) -> dict:
     return cell
 
 
-def build(mode: str) -> tuple[dict, dict]:
+def build(mode: str, user: str = KAGGLE_USER, run_id: str = RUN_ID) -> tuple[dict, dict]:
     seed = {"preflight": None, "seed42": 42, "seed43": 43}[mode]
     gpu = mode != "preflight"
     cells = [
@@ -603,14 +607,14 @@ def build(mode: str) -> tuple[dict, dict]:
                      "language_info": {"name": "python"}},
         "cells": [nb_cell(k, sub(s)) for k, s in cells],
     }
-    slug = f"papyruslab-{RUN_ID}-{mode}"
+    slug = f"papyruslab-{run_id}-{mode}"
     meta = {
-        "id": f"{KAGGLE_USER}/{slug}", "title": slug, "code_file": f"{slug}.ipynb",
+        "id": f"{user}/{slug}", "title": slug, "code_file": f"{slug}.ipynb",
         "language": "python", "kernel_type": "notebook", "is_private": True,
         "enable_gpu": gpu, "enable_internet": True,
-        "dataset_sources": [LABEL_DATASET] + ([f"{KAGGLE_USER}/papyruslab-{RUN_ID}-seed42-out"] if mode == "seed43" else []),
+        "dataset_sources": [f"{user}/{LABEL_DATASET_SLUG}"] + ([f"{user}/papyruslab-{run_id}-seed42-out"] if mode == "seed43" else []),
         "competition_sources": [],
-        "kernel_sources": [f"{KAGGLE_USER}/papyruslab-{RUN_ID}-seed42"] if mode == "seed43" else [],
+        "kernel_sources": [f"{user}/papyruslab-{run_id}-seed42"] if mode == "seed43" else [],
         "model_sources": [],
     }
     if gpu:
@@ -619,10 +623,14 @@ def build(mode: str) -> tuple[dict, dict]:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--user", default=KAGGLE_USER, help="Kaggle username that owns kernels and datasets")
+    ap.add_argument("--run-id", default=RUN_ID, help="run identifier, e.g. e00-r01 or e01-r01")
+    a = ap.parse_args()
     root = Path(__file__).resolve().parents[1]
     for mode in ["preflight", "seed42", "seed43"]:
-        notebook, meta = build(mode)
-        folder = root / "kaggle" / f"{RUN_ID}-{mode}"
+        notebook, meta = build(mode, a.user, a.run_id)
+        folder = root / "kaggle" / f"{a.run_id}-{mode}"
         folder.mkdir(parents=True, exist_ok=True)
         # LF esplicito: file identici su Windows e Linux, nessuna normalizzazione da parte di Git
         with open(folder / meta["code_file"], "w", encoding="utf-8", newline="\n") as fh:

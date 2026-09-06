@@ -92,10 +92,13 @@ def tree_sha256(root: Path) -> tuple[str, dict[str, str]]:
 
 
 def main() -> None:
+    global KAGGLE_USER
     ap = argparse.ArgumentParser()
     ap.add_argument("--from", dest="src", default=None, help="directory already containing labels/w035 (verified download)")
     ap.add_argument("--out", default=str(ROOT / "runs" / "E00-R01" / "dataset-w035-labels"))
+    ap.add_argument("--user", default=KAGGLE_USER, help="Kaggle username that will own the dataset")
     a = ap.parse_args()
+    KAGGLE_USER = a.user
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
 
     listing = list_files()
