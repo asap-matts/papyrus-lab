@@ -188,6 +188,13 @@ def ensure_import(modname):
 for modname in ["koine_machines.inference.infer", "vesuvius", "vesuvius.models.build.build_network_from_config",
                 "koine_machines.models.make_model"]:
     ensure_import(modname)
+# Dipendenze caricate pigramente (non intercettabili con un import): il run seed42 v2 (6 settembre 2026) ha completato
+# l'inferenza e si e' fermato scrivendo il TIFF perche' la compressione LZW di tifffile richiede `imagecodecs`.
+for lazy in ["imagecodecs"]:
+    if sh([PY, "-c", f"import {lazy}"]).returncode != 0:
+        ver = locked_version(lazy); assert ver, f"STOP: {lazy} non presente in uv.lock"
+        r2 = pip(f"{lazy}=={ver}"); assert r2.returncode == 0, f"STOP: pip install {lazy}=={ver} fallita\n" + r2.stderr[-3000:]
+        added.append({"module": lazy, "dist": lazy, "version": ver}); print("aggiunto", lazy, ver, "(dipendenza pigra di tifffile)")
 assert len(added) <= 10, f"STOP: {len(added)} pacchetti aggiunti, oltre il limite di dieci del piano"
 
 torch_after = torch_version()
@@ -378,6 +385,20 @@ json.dump(info, open(f"{WORK}/logs/model_build_cpu.json", "w"), indent=1)
 assert info["in_chans"] == 17, "STOP: il checkpoint non dichiara 17 slice in ingresso"
 assert "float16" in info["amp_dtype"], f"STOP: AMP dtype inatteso {info['amp_dtype']} (atteso float16 da mixed_precision=fp16)"
 print("modello costruito su CPU:", info)
+
+# Prova di scrittura del TIFF con gli stessi parametri di infer.py (uint8, tiled 128x128, LZW), in sottoprocesso
+tiff_code = r'''
+import numpy as np, tifffile, imagecodecs, json
+a = (np.arange(256 * 256) % 251).astype(np.uint8).reshape(256, 256)
+tifffile.imwrite("__OUT__", a, dtype=np.uint8, compression="lzw", tile=(128, 128))
+b = tifffile.imread("__OUT__")
+print("TIFF_TEST_JSON=" + json.dumps({"ok": bool((a == b).all()), "tifffile": tifffile.__version__, "imagecodecs": imagecodecs.__version__}))
+'''.replace("__OUT__", f"{WORK}/logs/tiff_lzw_test.tif")
+r = subprocess.run([sys.executable, "-c", tiff_code], capture_output=True, text=True)
+print(r.stdout[-800:]); print(r.stderr[-800:])
+assert r.returncode == 0, "STOP: scrittura TIFF LZW fallita: imagecodecs mancante o incompatibile"
+tinfo = json.loads(r.stdout.split("TIFF_TEST_JSON=")[1].splitlines()[0]); assert tinfo["ok"], "STOP: TIFF riletto diverso da quello scritto"
+json.dump(tinfo, open(f"{WORK}/logs/tiff_lzw_test.json", "w"), indent=1); print("scrittura TIFF LZW verificata:", tinfo)
 """
 
 CELL_7_INFER_BASH = r"""%%bash
