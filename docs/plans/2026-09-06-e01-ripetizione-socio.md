@@ -3,8 +3,8 @@
 **Scritto da:** Claude Code (writer, su incarico di Matteo) · **Esecutore previsto:** Codex, sul Mac del socio, con il socio che approva i run GPU · **Revisore dell'esito:** Claude (read-only), poi decisione di Matteo
 **Data:** 2026-09-06 · **Branch PapyrusLab di lavoro:** `e01-socio` (creato da `main`) · **Base:** il commit di `main` che contiene questo piano
 
-> Verifica prima di iniziare, dalla cartella del repository:
-> `git status --short` vuoto; `git log -1 --format=%s` su `main` deve contenere `E01`; il file `docs/plans/2026-09-06-e01-ripetizione-socio.md` esiste.
+> Verifica prima di iniziare, dalla cartella del repository (`~/dev/papyrus-lab`), sul branch `e01-socio`:
+> `git status --short` vuoto; esistono `docs/plans/2026-09-06-e01-ripetizione-socio.md`, `scripts/e01_bootstrap_mac.sh` e `kaggle/e01-r01-seed42/`.
 > Se non è così, **fermati**: il repository non è aggiornato (`git pull`).
 
 ---
@@ -59,7 +59,7 @@ In parole semplici: **w035** è un pezzo di papiro già annotato a mano dagli or
 
 | File | Cosa fare |
 |---|---|
-| `kaggle/e01-r01-{preflight,seed42,seed43}/` | Generati da `scripts/build_e00_notebooks.py --user <username-kaggle-del-socio> --run-id e01-r01`; **non modificare a mano** |
+| `kaggle/e01-r01-{preflight,seed42,seed43}/` | **Già generati e committati da Matteo** con `scripts/build_e00_notebooks.py --user micheleghisa --run-id e01-r01`; Codex li verifica soltanto (passo 2), **non li rigenera e non li modifica** |
 | `docs/reports/AAAA-MM-GG-e01-r01.md` | Scheda dell'esperimento compilata da `docs/templates/esperimento.md` (stessa struttura della scheda E00) |
 | `docs/reports/AAAA-MM-GG-e01-r01-manifest.json` | Manifest con commit, revisioni, hash, versioni, tempi, metriche, confronto con E00 (§5), elenco delle ambiguità trovate nelle istruzioni |
 
@@ -80,49 +80,53 @@ Fuori da Git (cartella ignorata): `runs/E01-R01/…` con gli output scaricati (u
 
 Sul Mac, in Terminale. Le parti che richiedono **una persona** sono segnate con 👤; tutto il resto lo fa Codex.
 
-### Passo 0 — Prerequisiti (una volta sola)
+### Passo 0 — Prerequisiti (già predisposti da Matteo; al socio restano tre login)
 
-- 👤 Il socio ha un account Kaggle con **verifica telefonica** completata (serve per Internet e GPU nei notebook) e conosce il proprio **username Kaggle** (quello nell'URL del profilo, `kaggle.com/<username>`).
-- 👤 Matteo ha invitato il socio al repository GitHub `asap-matts/papyrus-lab` con permesso di scrittura, e il socio ha accettato l'invito.
-- Codex verifica gli strumenti: `git --version`, `python3 --version` (serve **3.11 o superiore**; se manca, installarlo da python.org o con Homebrew `brew install python@3.12`), `pip3 --version`.
-- Codex installa la CLI Kaggle: `python3 -m pip install --user --upgrade kaggle` e verifica `kaggle --version` (attesa 2.2.x o superiore; se `kaggle` non è nel PATH, usare `python3 -m kaggle`).
-- 👤 Autenticazione Kaggle: il socio esegue `kaggle auth login` (si apre il browser) **oppure** genera un token su `kaggle.com/settings/api` → *Generate New Token* e lo salva in `~/.kaggle/access_token` (solo il token, niente altro). Codex non deve mai leggere né stampare quel file.
-- Verifica: `kaggle kernels list --mine --page-size 3` deve rispondere senza errori (anche con lista vuota).
+Stato di partenza dichiarato da Matteo il 6 settembre 2026: account Kaggle del socio `micheleghisa` con **verifica telefonica completata**; account GitHub `micheleghisa`; username già inseriti in piano, prompt e notebook; branch `e01-socio` già creato su GitHub; invito al repository inviato da Matteo.
 
-**Fatto quando:** i quattro comandi di verifica rispondono correttamente. Registrare le versioni nel manifest.
-
-### Passo 1 — Clone e branch
+Sul Mac, il socio apre il Terminale e incolla **una riga**, dopo aver installato `gh` se manca (`brew install gh`):
 
 ```bash
-mkdir -p ~/dev && cd ~/dev
-git clone https://github.com/asap-matts/papyrus-lab.git
-cd papyrus-lab
-git status --short --branch          # atteso: pulito, su main
+gh auth login
+bash <(curl -fsSL https://raw.githubusercontent.com/asap-matts/papyrus-lab/main/scripts/e01_bootstrap_mac.sh)
+```
+
+Lo script (`scripts/e01_bootstrap_mac.sh`) è rieseguibile e si ferma dicendo cosa manca: controlla `git` e Python ≥ 3.11, installa la CLI Kaggle, clona il repository in `~/dev/papyrus-lab` (fuori da iCloud), passa al branch `e01-socio`, verifica l'autenticazione Kaggle. I passaggi 👤 che chiede, quando servono:
+
+- 👤 `gh auth login` (GitHub.com, HTTPS, login nel browser) e accettare l'invito al repository, arrivato per e-mail o su `github.com/asap-matts/papyrus-lab/invitations`;
+- 👤 `python3 -m kaggle auth login` (si apre il browser) **oppure** token da `kaggle.com/settings/api` → *Generate New Token* salvato in `~/.kaggle/access_token` (solo il token). Codex non deve mai leggere né stampare quel file.
+
+**Fatto quando:** lo script stampa "Tutto pronto" con il commit del branch. Codex registra nel manifest le versioni di git, Python e CLI Kaggle stampate dallo script (o le rilegge con `git --version`, `python3 --version`, `python3 -m kaggle --version`).
+
+### Passo 1 — Verifica dello stato (Codex)
+
+```bash
+cd ~/dev/papyrus-lab
+git status --short --branch          # atteso: pulito, su e01-socio, allineato a origin/e01-socio
 git log -1 --format='%h %s'
-git switch -c e01-socio
+ls docs/plans/2026-09-06-e01-ripetizione-socio.md scripts/kaggle_e00.py
 ```
-**Fatto quando:** il branch `e01-socio` è attivo e `docs/plans/2026-09-06-e01-ripetizione-socio.md` esiste. Annotare l'hash del commit di `main` di partenza.
+**Fatto quando:** il branch è `e01-socio`, pulito, e i file esistono. Annotare l'hash del commit di partenza nel manifest.
 
-### Passo 2 — Generare i notebook con l'account del socio
+### Passo 2 — Verificare i notebook già generati (non rigenerarli)
 
 ```bash
-python3 scripts/build_e00_notebooks.py --user <USERNAME_KAGGLE_SOCIO> --run-id e01-r01
 ls kaggle/e01-r01-preflight kaggle/e01-r01-seed42 kaggle/e01-r01-seed43
-python3 -c "import json;print(json.load(open('kaggle/e01-r01-seed42/kernel-metadata.json'))['id'])"
+python3 -c "import json;[print(json.load(open(f'kaggle/e01-r01-{m}/kernel-metadata.json'))['id']) for m in ['preflight','seed42','seed43']]"
 ```
-**Fatto quando:** esistono le tre cartelle e l'`id` stampato inizia con l'username del socio.
+**Fatto quando:** i tre `id` stampati sono `micheleghisa/papyruslab-e01-r01-preflight`, `…-seed42`, `…-seed43`. Se il repository fosse indietro (cartelle assenti), `git pull` e ripetere; non eseguire il generatore.
 
 ### Passo 3 — Costruire e pubblicare il dataset della label (una volta; ~8–10 minuti di download)
 
 ```bash
-python3 scripts/build_w035_label_dataset.py --user <USERNAME_KAGGLE_SOCIO> --out runs/E01-R01/dataset-w035-labels
+python3 scripts/build_w035_label_dataset.py --user micheleghisa --out runs/E01-R01/dataset-w035-labels
 ```
 Atteso nelle ultime righe: `API listing: 5128 files, 737833 bytes` e **`LABEL_TREE_SHA256=09037f1d0ccc008c5f619b2a4f41a554d1abf50739fd02469a9a2fb799731f27`**.
 **Fermarsi se** il conteggio o l'hash differiscono: la label a monte è cambiata o il download è corrotto; registrare e non procedere.
 Poi:
 ```bash
-kaggle datasets create -p "$(pwd)/runs/E01-R01/dataset-w035-labels"
-kaggle datasets status <USERNAME_KAGGLE_SOCIO>/papyruslab-w035-labels    # ripetere finché risponde: ready
+python3 -m kaggle datasets create -p "$(pwd)/runs/E01-R01/dataset-w035-labels"
+python3 -m kaggle datasets status micheleghisa/papyruslab-w035-labels    # ripetere finché risponde: ready
 ```
 **Fatto quando:** lo stato è `ready`.
 
@@ -151,7 +155,7 @@ python3 -c "import json,glob;m=json.load(open(sorted(glob.glob('runs/E01-R01/see
 
 ```bash
 python3 scripts/kaggle_e00.py --run-id e01-r01 publish-seed42-out
-kaggle datasets status <USERNAME_KAGGLE_SOCIO>/papyruslab-e01-r01-seed42-out   # finché: ready
+python3 -m kaggle datasets status micheleghisa/papyruslab-e01-r01-seed42-out   # finché: ready
 ```
 Poi, con il "vai" del socio:
 ```bash

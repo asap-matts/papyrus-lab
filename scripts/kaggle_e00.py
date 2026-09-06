@@ -43,6 +43,8 @@ for _stream in (sys.stdout, sys.stderr):
         pass
 
 RUN_ID = DEFAULT_RUN_ID
+# On macOS a `pip install --user kaggle` often lands outside PATH: fall back to `python -m kaggle`.
+KAGGLE = [shutil.which("kaggle")] if shutil.which("kaggle") else [sys.executable, "-m", "kaggle"]
 
 
 def folder(mode: str) -> Path:
@@ -91,14 +93,14 @@ def push(mode: str) -> None:
         gate = json.loads((d / "e00" / "out" / "metrics_seed42.json").read_text(encoding="utf-8")).get("gate_B")
         if gate != "superato":
             sys.exit(f"seed43 rifiutato: il run seed42 ha gate_B={gate!r}, non 'superato'")
-    cmd = ["kaggle", "kernels", "push", "-p", str(folder(mode)), "-t", str(TIMEOUTS[mode])]
+    cmd = [*KAGGLE, "kernels", "push", "-p", str(folder(mode)), "-t", str(TIMEOUTS[mode])]
     if m.get("enable_gpu"):
         cmd += ["--accelerator", m.get("machine_shape", "NvidiaTeslaT4")]
     run(cmd)
 
 
 def status(mode: str) -> str:
-    out = run(["kaggle", "kernels", "status", kernel_id(mode)], check=False)
+    out = run([*KAGGLE, "kernels", "status", kernel_id(mode)], check=False)
     # Kaggle CLI 2.2.4 prints e.g.: <kernel> has status "KernelWorkerStatus.ERROR"
     m = re.search(r'status\s+"?(?:KernelWorkerStatus\.)?(\w+)"?', out)
     return m.group(1).lower() if m else "unknown"
@@ -129,7 +131,7 @@ def wait_cmd(mode: str) -> None:
 def output(mode: str) -> None:
     dest = runs_dir() / mode / time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     dest.mkdir(parents=True, exist_ok=True)
-    run(["kaggle", "kernels", "output", kernel_id(mode), "-p", str(dest)])
+    run([*KAGGLE, "kernels", "output", kernel_id(mode), "-p", str(dest)])
     sums = next(dest.rglob("SHA256SUMS"), None)
     if sums is None:
         print(f"SHA256SUMS non trovato negli output: il run non ha raggiunto il passo 10. Log e output parziali in {dest}")
@@ -175,9 +177,9 @@ def publish_seed42_out() -> None:
     (ds / "dataset-metadata.json").write_text(json.dumps({
         "title": f"PapyrusLab {RUN_ID.upper()} seed42 output", "id": f"{user}/papyruslab-{RUN_ID}-seed42-out",
         "licenses": [{"name": "other"}]}, indent=2) + "\n", encoding="utf-8")
-    out = run(["kaggle", "datasets", "create", "-p", str(ds)], check=False)
+    out = run([*KAGGLE, "datasets", "create", "-p", str(ds)], check=False)
     if "already exists" in out.lower() or "409" in out:
-        run(["kaggle", "datasets", "version", "-p", str(ds), "-m", "update seed42 output"])
+        run([*KAGGLE, "datasets", "version", "-p", str(ds), "-m", "update seed42 output"])
     print(f"dataset {user}/papyruslab-{RUN_ID}-seed42-out pubblicato (privato); TIFF sha256 {sha}")
 
 

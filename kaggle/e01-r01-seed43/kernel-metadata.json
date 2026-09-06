@@ -1,0 +1,20 @@
+{
+  "id": "micheleghisa/papyruslab-e01-r01-seed43",
+  "title": "papyruslab-e01-r01-seed43",
+  "code_file": "papyruslab-e01-r01-seed43.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [
+    "micheleghisa/papyruslab-w035-labels",
+    "micheleghisa/papyruslab-e01-r01-seed42-out"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [
+    "micheleghisa/papyruslab-e01-r01-seed42"
+  ],
+  "model_sources": [],
+  "machine_shape": "NvidiaTeslaT4"
+}

@@ -1,6 +1,6 @@
 # Prompt per il Codex del socio — E01
 
-Da incollare in Codex (CLI o app) **dopo** aver aperto la cartella del repository clonato (`~/dev/papyrus-lab`) come cartella di lavoro. Sostituire `<USERNAME_KAGGLE>` con il proprio username Kaggle. Prima di incollarlo, avere completato da soli i tre punti 👤 del passo 0 del piano: verifica telefonica Kaggle, invito GitHub accettato, autenticazione `kaggle` (`kaggle auth login` oppure token in `~/.kaggle/access_token`).
+Da incollare in Codex (CLI o app) **dopo** che lo script di avvio `scripts/e01_bootstrap_mac.sh` ha stampato "Tutto pronto", aprendo la cartella `~/dev/papyrus-lab` come cartella di lavoro. Lo username Kaggle (`micheleghisa`) è già inserito ovunque. I passaggi che restano al socio, guidati dallo script: `gh auth login` (il repository è privato), accettare l'invito GitHub, `python3 -m kaggle auth login`; e i due "vai" per la GPU durante l'esecuzione.
 
 ---
 
@@ -19,7 +19,7 @@ Regole non negoziabili:
 - Prima di ogni comando che consuma la mia quota GPU (`push seed42`, `push seed43`, e ogni loro ripetizione) fermati, dimmi cosa stai per fare e quanto costa, e aspetta il mio "vai" esplicito. Il preflight non consuma quota e puoi lanciarlo da solo.
 - Non leggere, stampare o copiare ~/.kaggle/access_token, ~/.kaggle/kaggle.json né altre credenziali. Verifica l'autenticazione solo con `kaggle kernels list --mine --page-size 3`.
 - Non scaricare né tracciare in Git file .tif, .pth o .zarr; controlla `git status` prima del commit.
-- Il mio username Kaggle è <USERNAME_KAGGLE>: usalo dove il piano scrive <USERNAME_KAGGLE_SOCIO>.
+- Il mio username Kaggle è micheleghisa ed è già inserito nel piano e nei notebook generati in kaggle/e01-r01-*: non rigenerarli e non cambiarlo.
 
 Cosa devi produrre alla fine:
 - docs/reports/<data>-e01-r01.md compilata dal template docs/templates/esperimento.md (stessa struttura della scheda E00, che potrai leggere solo a quel punto per il confronto), con la sezione obbligatoria "Ambiguità e ostacoli nelle istruzioni": ogni punto in cui piano o documentazione non erano chiari o sufficienti, anche se poi risolto.
