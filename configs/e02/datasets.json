@@ -1,0 +1,22 @@
+{
+  "_note": "Identita' e hash dei dataset Kaggle privati usati dai notebook E02 (plan step 4-6). I valori null vengono riempiti da scripts/build_label_dataset.py (label) e scripts/kaggle_e02.py publish-input / publish-seed42-out; il generatore rifiuta di produrre un notebook che richiede una costante ancora null.",
+  "owner": "matteopontesilli",
+  "labels": {
+    "slug": "papyruslab-e02-labels",
+    "segments": {
+      "pherc0814-46527": {"family": "aligned-scrollprizeorg-21slices", "file_count": null, "byte_total": null, "tree_sha256": null, "tar_sha256": null},
+      "pherc0139-w016": {"family": "aligned-scrollprizeorg-21slices", "file_count": null, "byte_total": null, "tree_sha256": null, "tar_sha256": null},
+      "pherc1667-w029": {"family": "aligned-scrollprizeorg-21slices", "file_count": null, "byte_total": null, "tree_sha256": null, "tar_sha256": null}
+    }
+  },
+  "inputs": {
+    "pherc0814-46527": {"slug": "papyruslab-e02-input-46527", "tree_sha256": null, "tar_sha256": null, "tar_bytes": null, "shape": [21, 2130, 3455]},
+    "pherc0139-w016": {"slug": "papyruslab-e02-input-w016", "tree_sha256": null, "tar_sha256": null, "tar_bytes": null, "shape": [21, 7020, 7220]},
+    "pherc1667-w029": {"slug": "papyruslab-e02-input-w029", "tree_sha256": null, "tar_sha256": null, "tar_bytes": null, "shape": [21, 9500, 7830]}
+  },
+  "seed42_outputs": {
+    "pherc0814-46527": {"slug": "papyruslab-e02-46527-seed42-out", "sha256_tif": null},
+    "pherc0139-w016": {"slug": "papyruslab-e02-w016-seed42-out", "sha256_tif": null},
+    "pherc1667-w029": {"slug": "papyruslab-e02-w029-seed42-out", "sha256_tif": null}
+  }
+}

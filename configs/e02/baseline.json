@@ -1,0 +1,32 @@
+{
+  "plan": "docs/plans/2026-09-06-e02-costruire-il-metro.md",
+  "origin": "procedura E00-R01 (docs/reports/2026-09-06-e00-r01.md), riprodotta bit per bit in E01-R01; costanti copiate da scripts/build_e00_notebooks.py",
+  "villa_branch": "merge-ink-pipelines",
+  "villa_commit": "3ea17f54a9b3d5fd1aaf73e1d2c8386dbaa9f30e",
+  "ink_9um_revision": "7109667e2607db1b90c37c8b09cb876ea7fe7bb1",
+  "checkpoints": {
+    "seed42": {"path": "hybrid_3d2d-seed42/step-075000.pth", "bytes": 138360039, "sha256": "e635558ae6a1a807a7e5ec1e83adfd45bc3c0ac53883ea43f1d4e085d62a9cab"},
+    "seed43": {"path": "hybrid_3d2d-seed43/step-075000.pth", "bytes": 138360231, "sha256": "2aeaa85a35ef28d7bc7bf3e848c4a6a91385e9132710927fdba41133c4ecb28f"}
+  },
+  "primary_seed": 42,
+  "infer_module": "koine_machines.inference.infer",
+  "infer_args": ["--overlap", "0.5", "--blend-mode", "hann", "--no-compile", "--gpus", "0", "--batch-size", "1"],
+  "infer_timeout_s": 1800,
+  "cuda_visible_devices": "0",
+  "direction": "forward",
+  "amp_dtype": "auto (float16 da mixed_precision fp16 del checkpoint)",
+  "layer_window": {"aligned_21": [2, 18], "native_28": [6, 22], "rule": "(depth // 2) - (17 // 2), 17 slice"},
+  "input_prep_aligned": {
+    "script": "ink-detection/scripts/prepare_9um_isotropic_input.py",
+    "level": 2,
+    "source_z_slice": [13, 97],
+    "output_slices": 21,
+    "z_pool": "rounded mean of 4 centered source planes",
+    "workers": 4
+  },
+  "install": "python di sistema Kaggle, pip install --no-deps, pacchetti aggiunti dal lock di villa (asciitree 0.3.3, pynrrd 1.1.3, imagecodecs 2026.3.6 in E00/E01)",
+  "torch_expected": {"cpu": "2.10.0+cpu", "gpu": "2.10.0+cu128"},
+  "threshold_rule": "score >= t; soglia piu' bassa fra quelle che massimizzano F1",
+  "threshold_dev": null,
+  "threshold_dev_note": "argmax F1 sull'unione dei pixel held-out di pherc0139-w016 e pherc0814-46527, seed 42: compilato al passo 7 del piano, mai ricalcolato su pherc1667-w029"
+}

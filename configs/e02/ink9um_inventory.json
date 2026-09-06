@@ -1,0 +1,2404 @@
+{
+ "contract_physical_key_mismatch": [
+  {
+   "contract_keys": [
+    "0139:w028",
+    "0139:w044"
+   ],
+   "label_names": [
+    "pherc0139-w028",
+    "w044"
+   ],
+   "public_segment": "20260115000000-w044_2026011522",
+   "scroll_dir": "PHerc0139"
+  }
+ ],
+ "counts": {
+  "dual_representations": 5,
+  "physical_segments": 24,
+  "representations": 29,
+  "scrolls": [
+   "PHerc0139",
+   "PHerc0814",
+   "PHerc1667",
+   "PHercParis4"
+  ],
+  "validation_mask_segments": 3
+ },
+ "dual_representations": [
+  "20250831000000-w040_2025083102",
+  "20260108000000-w041_2026010816",
+  "20260115000000-w044_2026011522",
+  "20260302000000-w039_2026030210",
+  "20260317000000-w035_2026031718"
+ ],
+ "generated_at": "2026-09-06T21:13:15+00:00",
+ "known_physical_duplicates_outside_training": [
+  {
+   "duplicate_of": "20260126000000-w045_2026012619",
+   "evidence_level": "L1",
+   "public_segment": "20260325000000-w046_20260325",
+   "scroll_dir": "PHerc0139",
+   "source": "villa issue #1547 (2026-08-20): valid masks identical, 81.4975% of vertices bit-identical"
+  }
+ ],
+ "physical_segments": [
+  {
+   "has_validation_mask": true,
+   "label_names": [
+    "pherc0139-w016"
+   ],
+   "public_segment": "20250108000004-w029_2025010827",
+   "scroll_dir": "PHerc0139"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "pherc0139-w017"
+   ],
+   "public_segment": "20250108000005-w030_2025010818",
+   "scroll_dir": "PHerc0139"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "pherc0139-w040",
+    "w040"
+   ],
+   "public_segment": "20250831000000-w040_2025083102",
+   "scroll_dir": "PHerc0139"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "pherc0139-w041",
+    "w041"
+   ],
+   "public_segment": "20260108000000-w041_2026010816",
+   "scroll_dir": "PHerc0139"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "pherc0139-w043"
+   ],
+   "public_segment": "20260112000000-w043_2026011217",
+   "scroll_dir": "PHerc0139"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "pherc0139-w028",
+    "w044"
+   ],
+   "public_segment": "20260115000000-w044_2026011522",
+   "scroll_dir": "PHerc0139"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "pherc0139-w029"
+   ],
+   "public_segment": "20260126000000-w045_2026012619",
+   "scroll_dir": "PHerc0139"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "pherc0139-w039",
+    "w039"
+   ],
+   "public_segment": "20260302000000-w039_2026030210",
+   "scroll_dir": "PHerc0139"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "pherc0139-w035",
+    "w035"
+   ],
+   "public_segment": "20260317000000-w035_2026031718",
+   "scroll_dir": "PHerc0139"
+  },
+  {
+   "has_validation_mask": true,
+   "label_names": [
+    "pherc0814-46527"
+   ],
+   "public_segment": "20260226000000-46527_2um_try2",
+   "scroll_dir": "PHerc0814"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "pherc1667-w013"
+   ],
+   "public_segment": "20240304141531-w013_20240304141531_flatboi",
+   "scroll_dir": "PHerc1667"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "pherc1667-w018"
+   ],
+   "public_segment": "20240304144031-w018_20240304144031_flatboi",
+   "scroll_dir": "PHerc1667"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "pherc1667-w023"
+   ],
+   "public_segment": "20240304161941-w023_20240304161941_flatboi",
+   "scroll_dir": "PHerc1667"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "pherc1667-w028"
+   ],
+   "public_segment": "20251208130119-w028_20251208130119156_flatboi",
+   "scroll_dir": "PHerc1667"
+  },
+  {
+   "has_validation_mask": true,
+   "label_names": [
+    "pherc1667-w029"
+   ],
+   "public_segment": "20251212185248-w029_20251212185248662_flatboi",
+   "scroll_dir": "PHerc1667"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "pherc1667-w031"
+   ],
+   "public_segment": "20251223230000-w031_2025122323_flatboi",
+   "scroll_dir": "PHerc1667"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "phercparis4-w01"
+   ],
+   "public_segment": "20230702185753",
+   "scroll_dir": "PHercParis4"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "phercparis4-w09"
+   ],
+   "public_segment": "20230929220926",
+   "scroll_dir": "PHercParis4"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "phercparis4-w07"
+   ],
+   "public_segment": "20231007101619",
+   "scroll_dir": "PHercParis4"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "phercparis4-w05"
+   ],
+   "public_segment": "20231012184424",
+   "scroll_dir": "PHercParis4"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "phercparis4-w00"
+   ],
+   "public_segment": "20231016151002",
+   "scroll_dir": "PHercParis4"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "phercparis4-w02"
+   ],
+   "public_segment": "20231031143852",
+   "scroll_dir": "PHercParis4"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "phercparis4-w03"
+   ],
+   "public_segment": "20231106155351",
+   "scroll_dir": "PHercParis4"
+  },
+  {
+   "has_validation_mask": false,
+   "label_names": [
+    "phercparis4-w06"
+   ],
+   "public_segment": "20231210121321",
+   "scroll_dir": "PHercParis4"
+  }
+ ],
+ "plan": "docs/plans/2026-09-06-e02-costruire-il-metro.md",
+ "representations": [
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "0139:w016",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc0139-w016",
+   "contract_scroll": "0139",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": true,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask",
+    "validation_mask"
+   ],
+   "label_byte_total": 746565,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 9414,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc0139-w016",
+   "label_shape": [
+    21,
+    7020,
+    7220
+   ],
+   "public_segment": "20250108000004-w029_2025010827",
+   "scroll_dir": "PHerc0139",
+   "scroll_label": "PHerc. 0139",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20250108000004-w029_2025010827/surface-volumes/2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      28080,
+      28880
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      7020,
+      7220
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "0139:w017",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc0139-w017",
+   "contract_scroll": "0139",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 501492,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 6276,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc0139-w017",
+   "label_shape": [
+    21,
+    6940,
+    7260
+   ],
+   "public_segment": "20250108000005-w030_2025010818",
+   "scroll_dir": "PHerc0139",
+   "scroll_label": "PHerc. 0139",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20250108000005-w030_2025010818/surface-volumes/2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      27760,
+      29040
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      6940,
+      7260
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "0139:w028",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc0139-w028",
+   "contract_scroll": "0139",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 469207,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 5802,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc0139-w028",
+   "label_shape": [
+    21,
+    5880,
+    7940
+   ],
+   "public_segment": "20260115000000-w044_2026011522",
+   "scroll_dir": "PHerc0139",
+   "scroll_label": "PHerc. 0139",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260115000000-w044_2026011522/surface-volumes/2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      23520,
+      31760
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      5880,
+      7940
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "0139:w029",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc0139-w029",
+   "contract_scroll": "0139",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 462210,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 5802,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc0139-w029",
+   "label_shape": [
+    21,
+    5820,
+    8020
+   ],
+   "public_segment": "20260126000000-w045_2026012619",
+   "scroll_dir": "PHerc0139",
+   "scroll_label": "PHerc. 0139",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260126000000-w045_2026012619/surface-volumes/2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      23280,
+      32080
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      5820,
+      8020
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "0139:w035",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc0139-w035",
+   "contract_scroll": "0139",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 297875,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 3606,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc0139-w035",
+   "label_shape": [
+    21,
+    5660,
+    5100
+   ],
+   "public_segment": "20260317000000-w035_2026031718",
+   "scroll_dir": "PHerc0139",
+   "scroll_label": "PHerc. 0139",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260317000000-w035_2026031718/surface-volumes/2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      22640,
+      20400
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      5660,
+      5100
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "0139:w039",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc0139-w039",
+   "contract_scroll": "0139",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 608788,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 7676,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc0139-w039",
+   "label_shape": [
+    21,
+    8320,
+    7500
+   ],
+   "public_segment": "20260302000000-w039_2026030210",
+   "scroll_dir": "PHerc0139",
+   "scroll_label": "PHerc. 0139",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260302000000-w039_2026030210/surface-volumes/2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      33280,
+      30000
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      8320,
+      7500
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "0139:w040",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc0139-w040",
+   "contract_scroll": "0139",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 494950,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 5984,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc0139-w040",
+   "label_shape": [
+    21,
+    6220,
+    7760
+   ],
+   "public_segment": "20250831000000-w040_2025083102",
+   "scroll_dir": "PHerc0139",
+   "scroll_label": "PHerc. 0139",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20250831000000-w040_2025083102/surface-volumes/2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      24880,
+      31040
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      6220,
+      7760
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "0139:w041",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc0139-w041",
+   "contract_scroll": "0139",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 466983,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 5862,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc0139-w041",
+   "label_shape": [
+    21,
+    6020,
+    7800
+   ],
+   "public_segment": "20260108000000-w041_2026010816",
+   "scroll_dir": "PHerc0139",
+   "scroll_label": "PHerc. 0139",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260108000000-w041_2026010816/surface-volumes/2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      24080,
+      31200
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      6020,
+      7800
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "0139:w043",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc0139-w043",
+   "contract_scroll": "0139",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 465699,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 5834,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc0139-w043",
+   "label_shape": [
+    21,
+    5940,
+    7900
+   ],
+   "public_segment": "20260112000000-w043_2026011217",
+   "scroll_dir": "PHerc0139",
+   "scroll_label": "PHerc. 0139",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260112000000-w043_2026011217/surface-volumes/2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20260102150214.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      23760,
+      31600
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      5940,
+      7900
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "0814:46527",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc0814-46527",
+   "contract_scroll": "0814",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": true,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask",
+    "validation_mask"
+   ],
+   "label_byte_total": 118869,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 1386,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc0814-46527",
+   "label_shape": [
+    21,
+    2130,
+    3455
+   ],
+   "public_segment": "20260226000000-46527_2um_try2",
+   "scroll_dir": "PHerc0814",
+   "scroll_label": "PHerc. 0814",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0814/segments/20260226000000-46527_2um_try2/surface-volumes/2.399um-0.22m-78keV-volume-20260309142202.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20260309142202.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      8520,
+      13820
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      2130,
+      3455
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "1667:w013",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc1667-w013",
+   "contract_scroll": "1667",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 2029326,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 25590,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc1667-w013",
+   "label_shape": [
+    21,
+    10400,
+    19900
+   ],
+   "public_segment": "20240304141531-w013_20240304141531_flatboi",
+   "scroll_dir": "PHerc1667",
+   "scroll_label": "Scroll 1667",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc1667/segments/20240304141531-w013_20240304141531_flatboi/surface-volumes/2.399um-0.22m-78keV-volume-20251217075048.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20251217075048.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": "blosc",
+     "dtype": "|u1",
+     "shape": [
+      109,
+      41600,
+      79600
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": "blosc",
+     "dtype": "|u1",
+     "shape": [
+      109,
+      10400,
+      19900
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "1667:w018",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc1667-w018",
+   "contract_scroll": "1667",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 2600948,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 31878,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc1667-w018",
+   "label_shape": [
+    21,
+    10595,
+    24525
+   ],
+   "public_segment": "20240304144031-w018_20240304144031_flatboi",
+   "scroll_dir": "PHerc1667",
+   "scroll_label": "Scroll 1667",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc1667/segments/20240304144031-w018_20240304144031_flatboi/surface-volumes/2.399um-0.22m-78keV-volume-20251217075048.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20251217075048.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      42380,
+      98100
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      10595,
+      24525
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "1667:w023",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc1667-w023",
+   "contract_scroll": "1667",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 2603489,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 32806,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc1667-w023",
+   "label_shape": [
+    21,
+    10465,
+    25590
+   ],
+   "public_segment": "20240304161941-w023_20240304161941_flatboi",
+   "scroll_dir": "PHerc1667",
+   "scroll_label": "Scroll 1667",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc1667/segments/20240304161941-w023_20240304161941_flatboi/surface-volumes/2.399um-0.22m-78keV-volume-20251217075048.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20251217075048.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      41860,
+      102360
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      10465,
+      25590
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "1667:w028",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc1667-w028",
+   "contract_scroll": "1667",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 705959,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 8886,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc1667-w028",
+   "label_shape": [
+    21,
+    9355,
+    7585
+   ],
+   "public_segment": "20251208130119-w028_20251208130119156_flatboi",
+   "scroll_dir": "PHerc1667",
+   "scroll_label": "Scroll 1667",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc1667/segments/20251208130119-w028_20251208130119156_flatboi/surface-volumes/2.399um-0.22m-78keV-volume-20251217075048.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20251217075048.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      37420,
+      30340
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      9355,
+      7585
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "1667:w029",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc1667-w029",
+   "contract_scroll": "1667",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": true,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask",
+    "validation_mask"
+   ],
+   "label_byte_total": 1108191,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 13959,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc1667-w029",
+   "label_shape": [
+    21,
+    9500,
+    7830
+   ],
+   "public_segment": "20251212185248-w029_20251212185248662_flatboi",
+   "scroll_dir": "PHerc1667",
+   "scroll_label": "Scroll 1667",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc1667/segments/20251212185248-w029_20251212185248662_flatboi/surface-volumes/2.399um-0.22m-78keV-volume-20251217075048.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20251217075048.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      38000,
+      31320
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      9500,
+      7830
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "1667:w031",
+   "contract_representation_key": "public_2p4_level2_zmean4:pherc1667-w031",
+   "contract_scroll": "1667",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 755293,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 9330,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "pherc1667-w031",
+   "label_shape": [
+    21,
+    9370,
+    8045
+   ],
+   "public_segment": "20251223230000-w031_2025122323_flatboi",
+   "scroll_dir": "PHerc1667",
+   "scroll_label": "Scroll 1667",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc1667/segments/20251223230000-w031_2025122323_flatboi/surface-volumes/2.399um-0.22m-78keV-volume-20251217075048.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.399um-0.22m-78keV-volume-20251217075048.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      37480,
+      32180
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      9370,
+      8045
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.399,
+    9.596,
+    9.596
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "Paris4:w00",
+   "contract_representation_key": "public_2p4_level2_zmean4:phercparis4-w00",
+   "contract_scroll": "Paris4",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 1050932,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 12858,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "phercparis4-w00",
+   "label_shape": [
+    21,
+    7990,
+    12990
+   ],
+   "public_segment": "20231016151002",
+   "scroll_dir": "PHercParis4",
+   "scroll_label": "PHerc. Paris 4",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHercParis4/segments/20231016151002/surface-volumes/2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      31960,
+      51960
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      7990,
+      12990
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.4,
+    9.6,
+    9.6
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "Paris4:w01",
+   "contract_representation_key": "public_2p4_level2_zmean4:phercparis4-w01",
+   "contract_scroll": "Paris4",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 1184662,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 14262,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "phercparis4-w01",
+   "label_shape": [
+    21,
+    12650,
+    9100
+   ],
+   "public_segment": "20230702185753",
+   "scroll_dir": "PHercParis4",
+   "scroll_label": "PHerc. Paris 4",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHercParis4/segments/20230702185753/surface-volumes/2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      50600,
+      36400
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      12650,
+      9100
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.4,
+    9.6,
+    9.6
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "Paris4:w02",
+   "contract_representation_key": "public_2p4_level2_zmean4:phercparis4-w02",
+   "contract_scroll": "Paris4",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 936513,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 11530,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "phercparis4-w02",
+   "label_shape": [
+    21,
+    8545,
+    11005
+   ],
+   "public_segment": "20231031143852",
+   "scroll_dir": "PHercParis4",
+   "scroll_label": "PHerc. Paris 4",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHercParis4/segments/20231031143852/surface-volumes/2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      34180,
+      44020
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      8545,
+      11005
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.4,
+    9.6,
+    9.6
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "Paris4:w03",
+   "contract_representation_key": "public_2p4_level2_zmean4:phercparis4-w03",
+   "contract_scroll": "Paris4",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 1118475,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 13540,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "phercparis4-w03",
+   "label_shape": [
+    21,
+    8575,
+    12810
+   ],
+   "public_segment": "20231106155351",
+   "scroll_dir": "PHercParis4",
+   "scroll_label": "PHerc. Paris 4",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHercParis4/segments/20231106155351/surface-volumes/2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      34300,
+      51240
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      8575,
+      12810
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.4,
+    9.6,
+    9.6
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "Paris4:w05",
+   "contract_representation_key": "public_2p4_level2_zmean4:phercparis4-w05",
+   "contract_scroll": "Paris4",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 2485506,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 29606,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "phercparis4-w05",
+   "label_shape": [
+    21,
+    12700,
+    18930
+   ],
+   "public_segment": "20231012184424",
+   "scroll_dir": "PHercParis4",
+   "scroll_label": "PHerc. Paris 4",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHercParis4/segments/20231012184424/surface-volumes/2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      50800,
+      75720
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      12700,
+      18930
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.4,
+    9.6,
+    9.6
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "Paris4:w06",
+   "contract_representation_key": "public_2p4_level2_zmean4:phercparis4-w06",
+   "contract_scroll": "Paris4",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 1341134,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 15806,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "phercparis4-w06",
+   "label_shape": [
+    21,
+    12750,
+    9995
+   ],
+   "public_segment": "20231210121321",
+   "scroll_dir": "PHercParis4",
+   "scroll_label": "PHerc. Paris 4",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHercParis4/segments/20231210121321/surface-volumes/2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      51000,
+      39980
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      12750,
+      9995
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.4,
+    9.6,
+    9.6
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "Paris4:w07",
+   "contract_representation_key": "public_2p4_level2_zmean4:phercparis4-w07",
+   "contract_scroll": "Paris4",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 3524506,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 43254,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "phercparis4-w07",
+   "label_shape": [
+    21,
+    13010,
+    27035
+   ],
+   "public_segment": "20231007101619",
+   "scroll_dir": "PHercParis4",
+   "scroll_label": "PHerc. Paris 4",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHercParis4/segments/20231007101619/surface-volumes/2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      52040,
+      108140
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      13010,
+      27035
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.4,
+    9.6,
+    9.6
+   ]
+  },
+  {
+   "annotation_center_channel": 10,
+   "contract_physical_key": "Paris4:w09",
+   "contract_representation_key": "public_2p4_level2_zmean4:phercparis4-w09",
+   "contract_scroll": "Paris4",
+   "family": "aligned-scrollprizeorg-21slices",
+   "family_key": "aligned",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 1512603,
+   "label_chunks": [
+    21,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 18780,
+   "label_format": "aligned-public-level2-zmean4-21slice-v1",
+   "label_name": "phercparis4-w09",
+   "label_shape": [
+    21,
+    8020,
+    18950
+   ],
+   "public_segment": "20230929220926",
+   "scroll_dir": "PHercParis4",
+   "scroll_label": "PHerc. Paris 4",
+   "source_level_used": "2",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHercParis4/segments/20230929220926/surface-volumes/2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "source_zarr": "2.4um-0.22m-78keV-volume-20260411134726.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      32080,
+      75800
+     ]
+    },
+    "2": {
+     "chunks": [
+      109,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      109,
+      8020,
+      18950
+     ]
+    }
+   },
+   "volume_num_slices": 109,
+   "volume_scale_um_at_level": [
+    2.4,
+    9.6,
+    9.6
+   ]
+  },
+  {
+   "annotation_center_channel": null,
+   "contract_physical_key": "0139:w035",
+   "contract_representation_key": "native_9p362_level0:w035",
+   "contract_scroll": "0139",
+   "family": "native9-scrollprizeorg-21slices",
+   "family_key": "native",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 737833,
+   "label_chunks": [
+    28,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 5128,
+   "label_format": null,
+   "label_name": "w035",
+   "label_shape": [
+    28,
+    5820,
+    5240
+   ],
+   "public_segment": "20260317000000-w035_2026031718",
+   "scroll_dir": "PHerc0139",
+   "scroll_label": "PHerc. 0139",
+   "source_level_used": "0",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260317000000-w035_2026031718/surface-volumes/9.362um-1.2m-113keV-volume-20250728140407.zarr",
+   "source_z_slice": null,
+   "source_zarr": "9.362um-1.2m-113keV-volume-20250728140407.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      28,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      28,
+      5820,
+      5240
+     ]
+    }
+   },
+   "volume_num_slices": 28,
+   "volume_scale_um_at_level": [
+    9.362,
+    9.362,
+    9.362
+   ]
+  },
+  {
+   "annotation_center_channel": null,
+   "contract_physical_key": "0139:w039",
+   "contract_representation_key": "native_9p362_level0:w039",
+   "contract_scroll": "0139",
+   "family": "native9-scrollprizeorg-21slices",
+   "family_key": "native",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 1511569,
+   "label_chunks": [
+    28,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 11050,
+   "label_format": null,
+   "label_name": "w039",
+   "label_shape": [
+    28,
+    8560,
+    7720
+   ],
+   "public_segment": "20260302000000-w039_2026030210",
+   "scroll_dir": "PHerc0139",
+   "scroll_label": "PHerc. 0139",
+   "source_level_used": "0",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260302000000-w039_2026030210/surface-volumes/9.362um-1.2m-113keV-volume-20250728140407.zarr",
+   "source_z_slice": null,
+   "source_zarr": "9.362um-1.2m-113keV-volume-20250728140407.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      28,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      28,
+      8560,
+      7720
+     ]
+    }
+   },
+   "volume_num_slices": 28,
+   "volume_scale_um_at_level": [
+    9.362,
+    9.362,
+    9.362
+   ]
+  },
+  {
+   "annotation_center_channel": null,
+   "contract_physical_key": "0139:w040",
+   "contract_representation_key": "native_9p362_level0:w040",
+   "contract_scroll": "0139",
+   "family": "native9-scrollprizeorg-21slices",
+   "family_key": "native",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 1218126,
+   "label_chunks": [
+    28,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 8496,
+   "label_format": null,
+   "label_name": "w040",
+   "label_shape": [
+    28,
+    6400,
+    7980
+   ],
+   "public_segment": "20250831000000-w040_2025083102",
+   "scroll_dir": "PHerc0139",
+   "scroll_label": "PHerc. 0139",
+   "source_level_used": "0",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20250831000000-w040_2025083102/surface-volumes/9.362um-1.2m-113keV-volume-20250728140407.zarr",
+   "source_z_slice": null,
+   "source_zarr": "9.362um-1.2m-113keV-volume-20250728140407.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      28,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      28,
+      6400,
+      7980
+     ]
+    }
+   },
+   "volume_num_slices": 28,
+   "volume_scale_um_at_level": [
+    9.362,
+    9.362,
+    9.362
+   ]
+  },
+  {
+   "annotation_center_channel": null,
+   "contract_physical_key": "0139:w041",
+   "contract_representation_key": "native_9p362_level0:w041",
+   "contract_scroll": "0139",
+   "family": "native9-scrollprizeorg-21slices",
+   "family_key": "native",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 1150429,
+   "label_chunks": [
+    28,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 8370,
+   "label_format": null,
+   "label_name": "w041",
+   "label_shape": [
+    28,
+    6200,
+    8020
+   ],
+   "public_segment": "20260108000000-w041_2026010816",
+   "scroll_dir": "PHerc0139",
+   "scroll_label": "PHerc. 0139",
+   "source_level_used": "0",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260108000000-w041_2026010816/surface-volumes/9.362um-1.2m-113keV-volume-20250728140407.zarr",
+   "source_z_slice": null,
+   "source_zarr": "9.362um-1.2m-113keV-volume-20250728140407.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      28,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      28,
+      6200,
+      8020
+     ]
+    }
+   },
+   "volume_num_slices": 28,
+   "volume_scale_um_at_level": [
+    9.362,
+    9.362,
+    9.362
+   ]
+  },
+  {
+   "annotation_center_channel": null,
+   "contract_physical_key": "0139:w044",
+   "contract_representation_key": "native_9p362_level0:w044",
+   "contract_scroll": "0139",
+   "family": "native9-scrollprizeorg-21slices",
+   "family_key": "native",
+   "has_validation_mask": false,
+   "label_arrays": [
+    "inklabels",
+    "supervision_mask"
+   ],
+   "label_byte_total": 1143750,
+   "label_chunks": [
+    28,
+    128,
+    128
+   ],
+   "label_compressor": "blosc",
+   "label_dtype": "|u1",
+   "label_file_count": 8220,
+   "label_format": null,
+   "label_name": "w044",
+   "label_shape": [
+    28,
+    6040,
+    8160
+   ],
+   "public_segment": "20260115000000-w044_2026011522",
+   "scroll_dir": "PHerc0139",
+   "scroll_label": "PHerc. 0139",
+   "source_level_used": "0",
+   "source_volume_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260115000000-w044_2026011522/surface-volumes/9.362um-1.2m-113keV-volume-20250728140407.zarr",
+   "source_z_slice": null,
+   "source_zarr": "9.362um-1.2m-113keV-volume-20250728140407.zarr",
+   "volume_axes": "ZYX (slice, row, col)",
+   "volume_levels": {
+    "0": {
+     "chunks": [
+      28,
+      128,
+      128
+     ],
+     "compressor": null,
+     "dtype": "|u1",
+     "shape": [
+      28,
+      6040,
+      8160
+     ]
+    }
+   },
+   "volume_num_slices": 28,
+   "volume_scale_um_at_level": [
+    9.362,
+    9.362,
+    9.362
+   ]
+  }
+ ],
+ "sources": {
+  "bucket_listing": {
+   "api": "https://huggingface.co/api/buckets/scrollprize/datasets/tree/ink_9um/labels",
+   "byte_total": 33351882,
+   "fetched_at": "2026-09-06T21:13:15+00:00",
+   "file_count": 380991
+  },
+  "open_data_s3": {
+   "base": "https://vesuvius-challenge-open-data.s3.amazonaws.com/",
+   "fetched_at": "2026-09-06T21:13:15+00:00"
+  },
+  "readme": {
+   "bytes": 10739,
+   "fetched_at": "2026-09-06T21:13:15+00:00",
+   "sha256": "c9a88ff970594fcef3788eb588bb75dbbd0e6436f4812f89074e26c0d9fef7a5",
+   "url": "https://huggingface.co/buckets/scrollprize/datasets/resolve/ink_9um/README.md"
+  },
+  "villa_contract": {
+   "bytes": 6084,
+   "commit": "3ea17f54a9b3d5fd1aaf73e1d2c8386dbaa9f30e",
+   "fetched_at": "2026-09-06T21:13:15+00:00",
+   "sha256": "0e20230f4d2517987f31baed4c6fc2fa8110d230ce2d14a60dfe5d6a838c68d1",
+   "url": "https://raw.githubusercontent.com/ScrollPrize/villa/3ea17f54a9b3d5fd1aaf73e1d2c8386dbaa9f30e/ink-detection/configs/aligned21_fixed_scroll_prior.json"
+  }
+ },
+ "traps": [
+  "label names pherc0139-wNNN do not follow the public w-numbering (w016->w029, w017->w030, w028->w044, w029->w045)",
+  "five physical segments appear in two representations (aligned 2.4 um pooled and native 9.362 um)",
+  "villa's contract shares one physical budget for four dual pairs but not for pherc0139-w028 / w044 (same public segment)"
+ ],
+ "validation_mask_segments": [
+  "pherc0139-w016",
+  "pherc0814-46527",
+  "pherc1667-w029"
+ ]
+}

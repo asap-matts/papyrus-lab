@@ -1,0 +1,25 @@
+{
+  "plan": "docs/plans/2026-09-06-e02-costruire-il-metro.md",
+  "annotated_plane": "shape[0] // 2 (10 per le label allineate a 21 slice, 14 per le native a 28)",
+  "verifica": {
+    "segments": ["pherc1667-w029"],
+    "pixels": "validation_mask == 1 al piano annotato",
+    "uso": "nessuno prima di E05: in E02 si esegue l'inferenza, si controllano identita' e pixel di training, il TIFF viene conservato con hash e i pixel held-out non vengono letti da nessuno script"
+  },
+  "sviluppo": {
+    "segments": ["pherc0139-w016", "pherc0814-46527"],
+    "pixels": "validation_mask == 1 al piano annotato",
+    "uso": "scelte di E03/E04; soglia congelata threshold_dev (baseline.json)"
+  },
+  "controllo_operativo": {
+    "segments": ["pherc0139-w016", "pherc0814-46527", "pherc1667-w029", "w035 (nativo, E00)"],
+    "pixels": "supervision_mask == 1 al piano annotato",
+    "uso": "riferimento di memorizzazione, mai come misura di generalizzazione"
+  },
+  "training_non_misurato": "le altre 25 rappresentazioni di configs/e02/ink9um_inventory.json",
+  "cross_scroll": "non disponibile: nessuna label ufficiale anonima fuori dai quattro rotoli del training a ~9 um",
+  "esclusioni": {
+    "20260325000000-w046_20260325": "stesso foglio del segmento pubblico w045 di PHerc0139, che e' nel training (villa #1547, L1)"
+  },
+  "motivazioni": "docs/plans/2026-09-06-e02-costruire-il-metro.md, sezione 2, 'Decisioni gia' prese, e perche''"
+}
