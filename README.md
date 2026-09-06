@@ -17,10 +17,11 @@ L'amico fisico di Matteo lavora indipendentemente: condivide informazioni e stru
 7. [Ricerca sulla community e registro dei contributi](docs/06-ricerca-community.md).
 8. [Procedura operativa canonica](docs/07-procedura-operativa.md).
 9. [Dossier tecnico dell'input candidato E00](docs/08-dossier-input-e00.md).
+10. [Dove investire le energie: regola e mappa delle opzioni](docs/decisions/2026-09-06-dove-investire.md) — decisione rinviata a dopo E02, di proposito.
 
 Per la prossima attività pratica: [prima sessione guidata](docs/04-prima-sessione.md), con un esempio ufficiale da esplorare nel browser. Disponibili anche il PC fisso di Matteo (i7-12700K, 32 GB, GTX 1060 6 GB, 681 GB liberi, WSL2; inventario rilevato) e il Mac M3 Pro del socio; la prima inferenza GPU è su Kaggle, il fisso richiede un preflight dedicato.
 
-La prima meta è riprodurre una procedura nota e comprenderne i limiti. La scelta fra First Letters e Progress Prizes resta da consolidare. Vincere è l'obiettivo del progetto, non un esito garantito dal funzionamento del software.
+La prima meta — riprodurre una procedura nota e comprenderne i limiti — è raggiunta con E00 ed E01. L'obiettivo è capire l'intero processo, misurare dove si perde di più e concentrare lì il miglioramento, per un contributo utile alla community che possa meritare un premio; la scelta dello stadio su cui investire e fra First Letters e Progress Prizes è rinviata a dopo E02 ([regola](docs/decisions/2026-09-06-dove-investire.md)). Vincere è l'obiettivo del progetto, non un esito garantito dal funzionamento del software.
 
 Account Kaggle e telefono verificati. Il [preflight dell'ambiente Kaggle](docs/reports/2026-09-05-kaggle-preflight.md) ha confermato PyTorch e due Tesla T4; la sessione è stata fermata e nessuna inferenza Vesuvius è stata ancora eseguita. La [revisione del 6 settembre 2026](docs/reports/2026-09-06-revisione-procedura-e00.md) ha verificato il dossier E00 su fonti primarie e fissato le decisioni per il piano. La ricerca comprende contributi pubblici di altri partecipanti oltre agli aggiornamenti di Francesco: prima selezione di 11 risorse documentata, nessuna nuova pipeline replicata.
 
