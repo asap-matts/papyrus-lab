@@ -2,7 +2,7 @@
 
 Progetto di Matteo e del suo socio per contribuire alla Vesuvius Challenge e costruire un risultato verificabile candidabile a un premio.
 
-**Stato:** procedura operativa e dossier E00 revisionati e corretti il 6 settembre 2026; preflight Kaggle completato il 5 settembre; inventario del fisso rilevato. Nessun esperimento scientifico eseguito in questo repository. Nome di lavoro provvisorio.
+**Stato:** **E00 superato il 6 settembre 2026** — controllo noto della pipeline ufficiale `ink_9um` su w035, eseguito su Kaggle via API, AUROC 0,999 contro la label ufficiale con orientamento verificato, due seed concordanti ([scheda](docs/reports/2026-09-06-e00-r01.md)). È un controllo di funzionamento su un segmento del training set: nessuna evidenza di generalizzazione, nessuna scoperta. Prossimo: E01 (ripetizione del socio). Nome di lavoro provvisorio.
 
 L'amico fisico di Matteo lavora indipendentemente: condivide informazioni e strumenti, ma non fa parte del team. ScrollScout è una risorsa esterna da valutare, non il progetto del team né una dipendenza già scelta.
 

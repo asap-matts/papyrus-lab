@@ -73,14 +73,31 @@
          "disk_peak_bytes": 360455367}
       ]
     },
-    "seed43": {"kaggle_kernel": "matteopontesilli/papyruslab-e00-r01-seed43", "attempts": [{"version": 1, "result": "PENDING"}]}
+    "seed43": {
+      "kaggle_kernel": "matteopontesilli/papyruslab-e00-r01-seed43",
+      "seed42_output_source": "kaggle dataset matteopontesilli/papyruslab-e00-r01-seed42-out (metrics, TIFF, log; TIFF SHA-256 verified in the guard cell)",
+      "attempts": [
+        {"version": 1, "result": "stopped by initial guard before GPU use: seed42 kernel_source not visible at the expected path (~1 min)"},
+        {"version": 2, "utc": "14:40:41-15:09:34", "result": "complete", "inference_seconds": 619, "exit_code": 0,
+         "gpu_peak_mib": {"0": 383, "1": 3},
+         "tif_sha256": "72fabca911ca12008bf313396abe1eef728958893986f54d85112cd5423ec8e5", "tif_bytes": 14128920,
+         "metrics_sha256": "a2baa43f3165d487d11e8245a90558d3f33d2f5ad55b042d0c5d772f14e7910a",
+         "compare_sha256": "18e64473e197c88a7229b6f62d6179b4630b2a1d76e743ee9998865d61c91355",
+         "log_sha256": "bd52b9a104c1030c53dd4fb91eef5b7942b22e465442a5bd8fb2d355b1d36f5d"}
+      ]
+    }
   },
   "metrics_seed42": {
     "auroc_original": 0.99907859176232, "auroc_rot180": 0.5319418364520899, "auroc_flipY": 0.5397187179196468, "auroc_flipX": 0.5764798188340526,
     "orientation_ok": true, "median_ink": 200.0, "median_background": 57.0, "gate_B": "superato"
   },
-  "metrics_seed43": "PENDING",
-  "gpu_quota_minutes_estimate": {"seed42_attempts": 32, "seed43": "PENDING", "preflight": 0},
+  "metrics_seed43": {
+    "auroc_original": 0.9982515614702061, "auroc_rot180": 0.5114786217448567, "auroc_flipY": 0.5371853447674287, "auroc_flipX": 0.5805425458608258,
+    "orientation_ok": true, "median_ink": 200.0, "median_background": 58.0, "gate_B": "superato"
+  },
+  "seed_comparison_on_supervised_pixels": {"spearman": 0.9168450565668599, "delta_auroc_43_minus_42": -0.0008270302921138395, "n_pixels": 1071121,
+    "note": "concordanza, non indipendenza: stessa architettura, dati e ricetta"},
+  "gpu_quota_minutes_estimate": {"seed42_attempts": 32, "seed43_attempts": 30, "preflight": 0, "total": 62},
   "artifacts_local": "runs/E00-R01/{preflight,seed42,seed43}/ (ignored by Git; SHA256SUMS verified with scripts/kaggle_e00.py output)",
   "verdict": "E00 superato (L3): catena dati -> codice -> modello -> output collegata correttamente su w035, orientamento verificato. Nessuna evidenza di generalizzazione."
 }

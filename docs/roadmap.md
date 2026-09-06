@@ -25,8 +25,8 @@ Aggiornamento: 6 settembre 2026.
 |---|---|---|
 | F0 — Avvio | Completata e verificata | Repository privato e primo commit locale/remoto coincidenti |
 | F1 — Comprensione | In corso; prima sessione guidata preparata | Entrambi distinguono scansione, mesh, render, previsione e prova |
-| F2 — Setup minimo | Notebook Kaggle privato eseguito su due Tesla T4; inventario del fisso rilevato; pipeline e campione non ancora provati | Un campione noto visualizzato e inferenza minima verificata |
-| F3 — Progettazione dei test | Procedura revisionata e corretta il 6 settembre 2026; dossier E00 verificato su fonti primarie; piano E00 da scrivere sul commit corrente | Campioni, baseline, controlli, budget, metriche e stop definiti |
+| F2 — Setup minimo | **Completata il 6 settembre 2026 con E00-R01**: pipeline ufficiale eseguita su Kaggle (una T4) su w035, output verificato contro la label (AUROC 0,999, orientamento corretto), due seed concordanti; G1 superato | Un campione noto visualizzato e inferenza minima verificata |
+| F3 — Progettazione dei test | Procedura revisionata e corretta; piano E00 eseguito e congelato; prossimo: piano E01 (ripetizione del socio) e progettazione E02 | Campioni, baseline, controlli, budget, metriche e stop definiti |
 | R — Ricerca community | Prima selezione di 11 risorse, revisioni e prove proposte registrate | Soluzioni esistenti valutate prima di ogni esperimento o nuovo strumento |
 | F4 — Implementazione minima | Non avviata | Script/notebook ripetibile per E00–E02 |
 | F5 — Ottimizzazione | Non avviata | Confronti documentati, esiti positivi e negativi |
@@ -38,10 +38,10 @@ Prima delle campagne di ottimizzazione completare F3. Il setup può comprendere 
 
 La [procedura operativa canonica](07-procedura-operativa.md) è stata revisionata in due giri read-only il 6 settembre 2026 ([rapporto](reports/2026-09-06-revisione-procedura-e00.md)): 23 finding, nessun P0, correzioni accettate e integrate. Il [dossier E00](08-dossier-input-e00.md) è stato verificato su fonti primarie e contiene le decisioni prese, il comando candidato e il criterio di esito proposto. Il [piano di verifica di ScrollScout](05-scrollscout-e-piano-di-verifica.md) resta uno dei filoni di confronto.
 
-1. Commit documentale delle correzioni eseguito (`d430456`). Sul quel commit è scritto il [piano E00](plans/2026-09-06-e00-controllo-noto-w035.md) con prerequisiti, criterio di esito e comando congelati; revisione read-only del piano da parte di Codex, poi commit del piano su richiesta.
-2. Prerequisiti senza GPU: installazione sul Python di Kaggle provata, Internet del notebook verificato, label scaricata, hash dei checkpoint controllati, destinazione degli output decisa.
-3. E00 su una Tesla T4 con il notebook privato; il [preflight](reports/2026-09-05-kaggle-preflight.md) ha verificato l'acceleratore, non il modello.
-4. Salvare istruzioni, parametri e risultati; predisporre la ripetizione del socio (E01) e il confronto E02. Servono ancora RAM e spazio del Mac e l'username GitHub del socio per un invito esplicitamente richiesto. Un preflight della GTX 1060 del fisso è un'attività separata.
+1. **E00-R01 eseguito e superato il 6 settembre 2026** ([scheda](reports/2026-09-06-e00-r01.md), [manifest](reports/2026-09-06-e00-r01-manifest.json), [piano](plans/2026-09-06-e00-controllo-noto-w035.md)): esecuzione automatizzata via API Kaggle (`scripts/kaggle_e00.py`), tre run generati da `scripts/build_e00_notebooks.py`; ~62 minuti di quota GPU in tutto, di cui due tentativi persi su dipendenze pigre poi coperte dal preflight. Revisione dell'esito da parte di Codex in sola lettura.
+2. **E01**: piano per la ripetizione del socio dal solo repository (Mac, `uv run` con ambiente persistente: variabile dichiarata), senza mostrargli l'esito di E00. Servono l'invito al repository (username GitHub) e l'inventario del Mac.
+3. **E02**: congelare dati di sviluppo e verifica, baseline e metriche, usando R02–R05 del registro community; attenzione alle due trappole del dataset `ink_9um` (doppia rappresentazione, nomi non allineati).
+4. Attività separate, non bloccanti: preflight della GTX 1060 del fisso; aggiornamento del registro community.
 
 L'acceleratore Kaggle è stato attivato soltanto per il preflight e poi fermato. Non sono stati effettuati inviti, registrazione Discord, installazione VC3D o submission. Non è stato impostato un monitoraggio automatico della community: il registro verrà usato nelle sessioni di ricerca e quando arrivano nuovi aggiornamenti.
 
