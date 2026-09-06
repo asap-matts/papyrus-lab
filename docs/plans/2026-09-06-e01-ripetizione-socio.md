@@ -88,8 +88,11 @@ Sul Mac, il socio apre il Terminale e incolla **una riga**, dopo aver installato
 
 ```bash
 gh auth login
-bash <(curl -fsSL https://raw.githubusercontent.com/asap-matts/papyrus-lab/main/scripts/e01_bootstrap_mac.sh)
+gh repo clone asap-matts/papyrus-lab ~/dev/papyrus-lab
+bash ~/dev/papyrus-lab/scripts/e01_bootstrap_mac.sh
 ```
+
+(Il repository è privato: un `curl` sull'URL raw risponde 404, perché non usa il login di `gh`. Si clona prima con `gh`, poi si lancia lo script dalla copia clonata; lo script è rieseguibile.)
 
 Lo script (`scripts/e01_bootstrap_mac.sh`) è rieseguibile e si ferma dicendo cosa manca: controlla `git` e Python ≥ 3.11, installa la CLI Kaggle, clona il repository in `~/dev/papyrus-lab` (fuori da iCloud), passa al branch `e01-socio`, verifica l'autenticazione Kaggle. I passaggi 👤 che chiede, quando servono:
 

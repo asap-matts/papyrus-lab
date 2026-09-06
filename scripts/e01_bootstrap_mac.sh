@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-# PapyrusLab — avvio di E01 sul Mac del socio. Una sola riga da incollare nel Terminale:
+# PapyrusLab — avvio di E01 sul Mac del socio. Il repository e' privato (curl sull'URL raw da' 404), quindi:
 #
-#   bash <(curl -fsSL https://raw.githubusercontent.com/asap-matts/papyrus-lab/main/scripts/e01_bootstrap_mac.sh)
-#
-# (il repository e' privato: la riga sopra funziona solo dopo `gh auth login`; in alternativa, dopo il clone
-#  manuale, eseguire: bash scripts/e01_bootstrap_mac.sh)
+#   gh auth login
+#   gh repo clone asap-matts/papyrus-lab ~/dev/papyrus-lab
+#   bash ~/dev/papyrus-lab/scripts/e01_bootstrap_mac.sh
 #
 # Cosa fa: controlla git e Python, installa gh (se manca, con Homebrew) e la CLI Kaggle, clona il repository in
 # ~/dev/papyrus-lab (fuori da iCloud), passa al branch e01-socio, verifica l'autenticazione Kaggle e dice cosa manca.
