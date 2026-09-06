@@ -1,6 +1,6 @@
 # Procedura operativa canonica
 
-**Stato: bozza operativa da sottoporre a revisione incrociata.** Questa procedura governa il lavoro di PapyrusLab dalla scelta di un problema fino a una possibile candidatura. I singoli esperimenti avranno un piano eseguibile separato in `docs/plans/`, scritto sul commit esatto da cui partiranno.
+**Stato: revisionata il 6 settembre 2026** in due giri read-only ([rapporto di revisione](reports/2026-09-06-revisione-procedura-e00.md)); i finding accettati sono integrati in questa versione. Questa procedura governa il lavoro di PapyrusLab dalla scelta di un problema fino a una possibile candidatura. I singoli esperimenti avranno un piano eseguibile separato in `docs/plans/`, scritto sul commit esatto da cui partiranno.
 
 ## Obiettivo e principio guida
 
@@ -26,6 +26,7 @@ Un errore a monte può propagarsi fino alla fine. Prima di modificare il modello
 - **Socio:** secondo operatore del team, replica procedure e svolge valutazioni indipendenti quando assegnato. Il Mac M3 Pro non implica automaticamente compatibilità o prestazioni: si misura sul campione comune.
 - **Esecutore:** persona o agente che prepara il piano approvato, esegue la prova e raccoglie gli artefatti.
 - **Revisore:** persona o agente che legge piano, diff, manifest, output e risultati senza modificare gli stessi file. Cerca errori, alternative e conclusioni più ampie dell'evidenza.
+- **Writer:** persona o agente che, in un dato momento, è l'unico autorizzato a modificare i file di una cartella. Riceve i finding del revisore e li classifica come accettati, rifiutati o differiti, motivando. Se writer e revisore non concordano, decide Matteo: chi ha prodotto un lavoro non è l'ultimo giudice delle critiche che riceve.
 - **Francesco e community:** fonti esterne indipendenti. I loro contributi vengono attribuiti, controllati e confrontati; non ricevono compiti o responsabilità del team.
 
 Claude e Codex non hanno ruoli permanenti nel progetto. Per ogni attività Matteo decide come combinarli in base a quattro elementi: ampiezza del contesto, tipo e importanza del compito, valore di un controllo indipendente e disponibilità dei rispettivi budget. Entrambi possono progettare, eseguire o revisionare; per un compito importante può essere utile che uno produca il lavoro e l'altro lo controlli, mentre una sessione lunga può passare dall'uno all'altro su un commit coerente. La modalità scelta viene registrata prima del lavoro. Vale sempre una delle tre configurazioni sicure: un solo writer con revisore in sola lettura, staffetta su un commit, oppure worktree distinti per lavori realmente indipendenti. Due agenti non scrivono contemporaneamente nella stessa cartella.
@@ -44,16 +45,16 @@ La tabella descrive opzioni e non assegna in anticipo Claude o Codex a una colon
 
 ## Gerarchia delle evidenze
 
-Ogni affermazione durevole deve indicare a quale livello appartiene:
+Ogni affermazione durevole deve indicare a quale livello appartiene. I livelli si chiamano `L0–L5` per non confonderli con gli esperimenti `E00–E06`:
 
 | Livello | Significato | Formulazione ammessa |
 |---|---|---|
-| E0 — fonte ufficiale | Regola, dato o procedura pubblicata dagli organizzatori | “La pagina ufficiale richiede…” |
-| E1 — risultato esterno | Misura o affermazione di un altro autore | “L'autore riporta…” |
-| E2 — ispezione del team | Codice, file o interfaccia controllati senza eseguire la prova | “Abbiamo verificato nel codice…” |
-| E3 — replica operativa | Pipeline esterna eseguita dal team sullo stesso caso | “Abbiamo riprodotto…” |
-| E4 — confronto controllato | Baseline e variante confrontate su dati e criteri fissati | “La variante migliora su…” |
-| E5 — verifica indipendente | Risultato congelato valutato su dati non usati per le scelte | “Il risultato si mantiene sul test…” |
+| L0 — fonte ufficiale | Regola, dato o procedura pubblicata dagli organizzatori | “La pagina ufficiale richiede…” |
+| L1 — risultato esterno | Misura o affermazione di un altro autore | “L'autore riporta…” |
+| L2 — ispezione del team | Codice, file o interfaccia controllati senza eseguire la prova | “Abbiamo verificato nel codice…” |
+| L3 — replica operativa | Pipeline esterna eseguita dal team sullo stesso caso | “Abbiamo riprodotto…” |
+| L4 — confronto controllato | Baseline e variante confrontate su dati e criteri fissati | “La variante migliora su…” |
+| L5 — verifica indipendente | Risultato congelato valutato su dati non usati per le scelte | “Il risultato si mantiene sul test…” |
 
 Un livello non eredita automaticamente il successivo. Un repository letto non è una pipeline replicata; una replica non dimostra generalizzazione; una predizione stabile non equivale a lettere leggibili.
 
@@ -66,7 +67,7 @@ Un livello non eredita automaticamente il successivo. Un repository letto non è
 | G2 — riproducibilità | Il secondo operatore ottiene un risultato equivalente dalle istruzioni | E01 con differenze entro la tolleranza dichiarata |
 | G3 — valutazione valida | Esistono dati di sviluppo e verifica, baselines e metriche adatte | Manifest E02 congelato prima dell'ottimizzazione |
 | G4 — miglioramento | Una modifica supera la baseline a costo comparabile | Confronto E03/E04 e revisione incrociata accettata |
-| G5 — candidato | Una zona di un volume eleggibile supera controlli tecnici e umani | E06 ripetuta, coordinate e artefatti originali conservati |
+| G5 — candidato | Una zona di un volume eleggibile supera controlli tecnici e umani | E05 completata su dati esclusi dalle decisioni (evidenza L5), poi E06 ripetuta, coordinate e artefatti originali conservati |
 | G6 — candidatura | Requisiti correnti del premio e pacchetto di evidenze completi | Audit finale e decisione esplicita di Matteo |
 
 Non saltare un gate chiamando “esplorazione” un test incompleto. È possibile svolgere piccole prove tecniche mentre si prepara G3, ma i loro risultati restano controlli operativi.
@@ -102,13 +103,15 @@ Prima dell'esecuzione verificare che `git rev-parse HEAD` coincida con il commit
 Eseguire inizialmente controlli che non consumano GPU:
 
 1. verificare identità, dimensioni, ordine degli assi, scala fisica e hash degli input;
-2. verificare spazio libero e destinazione degli output;
-3. registrare commit del progetto e delle dipendenze;
-4. controllare che dati, modelli e output voluminosi siano esclusi da Git;
-5. eseguire import e comando di aiuto del software;
-6. preparare una prova minima su un sottoinsieme;
-7. attivare la GPU soltanto quando download e configurazione sono pronti;
-8. verificare che il framework riconosca davvero l'acceleratore e registrarne il modello.
+2. verificare spazio libero e destinazione degli output, e che gli output sopravvivano alla chiusura della sessione;
+3. verificare l'accesso di rete dell'ambiente verso le sorgenti di dati e modelli con una richiesta a costo nullo (su Kaggle l'accesso a Internet è un'impostazione separata dalla GPU);
+4. registrare commit del progetto e delle dipendenze;
+5. controllare che dati, modelli e output voluminosi siano esclusi da Git;
+6. installare il software e verificare che l'installazione non abbia sostituito o duplicato il framework preinstallato (versione di PyTorch prima e dopo);
+7. eseguire import e comando di aiuto del software;
+8. preparare una prova minima su un sottoinsieme;
+9. attivare la GPU soltanto quando download e configurazione sono pronti;
+10. verificare che il framework riconosca davvero l'acceleratore e registrarne il modello.
 
 Un notebook che termina senza errori non supera il preflight scientifico: occorre controllare forma, orientamento e contenuto dell'output.
 
@@ -142,7 +145,7 @@ La revisione restituisce finding con:
 - effetto sulla conclusione;
 - correzione minima o prova discriminante.
 
-Il writer o coordinatore classifica ogni finding come accettato, rifiutato o differito, motivando la scelta. Il secondo giro serve soltanto a verificare correzioni materiali; il default massimo è due giri. La valutazione indipendente del socio resta distinta dalla review del codice fatta da un agente.
+Il writer classifica ogni finding come accettato, rifiutato o differito, motivando la scelta; in caso di disaccordo con il revisore decide Matteo. Il secondo giro serve soltanto a verificare correzioni materiali; il default massimo è due giri. Una seconda revisione nella stessa sessione dell'agente che ha fatto la prima è una verifica di chiusura, non un secondo parere indipendente: per l'indipendenza serve una sessione che non abbia visto la prima revisione. La valutazione indipendente del socio resta distinta dalla review del codice fatta da un agente.
 
 ### 7. Decisione e consolidamento
 
@@ -176,7 +179,7 @@ Ogni run avrà un identificatore stabile, per esempio `E00-R01`, e un manifest c
 |---|---|---|
 | Kaggle | E00 e inferenze GPU ripetibili | GPU assegnata, versione CUDA/PyTorch, tempo e persistenza degli output |
 | Portatile | Coordinamento, documentazione, esame di output piccoli | Spazio locale limitato già rilevato |
-| PC fisso | Dati, geometria, rendering e possibile inferenza con batch ridotto | Modello GPU/CPU, driver, VRAM e spazio libero al primo uso |
+| PC fisso (i7-12700K, 32 GB, GTX 1060 6 GB, 681 GB liberi, WSL2) | Scrittura, controlli CPU, conservazione dei dati, confronto label/output | Rilevato il 6 settembre 2026. La GPU è Pascal (compute capability 6.1), deprecata in CUDA 12.8 e lenta in fp16: l'inferenza sul fisso richiede un preflight dedicato e non entra nel piano E00 |
 | Mac M3 Pro | VC3D, analisi CPU e replica del socio | RAM, spazio, compatibilità e tempi sul campione comune |
 
 “Cloud” indica il calcolo remoto come Kaggle; “Claude” indica l'agente usato insieme a Codex. I due ruoli vanno registrati separatamente nei rapporti.
@@ -193,7 +196,7 @@ Il [preflight Kaggle del 5 settembre 2026](reports/2026-09-05-kaggle-preflight.m
 6. **E05:** configurazione congelata sui dati lasciati fuori dalle decisioni.
 7. **E06:** esplorazione limitata di un volume eleggibile e verifica dei candidati.
 
-Il piano eseguibile E00 verrà scritto dopo la revisione di questa procedura e dovrà partire dal commit che la contiene. In questo modo il piano può indicare una base reale e verificabile.
+La revisione di questa procedura è stata completata il 6 settembre 2026. Il piano eseguibile E00 parte dal commit che contiene le correzioni accettate, così da indicare una base reale e verificabile. Il [dossier E00](08-dossier-input-e00.md) raccoglie i dati verificati, le decisioni prese e il criterio di esito proposto da congelare nel piano.
 
 ## Condizioni di arresto generali
 
@@ -209,3 +212,18 @@ Fermare un esperimento quando:
 - due writer stanno modificando gli stessi percorsi.
 
 Un arresto viene registrato come risultato dell'esperimento, con evidenza e prossima prova proposta.
+
+## Glossario
+
+Termini usati in questa procedura e non definiti altrove nel repository. Le definizioni di *segmento*, *mesh*, *surface volume*, *modello*, *checkpoint* e *seed* sono in [Capire il processo](01-capire-il-processo.md); quella di *baseline* nel [metodo sperimentale](03-metodo-sperimentale.md).
+
+- **Manifest:** file che elenca, per un run, input, versioni, hash, comando esatto e output prodotti. È ciò che permette a un'altra persona di rifare la stessa cosa.
+- **Hash (SHA-256):** impronta di un file: una stringa che cambia se cambia anche un solo byte. Due file con lo stesso hash sono identici; serve a verificare che un download sia esattamente quello previsto.
+- **Preregistrazione:** scrivere domanda, metodo e criterio di successo *prima* di eseguire la prova, così l'esito non può cambiare il criterio.
+- **Recall@K:** fra i K casi che un ordinamento mette in cima, quanti sono davvero utili. Misura quanto una selezione fa risparmiare tempo a chi guarda.
+- **Staffetta:** passaggio del lavoro da un agente all'altro su un commit preciso, con una consegna scritta che dice cosa è fatto, cosa è aperto e cosa non toccare. Il formato della consegna verrà definito prima di E01.
+- **Worktree:** copia di lavoro separata dello stesso repository Git, su un altro branch, in un'altra cartella. Permette a due lavori indipendenti di procedere senza scriversi addosso.
+- **Diff:** elenco delle righe cambiate fra due versioni di un file.
+- **stdout / stderr:** i due flussi di testo che un programma emette mentre gira: messaggi normali ed errori. Vanno conservati entrambi.
+- **In cieco:** valutare un output senza sapere quale variante lo ha prodotto né quale esito ci si aspetta.
+- **fp16 / precisione mista:** calcolo con numeri a 16 bit invece di 32 per andare più veloce sulla GPU. Le schede recenti lo fanno bene; quelle vecchie (come una GTX 1060) no.

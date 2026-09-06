@@ -6,7 +6,7 @@ Fonte comune per Codex e Claude Code. Leggere prima README.md e docs/roadmap.md.
 
 Il team è Matteo e il suo socio (Mac M3 Pro). L'amico fisico è un interlocutore esterno indipendente. Non assegnargli ruoli, quote o obblighi. Non presumere che Matteo abbia già VC3D o competenze di segmentazione.
 
-Fase attuale: procedura operativa in bozza e preflight Kaggle completato; E00 non è stato eseguito e il metodo sperimentale va revisionato prima dell'esecuzione. L'avvio documentale non autorizza implicitamente campagne GPU, training, spese o submission. Il bootstrap e la prima sincronizzazione GitHub sono stati richiesti esplicitamente nella conversazione del 5 settembre 2026.
+Fase attuale: procedura operativa revisionata (due giri read-only il 6 settembre 2026, finding integrati; vedi docs/reports/2026-09-06-revisione-procedura-e00.md), preflight Kaggle completato, inventario del fisso rilevato; E00 non è stato eseguito e il piano E00 va scritto sul commit che contiene le correzioni. I livelli di evidenza si chiamano L0–L5, gli esperimenti E00–E06. L'avvio documentale non autorizza implicitamente campagne GPU, training, spese o submission. Il bootstrap e la prima sincronizzazione GitHub sono stati richiesti esplicitamente nella conversazione del 5 settembre 2026.
 
 ## Metodo
 
@@ -27,7 +27,7 @@ Il sito ufficiale decide regole e volumi eleggibili: ricontrollarlo prima di sel
 
 La ricerca sui contributi pubblici degli altri partecipanti è parte del progetto, oltre agli aggiornamenti di Francesco. Prima di fissare esperimenti o sviluppare strumenti, consultare docs/06-ricerca-community.md e aggiornare fonti, revisioni, limiti e prova minima proposta. Non trattare una risorsa individuata come una dipendenza adottata o un risultato replicato. Cercare anche correzioni già integrate a monte.
 
-w035 appartiene al training set di ink_9um: è un controllo di funzionamento, non una misura indipendente di generalizzazione. Due seed dello stesso modello possono condividere errori. Un punteggio ScrollScout non è una probabilità di avere trovato testo.
+w035 appartiene al training set di ink_9um, in due rappresentazioni (2,4 µm ridotta e nativa 9,362 µm): è un controllo di funzionamento, non una misura indipendente di generalizzazione. I nomi dei segmenti nel dataset delle label non seguono la numerazione pubblica: non dedurre identità dal numero. Due seed dello stesso modello possono condividere errori. Un punteggio ScrollScout non è una probabilità di avere trovato testo.
 
 Non usare generazione di immagini, completamento linguistico o ritocchi che inventino tratti per produrre evidenza di inchiostro. Conservare gli output originali; registrare separatamente trasformazioni per la sola visualizzazione.
 

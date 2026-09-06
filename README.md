@@ -2,7 +2,7 @@
 
 Progetto di Matteo e del suo socio per contribuire alla Vesuvius Challenge e costruire un risultato verificabile candidabile a un premio.
 
-**Stato:** avvio documentale e preflight Kaggle completato, 5 settembre 2026. Nessun esperimento scientifico eseguito in questo repository. Nome di lavoro provvisorio.
+**Stato:** procedura operativa e dossier E00 revisionati e corretti il 6 settembre 2026; preflight Kaggle completato il 5 settembre; inventario del fisso rilevato. Nessun esperimento scientifico eseguito in questo repository. Nome di lavoro provvisorio.
 
 L'amico fisico di Matteo lavora indipendentemente: condivide informazioni e strumenti, ma non fa parte del team. ScrollScout è una risorsa esterna da valutare, non il progetto del team né una dipendenza già scelta.
 
@@ -18,11 +18,11 @@ L'amico fisico di Matteo lavora indipendentemente: condivide informazioni e stru
 8. [Procedura operativa canonica](docs/07-procedura-operativa.md).
 9. [Dossier tecnico dell'input candidato E00](docs/08-dossier-input-e00.md).
 
-Per la prossima attività pratica: [prima sessione guidata](docs/04-prima-sessione.md), con un esempio ufficiale da esplorare nel browser. Disponibili anche un PC fisso da 32 GB dichiarato da Matteo e il Mac M3 Pro del socio; la destinazione del calcolo GPU sarà scelta dopo l'inventario e un confronto su un piccolo campione.
+Per la prossima attività pratica: [prima sessione guidata](docs/04-prima-sessione.md), con un esempio ufficiale da esplorare nel browser. Disponibili anche il PC fisso di Matteo (i7-12700K, 32 GB, GTX 1060 6 GB, 681 GB liberi, WSL2; inventario rilevato) e il Mac M3 Pro del socio; la prima inferenza GPU è su Kaggle, il fisso richiede un preflight dedicato.
 
 La prima meta è riprodurre una procedura nota e comprenderne i limiti. La scelta fra First Letters e Progress Prizes resta da consolidare. Vincere è l'obiettivo del progetto, non un esito garantito dal funzionamento del software.
 
-Account Kaggle e telefono verificati. Il [preflight dell'ambiente Kaggle](docs/reports/2026-09-05-kaggle-preflight.md) ha confermato PyTorch e due Tesla T4; la sessione è stata fermata e nessuna inferenza Vesuvius è stata ancora eseguita. L'inventario dettagliato del fisso arriverà al suo prossimo utilizzo e non blocca il setup Kaggle dal portatile. La ricerca comprende contributi pubblici di altri partecipanti oltre agli aggiornamenti di Francesco: prima selezione di 11 risorse documentata, nessuna nuova pipeline replicata.
+Account Kaggle e telefono verificati. Il [preflight dell'ambiente Kaggle](docs/reports/2026-09-05-kaggle-preflight.md) ha confermato PyTorch e due Tesla T4; la sessione è stata fermata e nessuna inferenza Vesuvius è stata ancora eseguita. La [revisione del 6 settembre 2026](docs/reports/2026-09-06-revisione-procedura-e00.md) ha verificato il dossier E00 su fonti primarie e fissato le decisioni per il piano. La ricerca comprende contributi pubblici di altri partecipanti oltre agli aggiornamenti di Francesco: prima selezione di 11 risorse documentata, nessuna nuova pipeline replicata.
 
 ## Organizzazione
 

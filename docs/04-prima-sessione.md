@@ -31,4 +31,4 @@ Prima di ampliare la ricerca completeremo il [metodo sperimentale](03-metodo-spe
 
 ## Dati mancanti per il setup eseguibile
 
-Modello esatto della NVIDIA da circa 6 GB e sistema operativo del fisso, memoria e spazio del Mac. Il fisso ha anche 32 GB RAM e NVMe da 1 TB secondo Matteo; lo spazio libero è sconosciuto. Nessun accesso al fisso o al Mac è stato verificato dalla sessione sul portatile. Account Kaggle e verifica telefonica sono invece completati: possiamo preparare E00 dal portatile, rinviando l'inventario del fisso al suo primo utilizzo.
+Il fisso è stato inventariato il 6 settembre 2026 (i7-12700K, 32 GB, GTX 1060 6 GB, 681 GB liberi, WSL2; dettagli in [strumenti e setup](02-strumenti-e-setup.md)). Restano da rilevare memoria e spazio del Mac. Account Kaggle e verifica telefonica sono completati: E00 si prepara su Kaggle; l'eventuale inferenza sul fisso richiede prima un preflight della GPU.
