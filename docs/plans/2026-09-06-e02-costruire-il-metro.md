@@ -534,7 +534,7 @@ Per ogni revisione registrare: modello ed effort effettivi riportati dal plugin,
 | 2 | P2 | Mancavano le misure alla soglia congelata (§5 D): i report avevano `threshold_arg = null` | accettato | metriche locali ricalcolate con `--threshold 91` sui sei TIFF conservati (nessuna GPU), `at_threshold` per insieme, strato e regione nel manifest e nella scheda |
 | 3 | P2 | I run del passo 7 sono stati avviati in parallelo, prima dei controlli intermedi; la deviazione non era dichiarata | accettato | deviazione 7 nella scheda, con orari e con la precisazione che i controlli sono stati fatti dopo gli avvii |
 
-- **Verifica di chiusura:** *(registrata sotto dopo il secondo giro)*
+- **Verifica di chiusura (secondo giro, stesso canale, `--base 7e2e317`):** i tre finding risultano **chiusi** (hash dei report, identità del TIFF e sigillo di w029 verificati prima dell'attestazione; soglia 91 presente in tutte le 32 voci per insieme, strato e regione; deviazione 7 coerente con il manifest); 4 test eseguiti da Codex, `git diff --check` superato, nessun nuovo P0–P1. **Verdetto: esito sostenuto così com'è.** Consumo Codex complessivo per E02: cinque chiamate (R1 due giri, R2, R3 due giri), fra 2 e 6 minuti ciascuna; l'usage meter non è esposto dal plugin.
 
 ---
 
