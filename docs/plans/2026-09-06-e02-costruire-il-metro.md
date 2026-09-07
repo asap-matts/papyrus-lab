@@ -523,6 +523,19 @@ Per ogni revisione registrare: modello ed effort effettivi riportati dal plugin,
 
 - `scripts/e02_metrics.py` → versione 1.2; 14 test superati; notebook rigenerati. Nessun secondo giro: le tre correzioni sono locali e coperte da test.
 
+### Revisione R3 (esito, 7 settembre 2026)
+
+- **Canale:** stesso plugin, `adversarial-review --base d6da61a` (scheda, manifest, configurazioni, registro della community). Codex ha ricalcolato la soglia τ\* = 91 e i numeri principali, e non ha trovato esposizioni dei pixel held-out di w029.
+- **Verdetto Codex:** esito sostenuto con correzioni. **3 finding, tutti P2, accettati 3.**
+
+| # | Sev. | Finding (sintesi) | Esito | Correzione |
+|---|---|---|---|---|
+| 1 | P2 | `scripts/e02_manifest.py` copiava le metriche senza verificarle contro `SHA256SUMS` e attestava il sigillo di w029 incondizionatamente | accettato | `validate_reports`: hash del JSON e del TIFF confrontati con `SHA256SUMS`, report locale sullo stesso TIFF e alla soglia congelata, rifiuto di qualunque insieme held-out o confronto held per w029; il sigillo è attestato solo dopo i controlli; 4 test negativi |
+| 2 | P2 | Mancavano le misure alla soglia congelata (§5 D): i report avevano `threshold_arg = null` | accettato | metriche locali ricalcolate con `--threshold 91` sui sei TIFF conservati (nessuna GPU), `at_threshold` per insieme, strato e regione nel manifest e nella scheda |
+| 3 | P2 | I run del passo 7 sono stati avviati in parallelo, prima dei controlli intermedi; la deviazione non era dichiarata | accettato | deviazione 7 nella scheda, con orari e con la precisazione che i controlli sono stati fatti dopo gli avvii |
+
+- **Verifica di chiusura:** *(registrata sotto dopo il secondo giro)*
+
 ---
 
 ## 11. Emendamenti dopo il congelamento

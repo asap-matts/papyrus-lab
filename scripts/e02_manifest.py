@@ -62,19 +62,54 @@ def run_info(d: Path) -> dict:
             "sha256sums": {p.strip().lstrip("*"): h for h, p in sums}}
 
 
+SEALED = "pherc1667-w029"
+KEEP = ("stratum", "region", "n_px", "n_ink", "ink_fraction", "auroc", "best_f1", "at_threshold")
+
+
 def summarize_sets(rep: dict) -> dict:
     out = {}
     for name, s in rep.get("sets", {}).items():
         row = {"n_px": s["n_px"], "n_ink": s["n_ink"], "ink_fraction": s["ink_fraction"], "trivial_floor": s["trivial_floor"],
-               "auroc": s["auroc"], "best_f1": s["best_f1"], "median_ink": s.get("median_ink"), "median_background": s.get("median_background")}
+               "auroc": s["auroc"], "best_f1": s["best_f1"], "at_threshold": s.get("at_threshold"),
+               "median_ink": s.get("median_ink"), "median_background": s.get("median_background")}
         if "orientation" in s:
             row["orientation"] = s["orientation"]
         if "strata" in s:
             row["within_patch"] = s["within_patch"]; row["within_two_patches"] = s["within_two_patches"]
-            row["strata"] = [{k: v for k, v in st.items() if k in ("stratum", "n_px", "n_ink", "ink_fraction", "auroc", "best_f1")} for st in s["strata"]]
-            row["regions"] = [{k: v for k, v in r.items() if k in ("region", "n_px", "n_ink", "ink_fraction", "auroc", "best_f1")} for r in s["regions"]]
+            row["strata"] = [{k: v for k, v in st.items() if k in KEEP} for st in s["strata"]]
+            row["regions"] = [{k: v for k, v in r.items() if k in KEEP} for r in s["regions"]]
         out[name] = row
     return out
+
+
+def sha256_file(p: Path) -> str:
+    import hashlib
+
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+def validate_reports(seg: str, seed: int, kaggle_rep: dict, local_rep: dict | None, compare: dict | None,
+                     sums: dict, kaggle_metrics_sha256: str, threshold: int | None) -> None:
+    """Refuse, before anything is written, every inconsistency that would break the identity chain or the seal
+    (review R3, finding 1). Raises ValueError with the reason."""
+    tif = f"out/{seg}_seed{seed}_step075000.tif"
+    mjson = f"out/metrics_{seg}_seed{seed}.json"
+    if sums.get(mjson) != kaggle_metrics_sha256:
+        raise ValueError(f"{seg} seed{seed}: the Kaggle metrics JSON does not match SHA256SUMS ({sums.get(mjson)} vs {kaggle_metrics_sha256})")
+    if sums.get(tif) != kaggle_rep.get("sha256_pred"):
+        raise ValueError(f"{seg} seed{seed}: TIFF hash in SHA256SUMS ({sums.get(tif)}) differs from the Kaggle report ({kaggle_rep.get('sha256_pred')})")
+    if local_rep is not None and local_rep.get("sha256_pred") != kaggle_rep.get("sha256_pred"):
+        raise ValueError(f"{seg} seed{seed}: local report computed on a different TIFF ({local_rep.get('sha256_pred')})")
+    if local_rep is not None and threshold is not None and local_rep.get("threshold_arg") != threshold:
+        raise ValueError(f"{seg} seed{seed}: local report not computed at the frozen threshold {threshold} (threshold_arg={local_rep.get('threshold_arg')})")
+    if seg == SEALED:
+        for name, rep in (("kaggle", kaggle_rep), ("local", local_rep)):
+            if rep is None:
+                continue
+            if "held" in rep.get("sets", {}) or "held" in (rep.get("sets_requested") or []):
+                raise ValueError(f"{seg}: the {name} report contains the held-out set: seal violated")
+        if compare and any("held" in k for k in compare):
+            raise ValueError(f"{seg}: compare_seeds contains held-out comparisons: seal violated")
 
 
 def classify(delta: float | None) -> str | None:
@@ -98,7 +133,7 @@ def main() -> int:
     inventory = read_json(ROOT / "configs" / "e02" / "ink9um_inventory.json")
     label_manifest = read_json(RUNS / "dataset-labels" / "manifest.json")
 
-    runs, replica, missing = {}, [], []
+    runs, replica, missing, checked_seal = {}, [], [], []
     for mode in gen.modes():
         d = latest(mode)
         if d is None:
@@ -117,6 +152,10 @@ def main() -> int:
         else:
             k = read_json(d / "e02" / "out" / f"metrics_{seg}_seed{seed}.json")
             local = read_json(RUNS / "metrics" / f"{seg}_seed{seed}.json")
+            cmp = read_json(d / "e02" / "out" / f"compare_seeds_{seg}.json")
+            validate_reports(seg, seed, k, local, cmp, info["sha256sums"],
+                             sha256_file(d / "e02" / "out" / f"metrics_{seg}_seed{seed}.json"), baseline.get("threshold_dev"))
+            checked_seal.append(seg == SEALED)
             log = (d / "e02" / "logs" / f"infer_seed{seed}.log").read_text(encoding="utf-8", errors="replace")
             mm = re.search(r"exit_code=(\d+) durata_s=(\d+) causa=(\S+)", log)
             info["inference"] = {"exit_code": int(mm.group(1)), "duration_s": int(mm.group(2)), "cause": mm.group(3)} if mm else None
@@ -129,8 +168,7 @@ def main() -> int:
                                      "sets_requested": k["sets_requested"], "disjoint_check": k["disjoint_check"], "sets": summarize_sets(k)}
             info["metrics_local"] = {"version": local["version"], "sha256_pred": local["sha256_pred"], "sets": summarize_sets(local),
                                      "auroc_equal_to_kaggle": {n: local["sets"][n]["auroc"] == k["sets"][n]["auroc"] for n in local["sets"]}} if local else None
-            info["sealed_held_out"] = (seg == "pherc1667-w029")
-            cmp = read_json(d / "e02" / "out" / f"compare_seeds_{seg}.json")
+            info["sealed_held_out"] = (seg == SEALED)
             if cmp:
                 info["compare_seeds"] = cmp
             for name, s in k["sets"].items():
@@ -160,7 +198,10 @@ def main() -> int:
         "runs": runs, "runs_missing": missing,
         "replica_R02": replica,
         "criterion_C_decision": "Matteo, 2026-09-07: concordante on held-out (2/2) and on training of 0814 and w029; anomalo on training of w016 (delta -0.032), cause attributed to the w016 masks (geometry differs from R02 for both operators; bucket files unchanged since 2026-08-18); meter not blocked",
-        "sealed_segment": {"segment": "pherc1667-w029", "held_out_pixels_read_in_E02": False, "opened_in": "E05"},
+        "sealed_segment": {"segment": SEALED, "reports_checked": int(sum(checked_seal)),
+                           "held_out_pixels_read_in_E02": False if sum(checked_seal) >= 2 else None,      # attested only after both w029 reports passed validate_reports
+                           "opened_in": "E05"},
+        "frozen_threshold_used_in_local_reports": baseline.get("threshold_dev"),
     }
     a.out.parent.mkdir(parents=True, exist_ok=True)
     with open(a.out, "w", encoding="utf-8", newline="\n") as fh:
