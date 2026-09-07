@@ -431,6 +431,18 @@ Nessun secondo giro di R1: le correzioni sono di piano, non di codice, e saranno
 
 Nessun secondo giro: le correzioni sono locali, coperte da 84 test (nove nuovi, scritti sui controesempi dei finding) e verificate sui dati reali (lista bianca sulle due cartelle di label vere, dataset montati dai notebook rigenerati).
 
+### Revisione R2-bis (codice modificato durante l'esecuzione, 7 settembre 2026, approvata da Matteo)
+
+- **Perché:** dopo R2 il generatore e il pilota sono stati modificati cinque volte sotto esecuzione (emendamenti A6–A11) e quel codice ha prodotto i 24 punti. Nessuno lo aveva riletto.
+- **Canale:** `adversarial-review --base 4520815`, modello `gpt-5.6-sol`, sola lettura, 14 min (job `review-mtro6stg-k9sofb`). Codex ha rieseguito il generatore e confrontato i 29 notebook committati con l'output (coincidono), letto i 28 `e03_point` (coerenti con `offsets.json` e `datasets.json`) e i 24 log dei run (input e indici corretti). **Verdetto sui dati: nessuna alterazione dei 24 punti, nessuna rigenerazione necessaria.** Verdetto sul pilota: NO-SHIP per riuso futuro. **2 finding (1 P1, 1 P2), accettati 2.**
+
+| # | Sev. | Finding (sintesi) | Esito | Correzione |
+|---|---|---|---|---|
+| 1 | P1 | Prenotazione, versione Kaggle e output non erano legati: un output verificato vecchio permetteva di rilanciare lo stesso modo senza scaricare una versione nuova; `settle` chiudeva la prenotazione **prima** della verifica e, con durata illeggibile, contava 0 minuti | accettato | Ogni prenotazione ha un id e la versione Kaggle restituita dal push; una prenotazione aperta **blocca** un nuovo push dello stesso modo; `output` chiude la prenotazione **dopo** la verifica, registrando `verified`/`failed`; durata illeggibile → resta il valore prenotato, mai zero. Cinque test nuovi |
+| 2 | P2 | `create_or_version` ignorava il codice di uscita di `datasets create`: con un create fallito e uno slug già `ready` da una versione vecchia, la pubblicazione risultava riuscita | accettato | Codici di uscita verificati (`create` 0, oppure conflitto riconosciuto e `version` 0); poi l'elenco remoto deve contenere i file locali con la stessa dimensione. L'impronta completa resta verificata dalla guardia del notebook al mount, che è il controllo che ha protetto i 24 punti |
+
+Nel registro corrente: 27 prenotazioni tutte chiuse, 24 output verificati, uno per punto. Nessun secondo giro: correzioni locali, coperte dai test.
+
 ---
 
 ## 11. Emendamenti dopo il congelamento

@@ -261,9 +261,10 @@ def test_settling_a_reservation_uses_the_measured_duration(tmp_path, monkeypatch
     d = tmp_path / mode / "20260101T000000Z"
     d.mkdir(parents=True)
     (d / "run.log").write_text(json.dumps([{"stream_name": "stdout", "time": 36.0, "data": "x"}]), encoding="utf-8")
-    used = pilot.settle(mode, d)
+    used = pilot.settle(mode, d, verified=False)
     assert abs(used - 0.6) < 0.01
     assert abs(pilot.consumed_minutes() - 0.6) < 0.01
+    assert pilot.open_reservation(mode) is None                      # chiusa: un nuovo push e' ammesso
 
 
 @pytest.mark.skipif(not GENERATED, reason="notebook non ancora generati")
@@ -301,3 +302,52 @@ def test_the_input_name_follows_the_pooling_not_the_offset():
         src = _source(folder)
         assert f'INPUT_NAME = "{expected}"' in src, f"{folder.name}: atteso {expected}"
         assert f"{seg}_pooled_{tag}.zarr" not in src or tag in ("zm3", "zp3")
+
+
+# --------------------------------------------------------------------------------- R2-bis: prenotazione <-> versione <-> output
+def test_an_open_reservation_blocks_a_second_push_of_the_same_mode(tmp_path, monkeypatch):
+    """v1 lanciata e non scaricata: un secondo push dello stesso modo deve essere rifiutato (R2-bis, finding 1)."""
+    monkeypatch.setattr(pilot, "runs_dir", lambda: tmp_path)
+    mode = "infer-46527-s42-zm2"
+    rid = pilot.reserve(mode, 60)
+    pilot.bind_version(rid, 7)
+    pending = pilot.open_reservation(mode)
+    assert pending is not None and pending["kaggle_version"] == 7 and pending["id"] == rid
+    assert pilot.open_reservation("infer-46527-s43-zm2") is None    # gli altri modi non sono toccati
+
+
+def test_settle_keeps_the_reservation_when_the_duration_is_unreadable(tmp_path, monkeypatch):
+    """Un download parziale senza log leggibile non deve costare zero minuti (R2-bis, finding 1)."""
+    monkeypatch.setattr(pilot, "runs_dir", lambda: tmp_path)
+    mode = "infer-w016-s42-zp2"
+    pilot.reserve(mode, 60)
+    d = tmp_path / mode / "20260101T000000Z"
+    d.mkdir(parents=True)                                            # nessun log, nessun run_info
+    used = pilot.settle(mode, d, verified=False)
+    assert used == 60 and pilot.consumed_minutes() == 60
+    entry = pilot.load_ledger()[-1]
+    assert entry["status"] == "failed" and entry["duration_measured"] is False
+
+
+def test_settle_records_the_outcome_and_closes_exactly_one_reservation(tmp_path, monkeypatch):
+    monkeypatch.setattr(pilot, "runs_dir", lambda: tmp_path)
+    mode = "infer-46527-s43-zp3"
+    pilot.reserve(mode, 60)
+    d = tmp_path / mode / "20260101T000000Z"; d.mkdir(parents=True)
+    (d / "run.log").write_text(json.dumps([{"stream_name": "stdout", "time": 200.0, "data": "x"}]), encoding="utf-8")
+    pilot.settle(mode, d, verified=True)
+    entries = [e for e in pilot.load_ledger() if e["mode"] == mode]
+    assert len(entries) == 1 and entries[0]["status"] == "verified" and abs(entries[0]["settled_minutes"] - 200 / 60) < 0.01
+    assert pilot.open_reservation(mode) is None
+
+
+def test_pushed_version_is_parsed_from_the_cli_output():
+    assert pilot.parse_pushed_version("Kernel version 3 successfully pushed.  Please check progress at https://...") == 3
+    assert pilot.parse_pushed_version("qualcosa e' andato storto") is None
+
+
+def test_conflict_detection_and_exit_code_logic():
+    assert pilot.is_conflict("The requested title is already in use by a dataset")
+    assert pilot.is_conflict("409 Client Error")
+    assert not pilot.is_conflict("The dataset title must be between 6 and 50 characters")
+    assert not pilot.is_conflict("403 Client Error: Forbidden")

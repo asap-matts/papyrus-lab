@@ -182,27 +182,60 @@ def save_ledger(entries: list[dict]) -> None:
     ledger_path().write_text(json.dumps(entries, indent=1) + "\n", encoding="utf-8")
 
 
-def reserve(mode: str, minutes: float) -> None:
-    """Prenotazione persistente scritta PRIMA del push: un secondo push dello stesso modo, o di un altro, la
-    trova gia' contata anche se il run e' ancora in volo (revisione R2, finding 5)."""
+def open_reservation(mode: str) -> dict | None:
+    """La prenotazione ancora aperta di questo modo, se c'e'. Per costruzione ce n'e' al massimo una: `push`
+    rifiuta finche' la precedente non e' chiusa da `output` (revisione R2-bis, finding 1)."""
+    entries = [e for e in load_ledger() if e["mode"] == mode and e.get("settled_minutes") is None]
+    return entries[-1] if entries else None
+
+
+def reserve(mode: str, minutes: float) -> str:
+    """Prenotazione persistente scritta PRIMA del push, con un identificativo univoco. La versione Kaggle
+    restituita dal push viene legata alla prenotazione subito dopo (`bind_version`)."""
     entries = load_ledger()
-    entries.append({"mode": mode, "reserved_minutes": minutes, "settled_minutes": None,
+    rid = f"{mode}#{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
+    entries.append({"id": rid, "mode": mode, "reserved_minutes": minutes, "settled_minutes": None,
+                    "kaggle_version": None, "status": "open",
                     "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+    save_ledger(entries)
+    return rid
+
+
+def bind_version(rid: str, version: int | None) -> None:
+    entries = load_ledger()
+    for e in entries:
+        if e.get("id") == rid:
+            e["kaggle_version"] = version
     save_ledger(entries)
 
 
-def settle(mode: str, folder: Path) -> float:
-    """Chiude la prenotazione piu' vecchia ancora aperta di questo modo con la durata misurata: un run fallito
-    dopo pochi secondi non deve costare l'intera prenotazione di 60 minuti."""
-    minutes = _minutes(folder)
+def parse_pushed_version(out: str) -> int | None:
+    m = re.search(r"Kernel version (\d+) successfully pushed", out)
+    return int(m.group(1)) if m else None
+
+
+def settle(mode: str, folder: Path, verified: bool) -> float:
+    """Chiude la (sola) prenotazione aperta di questo modo DOPO la verifica dell'output, registrando l'esito.
+    Minuti: la durata misurata se leggibile, altrimenti l'intera prenotazione. Mai zero per un run che e' partito
+    (revisione R2-bis, finding 1)."""
+    measured = _minutes(folder)
     entries = load_ledger()
-    for entry in entries:
-        if entry["mode"] == mode and entry.get("settled_minutes") is None:
-            entry["settled_minutes"] = round(minutes, 2)
-            entry["settled_from"] = folder.name
-            entry["settled_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
-            save_ledger(entries)
-            break
+    open_entries = [e for e in entries if e["mode"] == mode and e.get("settled_minutes") is None]
+    if not open_entries:
+        entries.append({"id": f"{mode}#unreserved#{folder.name}", "mode": mode, "reserved_minutes": 0.0,
+                        "settled_minutes": round(measured, 2), "status": "verified" if verified else "failed",
+                        "settled_from": folder.name, "note": "output senza prenotazione aperta: registrato a posteriori",
+                        "settled_at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+        save_ledger(entries)
+        return measured
+    entry = open_entries[0]
+    minutes = measured if measured > 0 else float(entry["reserved_minutes"])
+    entry["settled_minutes"] = round(minutes, 2)
+    entry["settled_from"] = folder.name
+    entry["status"] = "verified" if verified else "failed"
+    entry["duration_measured"] = measured > 0
+    entry["settled_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    save_ledger(entries)
     return minutes
 
 
@@ -274,27 +307,37 @@ def push(mode: str) -> None:
             if not ok:
                 sys.exit(f"push rifiutato: il run precedente {earlier} non e' concluso e verificato ({why}). "
                          f"Un run per volta, con i controlli in mezzo (piano §2, deviazione 7 di E02).")
-        # il modo corrente non deve essere gia' in volo, e un suo run concluso va prima scaricato e verificato
+        # ogni versione lanciata deve essere stata scaricata e verificata (o registrata come fallita) da `output`
+        # prima che lo stesso modo riparta: una prenotazione aperta blocca il push (revisione R2-bis, finding 1)
+        pending = open_reservation(mode)
+        if pending is not None:
+            sys.exit(f"push rifiutato: {mode} ha una prenotazione aperta ({pending['id']}, versione Kaggle "
+                     f"{pending.get('kaggle_version')}): eseguire 'output {mode}' per chiuderla, poi rilanciare.")
         st = status(mode)
         if st in {"running", "queued", "pending"}:
             sys.exit(f"push rifiutato: {mode} risulta gia' '{st}' su Kaggle: aspettare la fine, poi 'output {mode}'.")
-        if st == "complete" and latest_download(mode) is None:
-            sys.exit(f"push rifiutato: {mode} risulta 'complete' ma il suo output non e' stato scaricato e verificato: "
-                     f"eseguire 'output {mode}' prima di rilanciarlo.")
         b = ds["budget"]
         per_run = float(b["session_minutes_per_run"])
         used = consumed_minutes()
         if used + per_run > float(b["gpu_minutes_cap"]):
             sys.exit(f"push rifiutato: prenotazione oltre il tetto: impegnato {used:.1f} min + {per_run:.0f} min di "
                      f"sessione > {b['gpu_minutes_cap']} min. Fermarsi e chiedere a Matteo.")
-        reserve(mode, per_run)                    # scritta PRIMA del push: un secondo push la trova gia' contata
+        rid = reserve(mode, per_run)              # scritta PRIMA del push: un secondo push la trova gia' contata
         print(f"ATTENZIONE: {mode} consuma quota GPU (impegnata finora {used:.1f} min, prenotati altri {per_run:.0f}): "
               f"procedere solo con il via esplicito di Matteo", flush=True)
+    else:
+        rid = None
 
     cmd = [*KAGGLE, "kernels", "push", "-p", str(folder(mode)), "-t", str(TIMEOUTS[kind])]
     if m.get("enable_gpu"):
         cmd += ["--accelerator", m.get("machine_shape", "NvidiaTeslaT4")]
-    run(cmd)
+    out = run(cmd)
+    version = parse_pushed_version(out)
+    if rid is not None:
+        bind_version(rid, version)                 # la prenotazione conosce la versione che ha lanciato
+        if version is None:
+            print("ATTENZIONE: versione Kaggle non riconosciuta nell'output del push; la prenotazione resta aperta "
+                  "e verra' chiusa da 'output'.", flush=True)
 
 
 def status(mode: str) -> str:
@@ -323,12 +366,16 @@ def output(mode: str) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     run([*KAGGLE, "kernels", "output", kernel_id(mode), "-p", str(dest)])
     kind, _, _, _ = gen.parse_mode(mode)
-    if kind == "infer":
-        used = settle(mode, dest)                    # chiude la prenotazione con il consumo reale
-        print(f"quota di questo run: {used:.1f} min (registro aggiornato)")
+
+    def close(verified: bool) -> None:
+        if kind == "infer":
+            used = settle(mode, dest, verified)      # DOPO la verifica: la prenotazione si chiude con l'esito
+            print(f"quota di questo run: {used:.1f} min ({'verificato' if verified else 'fallito'}; registro aggiornato)")
+
     sums = next(dest.rglob("SHA256SUMS"), None)
     if sums is None:
         print(f"SHA256SUMS non trovato: il run non ha raggiunto la persistenza. Log e output parziali in {dest}")
+        close(False)
         sys.exit(1)
     base = sums.parent.parent
     bad, listed = 0, set()
@@ -347,28 +394,71 @@ def output(mode: str) -> None:
     if bad or missing:
         print("verifica NON superata: questa cartella non varra' come output disponibile "
               f"(nessun {VERIFIED_MARKER} scritto)")
+        close(False)
         sys.exit(1)
+    pending = open_reservation(mode) if kind == "infer" else None
     (dest / VERIFIED_MARKER).write_text(json.dumps(
         {"mode": mode, "files": len(lines), "differences": 0, "required_missing": [],
+         "reservation_id": pending["id"] if pending else None,
+         "kaggle_version": pending.get("kaggle_version") if pending else None,
          "verified_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
          "minutes": round(_minutes(dest), 2)}, indent=1) + "\n", encoding="utf-8")
+    close(True)
     print(f"marcatore di verifica scritto: {dest / VERIFIED_MARKER}")
 
 
 # ------------------------------------------------------------------------------------ publish
-def create_or_version(ds_dir: Path, message: str) -> None:
-    """Crea il dataset, o ne pubblica una nuova versione se esiste gia'. L'esito NON si deduce dal testo del
-    comando (la CLI stampa messaggi di errore senza la parola 'error': per esempio 'The dataset title must be
-    between 6 and 50 characters'): si verifica interrogando lo stato del dataset dopo la chiamata."""
-    ds_id = json.loads((ds_dir / "dataset-metadata.json").read_text(encoding="utf-8"))["id"]
-    out = run([*KAGGLE, "datasets", "create", "-p", str(ds_dir)], check=False)
+def run_rc(cmd: list[str]) -> tuple[str, int]:
+    """Come run(), ma restituisce anche il codice di uscita invece di terminare."""
+    print("$", " ".join(cmd), flush=True)
+    env = {**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}
+    p = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", env=env)
+    out = (p.stdout or "") + (p.stderr or "")
+    print("\n".join(l for l in out.splitlines()
+                    if "DeprecationWarning" not in l and "trace-deprecation" not in l).strip(), flush=True)
+    return out, p.returncode
+
+
+def is_conflict(out: str) -> bool:
     low = out.lower()
-    if "already exists" in low or "already in use" in low or "409" in out:
-        run([*KAGGLE, "datasets", "version", "-p", str(ds_dir), "-m", message])
+    return "already exists" in low or "already in use" in low or "409" in out
+
+
+def create_or_version(ds_dir: Path, message: str) -> None:
+    """Crea il dataset, o ne pubblica una nuova versione se esiste gia'. Fail-closed (revisione R2-bis, finding 2):
+    `create` deve uscire con 0, oppure segnalare un conflitto riconosciuto e allora `version` deve uscire con 0;
+    lo stato 'ready' dello slug non basta, perche' potrebbe essere quello di una versione vecchia. Dopo, l'elenco
+    dei file pubblicati deve contenere ogni file locale con la stessa dimensione. L'impronta completa del
+    contenuto la verifica la guardia del notebook al momento del mount (tree-SHA-256 contro datasets.json)."""
+    ds_id = json.loads((ds_dir / "dataset-metadata.json").read_text(encoding="utf-8"))["id"]
+    out, rc = run_rc([*KAGGLE, "datasets", "create", "-p", str(ds_dir)])
+    if rc != 0:
+        if not is_conflict(out):
+            sys.exit(f"creazione di {ds_id} fallita (exit {rc}) senza un conflitto riconosciuto: vedi output sopra")
+        out2, rc2 = run_rc([*KAGGLE, "datasets", "version", "-p", str(ds_dir), "-m", message])
+        if rc2 != 0:
+            sys.exit(f"nuova versione di {ds_id} fallita (exit {rc2}): vedi output sopra")
+    elif is_conflict(out):                       # exit 0 ma testo di conflitto: la CLI 2.2.4 lo fa (osservato in E02)
+        out2, rc2 = run_rc([*KAGGLE, "datasets", "version", "-p", str(ds_dir), "-m", message])
+        if rc2 != 0:
+            sys.exit(f"nuova versione di {ds_id} fallita (exit {rc2}): vedi output sopra")
     st = dataset_status(ds_id)
     if st != "ready":
         sys.exit(f"pubblicazione di {ds_id} non riuscita: stato '{st}'. Output del comando sopra.")
-    print(f"dataset {ds_id}: {st}")
+    listing, rc3 = run_rc([*KAGGLE, "datasets", "files", ds_id, "--page-size", "500"])
+    local = {p.name: p.stat().st_size for p in ds_dir.iterdir() if p.is_file() and p.name != "dataset-metadata.json"}
+    remote = {}
+    for line in listing.splitlines():
+        parts = line.split()
+        if len(parts) >= 2 and parts[1].isdigit():
+            remote[parts[0].split("/")[0] if parts[0].endswith(".tar") else parts[0]] = int(parts[1])
+    for name, size in local.items():
+        if name.endswith(".tar"):
+            continue                                # Kaggle estrae i tar: il contenuto e' verificato dalla guardia del notebook
+        if remote.get(name) != size:
+            sys.exit(f"pubblicazione di {ds_id}: il file {name} non risulta con la dimensione locale {size} "
+                     f"nell'elenco remoto ({remote.get(name)}). Vedi output sopra.")
+    print(f"dataset {ds_id}: {st}; file remoti elencati: {len(remote)}")
 
 
 def publish_labels() -> None:
