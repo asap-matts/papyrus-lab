@@ -109,13 +109,40 @@ def spearman(a: np.ndarray, b: np.ndarray) -> float:
 
 
 # ------------------------------------------------------------------------------------ seal (whitelist)
+SEALED_SEGMENT = "pherc1667-w029"
+EXPECTED_ARRAYS = ("inklabels", "supervision_mask", "validation_mask")
+
+
 def check_labels_allowed(labels_dir: Path) -> str:
-    """Fail-closed guard, called BEFORE any mask is opened: name in the allowlist AND frozen fingerprint."""
+    """Fail-closed guard, called BEFORE any mask is opened.
+
+    Order matters (review R2, finding 2): computing the tree fingerprint READS every file, so a folder that
+    merely carries an allowed name could get its sealed chunks read before the fingerprint says no. Everything
+    that can be decided from metadata alone is therefore decided first: the name, the absence of links, the
+    absence of any path naming the sealed segment, and the absence of unexpected entries. Only a directory that
+    survives all of that gets hashed."""
     labels_dir = Path(labels_dir)
     name = labels_dir.name
     if name not in LABEL_ALLOWLIST:
         raise ValueError(f"STOP: '{name}' non e' nella lista bianca dei segmenti di sviluppo "
-                         f"{sorted(LABEL_ALLOWLIST)}: nessuna maschera viene aperta")
+                         f"{sorted(LABEL_ALLOWLIST)}: nessun file viene letto")
+    if not labels_dir.is_dir():
+        raise ValueError(f"STOP: {labels_dir} non e' una cartella")
+    if labels_dir.is_symlink():
+        raise ValueError(f"STOP: {labels_dir} e' un collegamento: la cartella delle label deve essere reale")
+    # sola ispezione dei nomi: nessun byte letto
+    allowed_top = {f"{name}_{kind}.zarr" for kind in EXPECTED_ARRAYS}
+    for entry in sorted(labels_dir.iterdir()):
+        if entry.name not in allowed_top:
+            raise ValueError(f"STOP: voce inattesa '{entry.name}' in {labels_dir}: attese solo {sorted(allowed_top)}; "
+                             f"nessun file viene letto")
+    for p in labels_dir.rglob("*"):
+        if p.is_symlink():
+            raise ValueError(f"STOP: collegamento dentro le label ({p.relative_to(labels_dir)}): nessun file viene letto")
+        rel = p.relative_to(labels_dir).as_posix()
+        if SEALED_SEGMENT in rel or SEALED_SEGMENT in str(labels_dir.resolve()).replace("\\", "/"):
+            raise ValueError(f"STOP: il percorso nomina il segmento sigillato {SEALED_SEGMENT} "
+                             f"({rel}): nessun file viene letto")
     digest, _ = tree_sha256(labels_dir)
     if digest != LABEL_ALLOWLIST[name]:
         raise ValueError(f"STOP: impronta delle label di '{name}' diversa da quella congelata "

@@ -121,3 +121,61 @@ def test_budget_reservation_refuses_at_the_boundary(monkeypatch):
     assert cap == 240 and per_run == 60
     for used, allowed in ((0, True), (179, True), (180, True), (181, False), (239, False)):
         assert (used + per_run <= cap) is allowed, f"con {used} minuti consumati la decisione e' sbagliata"
+
+
+def test_the_label_dataset_of_e03_excludes_the_sealed_segment():
+    """Il dataset delle label di E02 contiene anche pherc1667-w029: montarlo porterebbe l'artefatto sigillato
+    dentro il perimetro del notebook (revisione R2, finding 1)."""
+    e02 = json.loads((ROOT / "configs" / "e02" / "datasets.json").read_text(encoding="utf-8"))
+    e03 = json.loads((ROOT / "configs" / "e03" / "datasets.json").read_text(encoding="utf-8"))
+    assert gen.SEALED in e02["labels"]["segments"]                      # il motivo per cui serve un dataset nuovo
+    assert e03["labels"]["slug"] != e02["labels"]["slug"]
+    assert set(e03["labels"]["segments"]) == set(gen.SEGMENTS) and gen.SEALED not in e03["labels"]["segments"]
+    built = ROOT / "runs" / "E03-R01" / "dataset-labels"
+    if built.is_dir():                                                  # cartella locale pronta per la pubblicazione
+        names = [p.name for p in built.rglob("*")]
+        assert not any("1667" in n or "w029" in n for n in names), names
+        man = json.loads((built / "manifest.json").read_text(encoding="utf-8"))
+        for seg, s in man["segments"].items():
+            frozen = e02["labels"]["segments"][seg]
+            assert s["tree_sha256"] == frozen["tree_sha256"] and s["tar_sha256"] == frozen["tar_sha256"]
+
+
+@pytest.mark.skipif(not GENERATED, reason="notebook non ancora generati")
+def test_notebooks_mount_only_the_e03_label_dataset():
+    e03 = json.loads((ROOT / "configs" / "e03" / "datasets.json").read_text(encoding="utf-8"))
+    for folder in GENERATED:
+        meta = json.loads((folder / "kernel-metadata.json").read_text(encoding="utf-8"))
+        assert any(e03["labels"]["slug"] in s for s in meta["dataset_sources"])
+        assert not any("papyruslab-e02-r01-labels" in s for s in meta["dataset_sources"])
+
+
+@pytest.mark.skipif(not GENERATED, reason="notebook non ancora generati")
+def test_the_guard_checks_names_before_hashing():
+    for folder in GENERATED:
+        src = _source(folder)
+        i_names = src.index("voci inattese nelle label montate")
+        i_hash = src.index("lsha, lfiles = tree_sha256(LABEL_DIR_MOUNTED)")
+        assert i_names < i_hash, f"{folder.name}: l'impronta si calcola prima dei controlli sui nomi"
+
+
+def test_pilot_requires_a_verification_marker(tmp_path, monkeypatch):
+    """Una cartella con SHA256SUMS ma senza marcatore non vale come output disponibile (R2, finding 4)."""
+    monkeypatch.setattr(pilot, "runs_dir", lambda: tmp_path)
+    mode = "infer-46527-s42-zm2"
+    d = tmp_path / mode / "20260101T000000Z" / "e03" / "out"
+    d.mkdir(parents=True)
+    (d / "SHA256SUMS").write_text("", encoding="utf-8")
+    assert pilot.latest_download(mode) is None
+    (d.parent.parent / pilot.VERIFIED_MARKER).write_text("{}", encoding="utf-8")
+    assert pilot.latest_download(mode) is not None
+
+
+def test_reservation_is_counted_before_the_download(tmp_path, monkeypatch):
+    """Un push ripetuto prima del download non deve poter superare il tetto (R2, finding 5)."""
+    monkeypatch.setattr(pilot, "runs_dir", lambda: tmp_path)
+    assert pilot.consumed_minutes() == 0
+    pilot.reserve("infer-46527-s42-zm2", 60)
+    assert pilot.consumed_minutes() == 60
+    pilot.reserve("infer-46527-s42-zm2", 60)          # secondo push dello stesso modo: si somma
+    assert pilot.consumed_minutes() == 120

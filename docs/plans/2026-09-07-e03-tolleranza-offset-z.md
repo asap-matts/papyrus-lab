@@ -391,7 +391,7 @@ Regole per il socio: nessun commit su `main`, nessuna pull request, nessun run G
 
 - **R1 — piano** (prima del congelamento): `adversarial-review` sull'albero di lavoro con focus: "trova ciò che renderebbe la curva non valida o non riproducibile: aritmetica degli offset e degli indici, identità degli input spostati, confronti fra seed, selezione a posteriori, sigillo di w029, budget, divisione del lavoro". Finding classificati sotto; piano congelato in `docs: freeze E03 plan (R01)`.
 - **R1 — piano**: modello `gpt-5.6-sol` (vedi sotto per i tentativi).
-- **R2 — codice** (prima dei run GPU, modello `gpt-5.6-sol`): sul diff dal congelamento: `e03_pool_shifted.py`, `e03_metrics.py`, `e03_curve.py`, generatore, pilota, test, configurazioni.
+- **R2 — codice** (prima dei run GPU, modello `gpt-5.6-sol`): sul diff dal congelamento: `e03_pool_shifted.py`, `e03_metrics.py`, `e03_curve.py`, generatore, pilota, test, configurazioni. **Eseguita il 7 settembre 2026**, esito sotto.
 - **R3 — esito** (prima del consolidamento, modello `gpt-5.6-sol`): scheda, manifest, `curve.json`, JSON delle metriche.
 - I compiti del socio con Codex (S1–S3) usano `gpt-5.6-sol`, salvo diversa indicazione di Matteo.
 
@@ -414,6 +414,22 @@ Per ogni revisione registrare: canale, modello ed effort dichiarati, durata, fin
 | 7 | P2 | La clausola "fa fede il generatore" permetteva al codice scritto dopo il congelamento di cambiare il comando eseguito senza correggere la preregistrazione | accettato | Piano congelato e `offsets.json` sono autoritativi; il generatore ha autorità solo sull'espansione meccanica; ogni divergenza semantica è un arresto con revisione del piano |
 
 Nessun secondo giro di R1: le correzioni sono di piano, non di codice, e saranno esercitate dai test e dalla revisione R2 sul codice che le implementa.
+
+### Revisione R2 (codice, 7 settembre 2026)
+
+- **Canale:** plugin `codex@openai-codex`, `adversarial-review --base 9e7f1d0`, modello **`gpt-5.6-sol`**, sola lettura, 12 min 5 s (job `review-mtrayrfi-zg6cgc`, sessione `01a07c26-bad0-7d11-8793-fb55b3670956`). Codex non ha potuto eseguire la suite (nel suo sandbox in sola lettura manca una cartella temporanea scrivibile): i test sono stati eseguiti da Claude, 84 superati.
+- **Verdetto: NO-SHIP.** **6 finding: 2 P0, 3 P1, 1 P2. Accettati 6**, rifiutati 0, differiti 0. Il primo avrebbe fermato ogni run al primo controllo.
+
+| # | Sev. | Finding (sintesi) | Esito | Correzione |
+|---|---|---|---|---|
+| 1 | P0 | Ogni notebook montava `papyruslab-e02-r01-labels`, che contiene **anche `pherc1667-w029`**: l'artefatto sigillato sarebbe entrato nel perimetro del run, e la guardia generata (che cerca il sigillato fra i mount) avrebbe fatto fallire **tutti** i run. Il test controllava solo lo slug, quindi passava | accettato | Nuovo dataset `papyruslab-e03-r01-labels` con i **soli due segmenti di sviluppo**, ricostruito dalle copie locali verificate: i tar risultano **identici byte per byte** a quelli di E02 (`tree_sha256` e `tar_sha256` uguali per entrambi i segmenti). `configs/e03/datasets.json` aggiornato, comando `publish-labels` nel pilota, due test nuovi |
+| 2 | P0 | `check_labels_allowed` decideva sul nome e poi calcolava l'impronta dell'intera cartella: e `tree_sha256` **legge ogni file**, quindi una copia del segmento sigillato rinominata con un nome ammesso sarebbe stata letta prima del rifiuto | accettato | Prima si decide con i soli **metadati**: nome nella lista bianca, nessun collegamento, nessuna voce diversa dai tre array attesi, nessun percorso che nomini il sigillato; solo dopo si calcola l'impronta. Stessa sequenza nella cella dei notebook. Test che intercetta `Path.read_bytes` e verifica che **nessun byte** venga letto prima del rifiuto |
+| 3 | P1 | La curva accettava qualunque `input_tree_sha256` purché non vuoto: 28 report costruiti da un input sbagliato ma con finestre giuste avrebbero prodotto una curva falsa | accettato | Ogni punto è confrontato con `configs/e03/datasets.json`: tipo di input previsto per quel `k` e impronta esatta; verificate anche impronta delle label, seed, soglia congelata 91, `run_id`, gate quando presenti e presenza delle letture secondarie |
+| 4 | P1 | `latest_download` considerava valido qualunque download con `SHA256SUMS`, anche uno che aveva **fallito** la verifica: poteva sbloccare il run successivo | accettato | `output()` scrive `VERIFIED.json` **solo** dopo zero differenze e zero file mancanti; `latest_download` richiede quel marcatore |
+| 5 | P1 | Sequenza e budget aggirabili: un secondo `push` prima del download non prenotava i 60 minuti già in volo, e un predecessore non generato veniva saltato | accettato | Registro persistente delle prenotazioni scritto **prima** del push e contato nel consumo; il modo corrente non deve risultare già in volo né concluso e non scaricato; un predecessore mancante è un errore, non un salto |
+| 6 | P2 | `curve.json` ometteva letture secondarie che il piano §5 C richiede sempre | accettato | Aggiunte best-F1, metriche alla soglia congelata, AUROC per strato e per regione, Spearman contro lo zero e fra i seed; la validazione rifiuta un report che non le contenga |
+
+Nessun secondo giro: le correzioni sono locali, coperte da 84 test (nove nuovi, scritti sui controesempi dei finding) e verificate sui dati reali (lista bianca sulle due cartelle di label vere, dataset montati dai notebook rigenerati).
 
 ---
 
@@ -444,6 +460,12 @@ Il piano è stato congelato il 7 settembre 2026 (`docs: freeze E03 plan (R01)`, 
 - **Cosa è successo.** Sul portatile, i tre pooling di `pherc0814-46527` hanno incontrato `aiohttp ServerDisconnectedError: Server disconnected` (lo stesso errore che R02 aveva osservato e che il piano E02 prevedeva): un tentativo perso per `--z-start 13`, uno per `1`, uno per `25`.
 - **Correzione.** Nessuna modifica al codice: lo script resta una riproduzione fedele di quello ufficiale, che non ha ritentativi. Si è **ripetuto il run**, come prescrive la procedura di E02, fino a tre tentativi. Tempi effettivi: 102 s, 95 s, 95 s; 0,8 GB letti per pooling.
 - **Esito.** `--z-start 13` produce l'albero con impronta **`bc7423431221bf24b247a8ba80d264b0306f816c52b4ecc0d08115a82305ac52`**, identica a quella ufficiale di E02: lo script riproduce il pooling di villa byte per byte. Gli input spostati hanno impronte `f73364dc…` (−3) e `8406e615…` (+3); le 18 slice condivise coincidono esattamente con l'input ufficiale e le tre slice nuove differiscono, come atteso.
+
+### A5 — dataset delle label proprio di E03 (dalla revisione R2, finding 1)
+
+- **Cosa è successo.** Il piano riusava il dataset delle label di E02. Quello contiene anche `pherc1667-w029`: montarlo avrebbe portato l'artefatto sigillato dentro il perimetro di ogni notebook e, per via della guardia stessa, avrebbe fatto fallire ogni run.
+- **Correzione.** `runs/E03-R01/dataset-labels/` contiene i tar dei **soli** due segmenti di sviluppo, ricostruiti dalle copie locali verificate con le funzioni congelate di `scripts/build_label_dataset.py`; i due tar risultano identici byte per byte a quelli di E02 (`tar_sha256` `32d3842a…` e `27f3e6ae…`). Si pubblica come `papyruslab-e03-r01-labels` con `python scripts/kaggle_e03.py publish-labels`, che rifiuta se il manifest non coincide con le impronte congelate.
+- **Conseguenza.** Un passo in più prima dei run (pubblicazione del dataset delle label), da fare con il token Kaggle rigenerato.
 
 ---
 

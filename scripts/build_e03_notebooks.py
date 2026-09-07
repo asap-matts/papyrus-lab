@@ -153,14 +153,26 @@ for root, dirs, files in os.walk("/kaggle/input"):
     depth = root.count("/") - 2
     if depth <= 3:
         print("  " * depth + os.path.basename(root) + "/", "(", len(files), "file )")
-sealed_hits = glob.glob(f"/kaggle/input/**/{SEALED_SEGMENT}*", recursive=True)
+# Nessun artefatto del segmento sigillato deve stare dentro il perimetro del notebook: il dataset delle label
+# di E03 contiene i soli due segmenti di sviluppo (revisione R2, finding 1).
+sealed_hits = glob.glob(f"/kaggle/input/**/*{SEALED_SEGMENT}*", recursive=True)
 assert not sealed_hits, f"STOP: il segmento sigillato {SEALED_SEGMENT} risulta montato: {sealed_hits[:3]}"
 lab_hits = glob.glob(f"/kaggle/input/**/{SEG}/{SEG}_inklabels.zarr/0/.zarray", recursive=True)
 assert lab_hits, f"STOP: label {SEG} non montata sotto /kaggle/input"
 LABEL_DIR_MOUNTED = os.path.dirname(os.path.dirname(os.path.dirname(lab_hits[0])))
-lsha, lfiles = tree_sha256(LABEL_DIR_MOUNTED)
-print("label montata:", LABEL_DIR_MOUNTED, "file", lfiles, "tree_sha256", lsha)
+# Prima i controlli che non leggono byte: nome, collegamenti, voci attese (revisione R2, finding 2).
 assert os.path.basename(LABEL_DIR_MOUNTED) in LABEL_ALLOWLIST, f"STOP: {LABEL_DIR_MOUNTED} fuori dalla lista bianca"
+assert not os.path.islink(LABEL_DIR_MOUNTED), "STOP: la cartella delle label e' un collegamento"
+allowed_top = {f"{SEG}_{k}.zarr" for k in ("inklabels", "supervision_mask", "validation_mask")}
+extra = sorted(set(os.listdir(LABEL_DIR_MOUNTED)) - allowed_top)
+assert not extra, f"STOP: voci inattese nelle label montate: {extra}"
+for d, dirs_, fs in os.walk(LABEL_DIR_MOUNTED):
+    for n in dirs_ + fs:
+        p = os.path.join(d, n)
+        assert not os.path.islink(p), f"STOP: collegamento dentro le label: {p}"
+        assert SEALED_SEGMENT not in os.path.relpath(p, LABEL_DIR_MOUNTED), f"STOP: percorso sigillato: {p}"
+lsha, lfiles = tree_sha256(LABEL_DIR_MOUNTED)          # solo ora si leggono i byte
+print("label montata:", LABEL_DIR_MOUNTED, "file", lfiles, "tree_sha256", lsha)
 assert lsha == LABEL_ALLOWLIST[SEG] == LABEL_TREE_SHA256, f"STOP: impronta delle label {lsha} diversa da quella congelata"
 print("lista bianca superata")
 '''

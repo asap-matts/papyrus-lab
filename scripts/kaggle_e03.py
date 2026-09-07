@@ -113,11 +113,16 @@ def required_outputs(mode: str) -> list[str]:
             f"out/metrics_{seg}_s{seed}_{tag}.json"]
 
 
+VERIFIED_MARKER = "VERIFIED.json"
+
+
 def latest_download(mode: str) -> Path | None:
+    """Solo un download che ha superato per intero la verifica di `output()` conta come disponibile: la presenza
+    di SHA256SUMS non basta, perche' resta anche quando la verifica fallisce (revisione R2, finding 4)."""
     base = runs_dir() / mode
     if not base.is_dir():
         return None
-    cands = sorted(p for p in base.iterdir() if p.is_dir() and (p / "e03" / "out" / "SHA256SUMS").exists())
+    cands = sorted(p for p in base.iterdir() if p.is_dir() and (p / VERIFIED_MARKER).exists())
     return cands[-1] if cands else None
 
 
@@ -142,20 +147,49 @@ def _minutes(d: Path) -> float:
         return 0.0
 
 
+def ledger_path() -> Path:
+    return runs_dir() / "gpu_ledger.json"
+
+
+def load_ledger() -> list[dict]:
+    p = ledger_path()
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else []
+
+
+def reserve(mode: str, minutes: float) -> None:
+    """Prenotazione persistente scritta PRIMA del push: un secondo push dello stesso modo, o di un altro, la
+    trova gia' contata anche se il run e' ancora in volo (revisione R2, finding 5)."""
+    entries = load_ledger()
+    entries.append({"mode": mode, "reserved_minutes": minutes,
+                    "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+    ledger_path().parent.mkdir(parents=True, exist_ok=True)
+    ledger_path().write_text(json.dumps(entries, indent=1) + "\n", encoding="utf-8")
+
+
 def consumed_minutes(verbose: bool = False) -> float:
-    """Ogni versione scaricata conta, anche quella di un tentativo fallito: il consumo di quota e' reale."""
-    total = 0.0
+    """Quota impegnata: per ogni run GPU vale la durata misurata dei download verificati, oppure -- se il run e'
+    stato lanciato e non ancora scaricato -- la prenotazione scritta nel registro. Mai meno del reale."""
+    per_mode: dict[str, float] = {}
     for mode in gen.modes():
         if not mode.startswith("infer-"):
             continue
         base = runs_dir() / mode
-        if not base.is_dir():
-            continue
-        for d in sorted(p for p in base.iterdir() if p.is_dir()):
-            m = _minutes(d)
-            total += m
-            if verbose and m:
-                print(f"  {mode:32} {d.name}  {m:6.1f} min")
+        if base.is_dir():
+            for d in sorted(p for p in base.iterdir() if p.is_dir()):
+                m = _minutes(d)
+                per_mode[mode] = per_mode.get(mode, 0.0) + m
+                if verbose and m:
+                    print(f"  {mode:32} {d.name}  {m:6.1f} min (misurato)")
+    reserved: dict[str, float] = {}
+    for entry in load_ledger():
+        reserved[entry["mode"]] = reserved.get(entry["mode"], 0.0) + float(entry["reserved_minutes"])
+    for mode, minutes in sorted(reserved.items()):
+        measured = per_mode.get(mode, 0.0)
+        if minutes > measured:                       # run lanciato e non ancora (interamente) scaricato
+            per_mode[mode] = minutes
+            if verbose:
+                print(f"  {mode:32} {'prenotato':>17}  {minutes:6.1f} min (in volo o non scaricato)")
+    total = sum(per_mode.values())
     for entry in load_ds().get("budget", {}).get("manual_entries", []):
         total += float(entry.get("minutes", 0))
         if verbose:
@@ -207,17 +241,27 @@ def push(mode: str) -> None:
         idx = ORDER.index(mode)
         for earlier in ORDER[:idx]:
             if not folder(earlier).exists():
-                continue                      # non ancora generato: appartiene a una tappa successiva
+                sys.exit(f"push rifiutato: il run precedente {earlier} non e' nemmeno generato. L'ordine congelato "
+                         f"non si salta: rigenerare i notebook (senza --only) ed eseguirli in sequenza.")
             ok, why = _gates_ok(earlier)
             if not ok:
                 sys.exit(f"push rifiutato: il run precedente {earlier} non e' concluso e verificato ({why}). "
                          f"Un run per volta, con i controlli in mezzo (piano §2, deviazione 7 di E02).")
+        # il modo corrente non deve essere gia' in volo, e un suo run concluso va prima scaricato e verificato
+        st = status(mode)
+        if st in {"running", "queued", "pending"}:
+            sys.exit(f"push rifiutato: {mode} risulta gia' '{st}' su Kaggle: aspettare la fine, poi 'output {mode}'.")
+        if st == "complete" and latest_download(mode) is None:
+            sys.exit(f"push rifiutato: {mode} risulta 'complete' ma il suo output non e' stato scaricato e verificato: "
+                     f"eseguire 'output {mode}' prima di rilanciarlo.")
         b = ds["budget"]
+        per_run = float(b["session_minutes_per_run"])
         used = consumed_minutes()
-        if used + float(b["session_minutes_per_run"]) > float(b["gpu_minutes_cap"]):
-            sys.exit(f"push rifiutato: prenotazione oltre il tetto: consumato {used:.1f} min + "
-                     f"{b['session_minutes_per_run']} min di sessione > {b['gpu_minutes_cap']} min. Fermarsi e chiedere a Matteo.")
-        print(f"ATTENZIONE: {mode} consuma quota GPU (consumata finora {used:.1f} min): "
+        if used + per_run > float(b["gpu_minutes_cap"]):
+            sys.exit(f"push rifiutato: prenotazione oltre il tetto: impegnato {used:.1f} min + {per_run:.0f} min di "
+                     f"sessione > {b['gpu_minutes_cap']} min. Fermarsi e chiedere a Matteo.")
+        reserve(mode, per_run)                    # scritta PRIMA del push: un secondo push la trova gia' contata
+        print(f"ATTENZIONE: {mode} consuma quota GPU (impegnata finora {used:.1f} min, prenotati altri {per_run:.0f}): "
               f"procedere solo con il via esplicito di Matteo", flush=True)
 
     cmd = [*KAGGLE, "kernels", "push", "-p", str(folder(mode)), "-t", str(TIMEOUTS[kind])]
@@ -270,7 +314,14 @@ def output(mode: str) -> None:
         check_not_sealed(name)
     print(f"file verificati: {len(lines)}; differenze: {bad}; richiesti mancanti: {missing or 'nessuno'}; cartella: {base}")
     if bad or missing:
+        print("verifica NON superata: questa cartella non varra' come output disponibile "
+              f"(nessun {VERIFIED_MARKER} scritto)")
         sys.exit(1)
+    (dest / VERIFIED_MARKER).write_text(json.dumps(
+        {"mode": mode, "files": len(lines), "differences": 0, "required_missing": [],
+         "verified_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+         "minutes": round(_minutes(dest), 2)}, indent=1) + "\n", encoding="utf-8")
+    print(f"marcatore di verifica scritto: {dest / VERIFIED_MARKER}")
 
 
 # ------------------------------------------------------------------------------------ publish
@@ -281,6 +332,27 @@ def create_or_version(ds_dir: Path, message: str) -> None:
         run([*KAGGLE, "datasets", "version", "-p", str(ds_dir), "-m", message])
     elif "error" in low:
         sys.exit("creazione del dataset fallita (vedi sopra)")
+
+
+def publish_labels() -> None:
+    """Pubblica il dataset delle label di E03: i soli due segmenti di sviluppo. Quello di E02 contiene anche il
+    segmento sigillato e non va montato (revisione R2, finding 1)."""
+    src = runs_dir() / "dataset-labels"
+    if not src.is_dir():
+        sys.exit(f"{src} assente: ricostruire la cartella dalle copie locali verificate delle label")
+    man = json.loads((src / "manifest.json").read_text(encoding="utf-8"))
+    ds = load_ds()
+    if set(man["segments"]) != set(ds["labels"]["segments"]):
+        sys.exit(f"il manifest contiene {sorted(man['segments'])}, attesi {sorted(ds['labels']['segments'])}")
+    for p in src.rglob("*"):
+        check_not_sealed(p.name)
+    for seg, s in man["segments"].items():
+        frozen = ds["labels"]["segments"][seg]
+        if s["tree_sha256"] != frozen["tree_sha256"] or s["tar_sha256"] != frozen["tar_sha256"]:
+            sys.exit(f"STOP: le label di {seg} non coincidono con quelle congelate")
+    create_or_version(src, "E03 labels: development segments only")
+    print(f"dataset {ds['owner']}/{ds['labels']['slug']} pubblicato (privato), "
+          f"con i soli segmenti {sorted(man['segments'])}")
 
 
 def publish_input(short: str, tag: str) -> None:
@@ -345,12 +417,15 @@ def publish_manifest() -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("action", choices=["push", "status", "wait", "output", "publish-input", "publish-manifest", "budget"])
+    ap.add_argument("action", choices=["push", "status", "wait", "output", "publish-labels", "publish-input",
+                                       "publish-manifest", "budget"])
     ap.add_argument("target", nargs="?")
     ap.add_argument("tag", nargs="?")
     a = ap.parse_args()
     if a.action == "budget":
         budget_cmd(); return
+    if a.action == "publish-labels":
+        publish_labels(); return
     if a.action == "publish-manifest":
         publish_manifest(); return
     if a.action == "publish-input":

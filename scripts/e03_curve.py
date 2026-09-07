@@ -26,7 +26,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OFFSETS_PATH = ROOT / "configs" / "e03" / "offsets.json"
+DATASETS_PATH = ROOT / "configs" / "e03" / "datasets.json"
 DEFAULT_METRICS = ROOT / "docs" / "reports" / "e03-r01" / "metrics"
+FROZEN_THRESHOLD = 91          # tau* di E02, congelata in configs/e02/baseline.json
+RUN_ID = "E03-R01"
 
 VERSION = "e03_curve/1.0"
 TOL_DROP = 0.05          # perdita media che definisce la tolleranza
@@ -85,7 +88,11 @@ def load_extras(metrics_dir: Path) -> dict:
 def validate_matrix(points: dict) -> None:
     # 1) coerenza di ogni singolo report: un file mal nominato va detto per quello che e', non come
     #    "punto mancante" (l'errore piu' insidioso di R1, finding 3, e' proprio un rinomino).
+    ds = json.loads(DATASETS_PATH.read_text(encoding="utf-8"))
     for (seg, seed, k), doc in sorted(points.items()):
+        if seg not in SEGMENTS:
+            raise ValueError(f"STOP: segmento '{seg}' fuori dai due di sviluppo {SEGMENTS} in {doc['_file']}"
+                             + (f" — il segmento sigillato {SEALED} non deve comparire" if seg == SEALED else ""))
         if k not in ROWS:
             raise ValueError(f"STOP: offset k={k:+d} assente da configs/e03/offsets.json in {doc['_file']}")
         pt, row, stem = doc["e03_point"], ROWS[k], Path(doc["_file"]).stem
@@ -110,13 +117,39 @@ def validate_matrix(points: dict) -> None:
                              f"(attesa {row['source_z_slice']}) in {doc['_file']}")
         if list(pt.get("layer_indices", [])) != list(row["expected_indices"]):
             raise ValueError(f"STOP: indici di layer incoerenti con k={k:+d} in {doc['_file']}")
-        if not pt.get("input_tree_sha256"):
-            raise ValueError(f"STOP: input_tree_sha256 assente in {doc['_file']}")
+        # l'input dichiarato deve essere quello previsto per questo k, e la sua impronta quella pubblicata
+        # in configs/e03/datasets.json: un input sbagliato con finestre giuste passerebbe altrimenti (R2, finding 3)
+        if pt.get("input") != row["input"]:
+            raise ValueError(f"STOP: input '{pt.get('input')}' incoerente con k={k:+d} (atteso '{row['input']}') "
+                             f"in {doc['_file']}")
+        key = {"official": "official", "shifted_m3": "shifted_zm3", "shifted_p3": "shifted_zp3"}[row["input"]]
+        expected_input = ds["inputs"][seg][key].get("tree_sha256")
+        if not expected_input:
+            raise ValueError(f"STOP: impronta dell'input '{key}' di {seg} non ancora pubblicata in datasets.json")
+        if pt.get("input_tree_sha256") != expected_input:
+            raise ValueError(f"STOP: input_tree_sha256 {str(pt.get('input_tree_sha256'))[:16]}… in {doc['_file']} "
+                             f"diverso da quello pubblicato per '{key}' di {seg} ({expected_input[:16]}…)")
         if pt.get("sha256_pred") != doc.get("sha256_pred"):
             raise ValueError(f"STOP: impronta della predizione incoerente fra report e punto in {doc['_file']}")
+        if doc.get("labels_tree_sha256") not in (None, ds["labels"]["segments"][seg]["tree_sha256"]):
+            raise ValueError(f"STOP: impronta delle label diversa da quella congelata in {doc['_file']}")
+        if int(pt.get("seed", -1)) not in SEEDS:
+            raise ValueError(f"STOP: seed {pt.get('seed')} fuori da {SEEDS} in {doc['_file']}")
+        if pt.get("threshold") != FROZEN_THRESHOLD:
+            raise ValueError(f"STOP: soglia congelata {pt.get('threshold')} invece di {FROZEN_THRESHOLD} "
+                             f"in {doc['_file']}")
+        if pt.get("run_id") != RUN_ID:
+            raise ValueError(f"STOP: run_id '{pt.get('run_id')}' invece di '{RUN_ID}' in {doc['_file']}")
+        for gate in ("gate_A", "gate_B"):                 # presenti solo nei report prodotti da un run Kaggle
+            if gate in doc and doc[gate] != "superato":
+                raise ValueError(f"STOP: {gate}={doc[gate]} in {doc['_file']}: il punto non e' valido")
         held = doc.get("sets", {}).get("held", {})
         if held.get("auroc") is None:
             raise ValueError(f"STOP: AUROC held-out assente in {doc['_file']}")
+        for required in ("best_f1", "at_threshold", "strata", "regions"):
+            if required not in held:
+                raise ValueError(f"STOP: lettura secondaria '{required}' assente in {doc['_file']} "
+                                 f"(il piano §5 C la richiede sempre)")
 
     # 2) completezza e assenza di intrusi
     expected = {(seg, seed, k) for seg in SEGMENTS for seed in SEEDS for k in KS}
@@ -219,6 +252,18 @@ def compute(points: dict, extras: dict | None = None) -> dict:
                                    for seed in SEEDS},
         "auroc_train": {str(seed): {str(k): {seg: points[(seg, seed, k)]["sets"].get("train", {}).get("auroc")
                                              for seg in SEGMENTS} for k in KS} for seed in SEEDS},
+        # letture secondarie richieste dal piano §5 C, sempre riportate (revisione R2, finding 6)
+        "best_f1_held": {str(seed): {str(k): {seg: points[(seg, seed, k)]["sets"]["held"]["best_f1"]
+                                              for seg in SEGMENTS} for k in KS} for seed in SEEDS},
+        "at_threshold_held": {str(seed): {str(k): {seg: points[(seg, seed, k)]["sets"]["held"]["at_threshold"]
+                                                   for seg in SEGMENTS} for k in KS} for seed in SEEDS},
+        "strata_auroc_held": {str(seed): {str(k): {seg: {s["stratum"]: s.get("auroc")
+                                                         for s in points[(seg, seed, k)]["sets"]["held"]["strata"]}
+                                                   for seg in SEGMENTS} for k in KS} for seed in SEEDS},
+        "regions_auroc_held": {str(seed): {str(k): {seg: {str(r["region"]): r.get("auroc")
+                                                          for r in points[(seg, seed, k)]["sets"]["held"]["regions"]}
+                                                    for seg in SEGMENTS} for k in KS} for seed in SEEDS},
+        "spearman_vs_zero": _spearman_table(extras),
         "delta": delta, "tolerance": tolerance, "asymmetric": bool(asym),
         "H1": h1, "H2": h2, "anomaly": anomaly, "controls": controls,
         "points": {f"{seg}|{seed}|{k}": points[(seg, seed, k)]["_file"]
@@ -227,6 +272,20 @@ def compute(points: dict, extras: dict | None = None) -> dict:
                         "AUROC(k) riportata per offset uniformi della finestra Z. L'errore simulato e' uniforme "
                         "e non rappresenta errori locali della superficie, normali sbagliate o cambi di foglio."),
     }
+
+
+def _spearman_table(extras: dict) -> dict:
+    """Concordanza di ogni variante con l'offset zero dello stesso seed, piu' quella fra i due seed."""
+    out: dict = {"vs_zero": {}, "between_seeds": {}}
+    for stem, doc in extras.items():
+        sp = doc.get("spearman")
+        if not sp:
+            continue
+        if stem.endswith("_seedmean_spearman"):
+            out["between_seeds"][stem[: -len("_seedmean_spearman")]] = sp
+        elif stem.endswith("_spearman_z0"):
+            out["vs_zero"][stem[: -len("_spearman_z0")]] = sp
+    return out
 
 
 def _controls(points: dict, extras: dict) -> dict:

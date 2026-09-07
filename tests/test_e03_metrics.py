@@ -234,3 +234,41 @@ def test_run_report_refuses_a_source_window_that_contradicts_k(tmp_path, seg):
     with pytest.raises(ValueError, match="finestra"):
         e03.build_run_report(pred, seg, k=-3, seed=42, threshold=91, input_tree_sha256="a" * 64,
                              layer_indices=list(range(2, 19)), source_z_slice=[13, 97], run_id="E03-R01")
+
+
+# --------------------------------------------------------------------------------- seal, hardened (R2 finding 2)
+def test_no_byte_is_read_from_a_renamed_sealed_folder(tmp_path, monkeypatch):
+    """Una cartella del segmento sigillato rinominata come uno ammesso non deve farsi leggere nemmeno un byte:
+    l'impronta si calcola solo dopo i controlli sui soli nomi (revisione R2, finding 2)."""
+    d = _labels(tmp_path, "pherc0814-46527")                    # nome ammesso...
+    inner = d / "pherc1667-w029_validation_mask.zarr"           # ...ma dentro c'e' il sigillato
+    inner.mkdir()
+    (inner / "0.0.0").write_bytes(b"chunk sigillato")
+    reads = []
+    real = Path.read_bytes
+    monkeypatch.setattr(Path, "read_bytes", lambda self, *a, **k: (reads.append(str(self)), real(self, *a, **k))[1])
+    with pytest.raises(ValueError, match="inattesa|sigillato"):
+        e03.check_labels_allowed(d)
+    assert reads == [], f"letti file prima del rifiuto: {reads[:3]}"
+
+
+def test_a_symlink_inside_the_labels_is_refused(tmp_path):
+    d = _labels(tmp_path, "pherc0814-46527")
+    target = tmp_path / "altrove"; target.mkdir()
+    try:
+        (d / "pherc0814-46527_inklabels.zarr" / "link").symlink_to(target, target_is_directory=True)
+    except (OSError, NotImplementedError):
+        pytest.skip("questo sistema non permette di creare collegamenti senza privilegi")
+    with pytest.raises(ValueError, match="[Cc]ollegamento"):
+        e03.check_labels_allowed(d)
+
+
+def test_an_unexpected_entry_is_refused_without_reading(tmp_path):
+    d = _labels(tmp_path, "pherc0139-w016")
+    (d / "note.txt").write_text("qualcosa", encoding="utf-8")
+    with pytest.raises(ValueError, match="inattesa"):
+        e03.check_labels_allowed(d)
+
+
+def test_the_sealed_segment_name_is_never_in_the_allowlist():
+    assert e03.SEALED_SEGMENT not in e03.LABEL_ALLOWLIST

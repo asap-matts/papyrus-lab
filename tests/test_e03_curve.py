@@ -22,6 +22,21 @@ SEEDS = [42, 43]
 KS = [-5, -3, -2, 0, 2, 3, 5]
 OFFSETS = json.loads((ROOT / "configs" / "e03" / "offsets.json").read_text(encoding="utf-8"))
 ROW = {int(r["k"]): r for r in OFFSETS["offsets"]}
+TEST_INPUT_SHA = "b" * 64
+
+
+@pytest.fixture(autouse=True)
+def datasets(tmp_path_factory, monkeypatch):
+    """La validazione confronta le impronte degli input con configs/e03/datasets.json (revisione R2, finding 3).
+    Qui si usa una copia con tutte le impronte riempite: quelle vere degli input spostati arrivano dai run prep."""
+    real = json.loads((ROOT / "configs" / "e03" / "datasets.json").read_text(encoding="utf-8"))
+    for seg in SEGMENTS:
+        for key in ("official", "shifted_zm3", "shifted_zp3"):
+            real["inputs"][seg][key]["tree_sha256"] = TEST_INPUT_SHA
+    p = tmp_path_factory.mktemp("cfg") / "datasets.json"
+    p.write_text(json.dumps(real), encoding="utf-8")
+    monkeypatch.setattr(curve, "DATASETS_PATH", p)
+    return p
 
 
 def _point(tmp: Path, seg: str, seed: int, k: int, auroc: float, *, f1: float = 0.5,
@@ -40,7 +55,7 @@ def _point(tmp: Path, seg: str, seed: int, k: int, auroc: float, *, f1: float = 
     rep["e03_point"] = {
         "run_id": "E03-R01", "segment": seg_in_point or seg, "seed": seed,
         "k": k if k_in_point is None else k_in_point, "tag": tag, "stage": row["stage"], "input": row["input"],
-        "input_tree_sha256": "b" * 64, "source_z_slice": row["source_z_slice"],
+        "input_tree_sha256": TEST_INPUT_SHA, "source_z_slice": row["source_z_slice"],
         "layer_indices": row["expected_indices"], "sha256_pred": rep["sha256_pred"],
         "threshold": 91, "orientation_gate": row["orientation_gate"], "micrometres": row["micrometres"],
     }
