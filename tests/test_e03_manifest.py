@@ -139,7 +139,7 @@ def test_s1_verdetto_vuoto_o_sconosciuto_fallisce():
         m.check_s1({"verdict": "", "counts": {}}, "")
     with pytest.raises(ValueError, match="verdetto S1"):
         m.check_s1({"verdict": "tutto bene", "counts": {}}, "tutto bene")
-    with pytest.raises(ValueError, match="sezione mancante"):
+    with pytest.raises(ValueError, match="presente 0 volte"):
         m.check_s1({"verdict": "trovato lavoro parziale", "counts": {}}, "altro testo")
 
 
@@ -249,9 +249,53 @@ def test_s1_verdetto_in_commento_html_fallisce():
     j = json.loads(_git_show("docs/reports/2026-09-07-e03-socio-s1-fonti.json"))
     assert m.check_s1(j, s1_md)["verdict"] == "trovato lavoro parziale"
     bad = s1_md.replace("**trovato lavoro parziale**", "**trovato lavoro equivalente**\n\n<!-- trovato lavoro parziale -->", 1)
-    with pytest.raises(ValueError, match="Verdetto"):
+    with pytest.raises(ValueError, match="commenti HTML"):
         m.check_s1(j, bad)
     # verdetto giusto in prima riga ma un secondo verdetto nella stessa sezione
     bad2 = s1_md.replace("**trovato lavoro parziale**", "**trovato lavoro parziale**\n\nOppure: trovato lavoro equivalente.", 1)
     with pytest.raises(ValueError, match="contiene anche"):
         m.check_s1(j, bad2)
+
+
+# --- quarto giro R3: commenti HTML, copie nascoste, intestazioni ripetute ---
+
+def _s1_pair():
+    s1_md = _git_show("docs/reports/2026-09-07-e03-socio-s1-novita.md")
+    if s1_md is None:
+        pytest.skip("branch origin/e03-socio non disponibile")
+    return json.loads(_git_show("docs/reports/2026-09-07-e03-socio-s1-fonti.json")), s1_md
+
+
+def test_s1_copia_corretta_in_commento_html_e_visibile_opposta_fallisce():
+    j, s1_md = _s1_pair()
+    bad = "<!--\n" + s1_md + "\n-->\n\n" + s1_md.replace("**trovato lavoro parziale**", "**trovato lavoro equivalente**", 1)
+    with pytest.raises(ValueError, match="commenti HTML"):
+        m.check_s1(j, bad)
+
+
+def test_s3_copia_corretta_in_commento_html_e_visibile_falsa_fallisce(s3, curve):
+    visible = s3.replace("0,813722", "0,999999", 1).replace("| 43 | − | −0,027476 | −0,051385 | −0,083349 | sì | sì | **sì** |",
+                                                            "| 43 | − | −0,027476 | −0,051385 | −0,083349 | sì | sì | **no** |")
+    bad = "<!--\n" + s3 + "\n-->\n\n" + visible
+    with pytest.raises(ValueError, match="commenti HTML"):
+        m.check_s3(bad, curve)
+
+
+def test_s3_due_copie_visibili_falliscono(s3, curve):
+    bad = s3 + "\n\n" + s3.replace("0,813722", "0,999999", 1)
+    with pytest.raises(ValueError, match="ripetute"):
+        m.check_s3(bad, curve)
+
+
+def test_s3_tabella_corretta_dentro_blocco_di_codice_non_conta(s3, curve):
+    body = s3.split("## AUROC held-out\n\n", 1)[1].split("\n\n", 1)[0]
+    bad = s3.replace(body, "```text\n" + body + "\n```\n\n" + body.replace("0,813722", "0,999999", 1), 1)
+    with pytest.raises(ValueError, match="AUROC held-out"):
+        m.check_s3(bad, curve)
+
+
+def test_s2_reale_con_blocchi_di_codice_passa(s2, ds):
+    # il rapporto S2 reale contiene blocchi ``` legittimi: il filtro li toglie senza rifiutare il rapporto
+    assert m.check_s2(s2, ds, m.sha256_file(ROOT / "scripts" / "e03_pool_shifted.py"))["slice_equality_declared"]
+    with pytest.raises(ValueError, match="non chiuso"):
+        m.check_s2(s2 + "\n```\n", ds, m.sha256_file(ROOT / "scripts" / "e03_pool_shifted.py"))

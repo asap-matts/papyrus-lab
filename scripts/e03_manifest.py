@@ -179,12 +179,28 @@ KS = (-5, -3, -2, 0, 2, 3, 5)
 KS_HEAD = ("−5", "−3", "−2", "0", "+2", "+3", "+5")
 
 
+def _plain(text: str) -> str:
+    """Testo del rapporto senza ciò che il lettore non vede o che non è prosa: i commenti HTML sono rifiutati,
+    i blocchi di codice recintati sono tolti, e nessuna intestazione può comparire due volte (R3, quarto giro)."""
+    if "<!--" in text or "-->" in text:
+        raise ValueError("rapporto del socio con commenti HTML: rifiutato")
+    if text.count("```") % 2:
+        raise ValueError("rapporto del socio con blocco di codice non chiuso")
+    text = re.sub(r"^```.*?^```[^\n]*$", "", text, flags=re.M | re.S)
+    heads = re.findall(r"^#{1,6} .*$", text, re.M)
+    dup = sorted({h for h in heads if heads.count(h) > 1})
+    if dup:
+        raise ValueError(f"rapporto del socio con intestazioni ripetute: {dup}")
+    return text
+
+
 def _section(text: str, heading: str) -> str:
-    """Corpo della sezione markdown che inizia con la riga `heading`, fino al titolo successivo di pari o superiore livello."""
+    """Corpo dell'unica sezione markdown che inizia con la riga `heading`, fino al titolo successivo di pari o superiore livello."""
     level = len(heading) - len(heading.lstrip("#"))
+    hits = re.findall(r"^" + re.escape(heading) + r"$", text, re.M)
+    if len(hits) != 1:
+        raise ValueError(f"sezione {heading!r} presente {len(hits)} volte nel rapporto del socio (attesa una)")
     m = re.search(r"^" + re.escape(heading) + r"\n(.*?)(?=^#{1," + str(level) + r"} |\Z)", text, re.M | re.S)
-    if not m:
-        raise ValueError(f"sezione mancante nel rapporto del socio: {heading!r}")
     return m.group(1)
 
 
@@ -243,6 +259,7 @@ def _offset_rows(body: str, header: tuple[str, ...]) -> dict[int, list[str]]:
 
 
 def check_s1(s1: dict, s1_md: str) -> dict:
+    s1_md = _plain(s1_md)
     v = s1.get("verdict")
     if v not in S1_VERDICTS:
         raise ValueError(f"verdetto S1 non riconosciuto: {v!r}")
@@ -259,6 +276,7 @@ def check_s1(s1: dict, s1_md: str) -> dict:
 
 
 def check_s2(s2: str, ds: dict, script_sha: str) -> dict:
+    s2 = _plain(s2)
     seg = "pherc0814-46527"
     got = {}
     for r in _table(_section(s2, "## Risultati"),
@@ -287,6 +305,7 @@ def check_s2(s2: str, ds: dict, script_sha: str) -> dict:
 
 def check_s3(s3: str, curve: dict) -> dict:
     """Confronta ogni cella numerica e ogni verdetto del rapporto S3 con curve.json. Ogni divergenza è un errore."""
+    s3 = _plain(s3)
     cells = 0
     head = ("offset",) + COMBOS
     # AUROC held-out, F1 alla soglia, Δ rispetto allo zero: 7 offset × 4 combinazioni ciascuna

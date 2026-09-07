@@ -472,9 +472,15 @@ Nel registro corrente: 27 prenotazioni tutte chiuse, 24 output verificati, uno p
 | 2 | alto | H1 ignorava il margine, H2 confrontava solo seed, verso e verdetto (non i tre Δ̄ né i due confronti), i controlli leggevano solo il verdetto testuale: `nan`, 999 e booleani invertiti passavano | accettato | Confronto cella per cella con `curve.json` di AUROC, F1 alla soglia, Δ, medie di Δ, tolleranza, H1 (Δ e margine = |Δ| − 0,02), H2 (Δ̄ a 2/3/5, confronti "3 < 2" e "5 < 3" ricavati dai numeri, esito = entrambi), controlli (ogni Δ, "aiuta?" per riga ricavato dai numeri, verdetto complessivo coerente con le righe e con la curva); 154 celle confrontate, `isfinite` su ogni numero |
 | 3 | medio | Il verdetto S1 era accettato ovunque nel file, anche in un commento HTML con un verdetto visibile opposto | accettato | Letto solo dalla sezione `## Verdetto`: prima riga `**<verdetto>**`, nessun altro verdetto ammesso nella sezione |
 
-30 test negativi in `tests/test_e03_manifest.py` (riga duplicata, offset mancante, `nan`/`inf`, colonne e intestazioni permutate o rinominate, F1/Δ/medie alterate, margine H1 falso, H2 con `nan`, booleano invertito o Δ̄ alterato, celle dei controlli alterate o incoerenti, verdetto fuori sezione, S1 in commento HTML, S2 alterato, curva alterata, modo sul sigillato). Suite completa: 126 test verdi.
+Test negativi in `tests/test_e03_manifest.py` (riga duplicata, offset mancante, `nan`/`inf`, colonne e intestazioni permutate o rinominate, F1/Δ/medie alterate, margine H1 falso, H2 con `nan`, booleano invertito o Δ̄ alterato, celle dei controlli alterate o incoerenti, verdetto fuori sezione, S1 in commento HTML, S2 alterato, curva alterata, modo sul sigillato).
 
-- **Quarto giro (chiusura):** *in corso*.
+- **Quarto giro** (`gpt-5.6-sol`, `--base 79bdf68`, job `review-mtrrimw2-vs562s`): i 30 test confermati; **NO-SHIP, 1 finding alto, accettato.**
+
+| # | Sev. | Finding (sintesi) | Esito | Correzione |
+|---|---|---|---|---|
+| 1 | alto | `_section` leggeva la prima intestazione trovata senza interpretare il Markdown: una copia corretta del rapporto dentro `<!-- -->`, seguita da una copia visibile con AUROC 0,999999 e H2 invertita, passava con 154 celle "concordanti"; lo stesso per S1 con verdetto visibile opposto | accettato | `_plain` prima di ogni lettura: rapporti con commenti HTML rifiutati, blocchi di codice recintati esclusi (S2 ne contiene di legittimi), blocco non chiuso rifiutato, intestazioni ripetute rifiutate; `_section` esige esattamente una occorrenza. Test: i due controesempi di Codex, due copie visibili, tabella corretta dentro un blocco di codice, S2 reale con i suoi blocchi |
+
+35 test in `tests/test_e03_manifest.py`; suite completa 131 test verdi. **Il quarto giro è oltre il massimo di due previsto dal metodo e la sua correzione non è stata riletta da Codex:** un quinto giro, se lo vuole, lo decide Matteo. Ciò che il manifest attesta del socio resta un confronto di testo strutturato con i nostri numeri, non una verifica del suo calcolo: quella è la riproduzione in cieco che il socio ha eseguito.
 
 ---
 
