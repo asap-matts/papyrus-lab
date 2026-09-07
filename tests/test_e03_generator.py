@@ -232,3 +232,54 @@ def test_the_label_manifest_has_the_schema_the_reused_cell_needs():
         assert all({"path", "size", "sha256"} <= set(f) for f in s["files"][:20])
         assert all(f["path"].startswith(s["source_prefix"]) for f in s["files"][:20])
         assert gen.SEALED not in json.dumps(s["files"][:50])
+
+
+@pytest.mark.skipif(not GENERATED, reason="notebook non ancora generati")
+def test_the_pre_install_guards_use_only_the_standard_library():
+    """Le guardie girano PRIMA della cella di installazione: un import di terze parti le fa fallire
+    (run infer-46527-s42-zm2 v1, 7 settembre 2026: `import zarr` nella guardia dell'input)."""
+    import re as _re
+    third_party = {"zarr", "numpy", "np", "tifffile", "scipy", "numcodecs", "torch", "pandas"}
+    for folder in GENERATED:
+        nb = json.loads(next(folder.glob("*.ipynb")).read_text(encoding="utf-8"))
+        sources = ["".join(c["source"]) for c in nb["cells"]]
+        install = next((i for i, s in enumerate(sources) if "torch_after" in s or "pip" in s.lower()), len(sources))
+        for i, src in enumerate(sources[:install]):
+            if src.lstrip().startswith("%%"):
+                continue
+            imported = set(_re.findall(r"^\s*(?:import|from)\s+([A-Za-z_][\w]*)", src, _re.M))
+            bad = imported & third_party
+            assert not bad, f"{folder.name}: la cella {i} importa {bad} prima dell'installazione"
+
+
+def test_settling_a_reservation_uses_the_measured_duration(tmp_path, monkeypatch):
+    """Un run fallito dopo pochi secondi non deve costare l'intera prenotazione (7 settembre 2026: 36 s)."""
+    monkeypatch.setattr(pilot, "runs_dir", lambda: tmp_path)
+    mode = "infer-46527-s42-zm2"
+    pilot.reserve(mode, 60)
+    assert pilot.consumed_minutes() == 60
+    d = tmp_path / mode / "20260101T000000Z"
+    d.mkdir(parents=True)
+    (d / "run.log").write_text(json.dumps([{"stream_name": "stdout", "time": 36.0, "data": "x"}]), encoding="utf-8")
+    used = pilot.settle(mode, d)
+    assert abs(used - 0.6) < 0.01
+    assert abs(pilot.consumed_minutes() - 0.6) < 0.01
+
+
+@pytest.mark.skipif(not GENERATED, reason="notebook non ancora generati")
+def test_the_bash_cell_and_the_python_cells_agree_on_file_names():
+    """Due segnaposto adiacenti perdono il separatore: la cella bash scriveva infer_seed42zm2.log mentre la
+    cella dei controlli cercava infer_seed42_zm2.log (run infer-46527-s42-zm2 v2, 7 settembre 2026)."""
+    import re as _re
+    for folder in GENERATED:
+        mode = folder.name[len("e03-r01-"):]
+        kind, seg, seed, tag = gen.parse_mode(mode)
+        if kind != "infer":
+            continue
+        src = _source(folder)
+        assert f"$WORK/out/{seg}_seed{seed}_step075000_{tag}.tif" in src
+        assert f"$WORK/logs/infer_seed{seed}_{tag}.log" in src
+        # nessun nome composto senza separatore
+        assert f"infer_seed{seed}{tag}" not in src and f"step075000{tag}" not in src
+        names = set(_re.findall(r"infer_seed[\w.]*\.log", src))
+        assert names == {f"infer_seed{seed}_{tag}.log"}, names

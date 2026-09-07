@@ -145,18 +145,27 @@ def dataset_status(ds_id: str, attempts: int = 4, pause: int = 10) -> str:
 
 # ------------------------------------------------------------------------------------ budget
 def _minutes(d: Path) -> float:
+    """Durata della sessione: da run_info.txt se il run ha raggiunto la persistenza, altrimenti dall'ultimo
+    istante del log del kernel (un run fallito presto costa pochi secondi, non l'intera prenotazione)."""
     info = (d / "e03" / "logs" / "run_info.txt")
-    if not info.exists():
-        return 0.0
-    txt = info.read_text(encoding="utf-8")
-    s = re.search(r"start=(\S+)", txt); e = re.search(r"end=(\S+)", txt)
-    if not (s and e):
-        return 0.0
-    fmt = "%Y-%m-%dT%H:%M:%SZ"
-    try:
-        return (datetime.strptime(e.group(1), fmt) - datetime.strptime(s.group(1), fmt)).total_seconds() / 60
-    except ValueError:
-        return 0.0
+    if info.exists():
+        txt = info.read_text(encoding="utf-8")
+        s = re.search(r"start=(\S+)", txt); e = re.search(r"end=(\S+)", txt)
+        if s and e:
+            fmt = "%Y-%m-%dT%H:%M:%SZ"
+            try:
+                return (datetime.strptime(e.group(1), fmt) - datetime.strptime(s.group(1), fmt)).total_seconds() / 60
+            except ValueError:
+                pass
+    for log in d.glob("*.log"):
+        try:
+            entries = json.loads(log.read_text(encoding="utf-8", errors="replace"))
+            times = [float(x["time"]) for x in entries if isinstance(x, dict) and "time" in x]
+            if times:
+                return max(times) / 60
+        except (ValueError, KeyError, TypeError):
+            continue
+    return 0.0
 
 
 def ledger_path() -> Path:
@@ -168,40 +177,46 @@ def load_ledger() -> list[dict]:
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else []
 
 
+def save_ledger(entries: list[dict]) -> None:
+    ledger_path().parent.mkdir(parents=True, exist_ok=True)
+    ledger_path().write_text(json.dumps(entries, indent=1) + "\n", encoding="utf-8")
+
+
 def reserve(mode: str, minutes: float) -> None:
     """Prenotazione persistente scritta PRIMA del push: un secondo push dello stesso modo, o di un altro, la
     trova gia' contata anche se il run e' ancora in volo (revisione R2, finding 5)."""
     entries = load_ledger()
-    entries.append({"mode": mode, "reserved_minutes": minutes,
+    entries.append({"mode": mode, "reserved_minutes": minutes, "settled_minutes": None,
                     "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
-    ledger_path().parent.mkdir(parents=True, exist_ok=True)
-    ledger_path().write_text(json.dumps(entries, indent=1) + "\n", encoding="utf-8")
+    save_ledger(entries)
+
+
+def settle(mode: str, folder: Path) -> float:
+    """Chiude la prenotazione piu' vecchia ancora aperta di questo modo con la durata misurata: un run fallito
+    dopo pochi secondi non deve costare l'intera prenotazione di 60 minuti."""
+    minutes = _minutes(folder)
+    entries = load_ledger()
+    for entry in entries:
+        if entry["mode"] == mode and entry.get("settled_minutes") is None:
+            entry["settled_minutes"] = round(minutes, 2)
+            entry["settled_from"] = folder.name
+            entry["settled_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+            save_ledger(entries)
+            break
+    return minutes
 
 
 def consumed_minutes(verbose: bool = False) -> float:
     """Quota impegnata: per ogni run GPU vale la durata misurata dei download verificati, oppure -- se il run e'
     stato lanciato e non ancora scaricato -- la prenotazione scritta nel registro. Mai meno del reale."""
-    per_mode: dict[str, float] = {}
-    for mode in gen.modes():
-        if not mode.startswith("infer-"):
-            continue
-        base = runs_dir() / mode
-        if base.is_dir():
-            for d in sorted(p for p in base.iterdir() if p.is_dir()):
-                m = _minutes(d)
-                per_mode[mode] = per_mode.get(mode, 0.0) + m
-                if verbose and m:
-                    print(f"  {mode:32} {d.name}  {m:6.1f} min (misurato)")
-    reserved: dict[str, float] = {}
+    total = 0.0
     for entry in load_ledger():
-        reserved[entry["mode"]] = reserved.get(entry["mode"], 0.0) + float(entry["reserved_minutes"])
-    for mode, minutes in sorted(reserved.items()):
-        measured = per_mode.get(mode, 0.0)
-        if minutes > measured:                       # run lanciato e non ancora (interamente) scaricato
-            per_mode[mode] = minutes
-            if verbose:
-                print(f"  {mode:32} {'prenotato':>17}  {minutes:6.1f} min (in volo o non scaricato)")
-    total = sum(per_mode.values())
+        settled = entry.get("settled_minutes")
+        minutes = float(entry["reserved_minutes"]) if settled is None else float(settled)
+        total += minutes
+        if verbose:
+            what = "in volo o non scaricato (prenotazione)" if settled is None else f"misurato su {entry.get('settled_from', '?')}"
+            print(f"  {entry['mode']:32} {minutes:6.1f} min  ({what})")
     for entry in load_ds().get("budget", {}).get("manual_entries", []):
         total += float(entry.get("minutes", 0))
         if verbose:
@@ -307,6 +322,10 @@ def output(mode: str) -> None:
     dest = runs_dir() / mode / time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     dest.mkdir(parents=True, exist_ok=True)
     run([*KAGGLE, "kernels", "output", kernel_id(mode), "-p", str(dest)])
+    kind, _, _, _ = gen.parse_mode(mode)
+    if kind == "infer":
+        used = settle(mode, dest)                    # chiude la prenotazione con il consumo reale
+        print(f"quota di questo run: {used:.1f} min (registro aggiornato)")
     sums = next(dest.rglob("SHA256SUMS"), None)
     if sums is None:
         print(f"SHA256SUMS non trovato: il run non ha raggiunto la persistenza. Log e output parziali in {dest}")

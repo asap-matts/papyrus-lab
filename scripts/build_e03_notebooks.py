@@ -187,11 +187,14 @@ INPUT_ZARR = os.path.dirname(os.path.dirname(hits[0]))
 tsha, nfiles = tree_sha256(INPUT_ZARR)
 print("input:", INPUT_ZARR, "file", nfiles, "tree_sha256", tsha)
 assert tsha == INPUT_TREE_SHA256, f"STOP: tree_sha256 dell'input montato ({tsha}) diverso da quello congelato ({INPUT_TREE_SHA256})"
-import zarr
-g = zarr.open(INPUT_ZARR, mode="r")
-attrs = dict(g.attrs); print("attrs:", attrs)
+# Attributi e forma letti dai file JSON dello store Zarr: questa cella gira PRIMA dell'installazione, quindi
+# non puo' importare zarr (run infer-46527-s42-zm2 v1 fallito cosi' il 7 settembre 2026).
+attrs = json.load(open(os.path.join(INPUT_ZARR, ".zattrs")))
+zarray = json.load(open(os.path.join(INPUT_ZARR, "0", ".zarray")))
+print("attrs:", attrs, "| shape:", zarray["shape"])
 assert list(attrs["source_z_slice"]) == SOURCE_Z_SLICE, f"STOP: finestra sorgente {attrs['source_z_slice']} diversa da {SOURCE_Z_SLICE}"
-assert tuple(g["0"].shape) == tuple(LABEL_SHAPE), f"STOP: forma {g['0'].shape} diversa dalla label {LABEL_SHAPE}"
+assert list(zarray["shape"]) == list(LABEL_SHAPE), f"STOP: forma {zarray['shape']} diversa dalla label {LABEL_SHAPE}"
+assert zarray["dtype"] in ("|u1", "uint8"), f"STOP: tipo {zarray['dtype']} inatteso"
 open("/kaggle/working/e03_guard.json", "w").write(json.dumps({"input_zarr": INPUT_ZARR, "input_tree_sha256": tsha,
                                                               "input_files": nfiles, "source_z_slice": SOURCE_Z_SLICE}))
 '''
@@ -287,7 +290,7 @@ source /kaggle/working/e03/env.sh
 cd $HEAVY
 INPUT_ZARR=$(python -c "import json; print(json.load(open('/kaggle/working/e03_guard.json'))['input_zarr'])")
 echo "input=$INPUT_ZARR" | tee $WORK/logs/input_path.txt
-disk_check "prima inferenza seed__SEED__ __TAG__"
+disk_check "prima inferenza __TAG__ seed__SEED__"
 nvidia-smi --query-gpu=index,name,memory.total,memory.used,driver_version --format=csv > $WORK/logs/nvidia-smi-before.txt \
   || { echo "STOP: nvidia-smi non disponibile: nessuna GPU assegnata"; exit 1; }
 cat $WORK/logs/nvidia-smi-before.txt
@@ -299,13 +302,13 @@ SAMPLER=$!
 set -o pipefail
 START=$(date +%s)
 timeout -s INT -k 30 __INFER_TIMEOUT__ python -m koine_machines.inference.infer \
-  "$INPUT_ZARR" checkpoints/ink_9um/hybrid_3d2d-seed__SEED__/step-075000.pth $WORK/out/__SEG___seed__SEED___step075000___TAG__.tif \
+  "$INPUT_ZARR" checkpoints/ink_9um/hybrid_3d2d-seed__SEED__/step-075000.pth $WORK/out/__TIF_NAME__ \
   --overlap 0.5 --blend-mode hann --no-compile --gpus 0 --batch-size 1 __LAYER_ARGS__ \
-  2>&1 | tee $WORK/logs/infer_seed__SEED____TAG__.log
+  2>&1 | tee $WORK/logs/__LOG_NAME__
 EXIT=${PIPESTATUS[0]}; END=$(date +%s)
 kill $SAMPLER 2>/dev/null; wait $SAMPLER 2>/dev/null
 CAUSA=normale; [ "$EXIT" -eq 124 ] && CAUSA=timeout___INFER_TIMEOUT__s
-echo "exit_code=$EXIT durata_s=$((END-START)) causa=$CAUSA" | tee -a $WORK/logs/infer_seed__SEED____TAG__.log
+echo "exit_code=$EXIT durata_s=$((END-START)) causa=$CAUSA" | tee -a $WORK/logs/__LOG_NAME__
 nvidia-smi --query-gpu=index,memory.used --format=csv > $WORK/logs/nvidia-smi-after.txt; cat $WORK/logs/nvidia-smi-after.txt
 disk_check "dopo inferenza"
 """
@@ -455,6 +458,10 @@ def build(mode: str, ds: dict, user: str, run_id: str) -> tuple[dict, dict]:
         "__SEED__": "None" if seed is None else str(seed), "__TAG__": tag,
         "__K__": "None" if k is None else str(k), "__Z_START__": str(z_start),
         "__SOURCE_Z_SLICE__": json.dumps(source_z), "__LAYER_ARGS__": layer_args,
+        # nomi dei file calcolati qui e non composti nel testo della cella: due segnaposto adiacenti
+        # perdono il separatore (run infer-46527-s42-zm2 v2, 7 settembre 2026: infer_seed42zm2.log)
+        "__TIF_NAME__": f"{seg}_seed{seed}_step075000_{tag}.tif",
+        "__LOG_NAME__": f"infer_seed{seed}_{tag}.log",
         # attenzione: le costanti finiscono in codice Python, non in JSON. json.dumps(None) darebbe 'null',
         # che in Python non esiste (run prep-w016-z13 v1 fallito cosi' il 7 settembre 2026).
         "__EXPECTED_INDICES__": "None" if expected_idx is None else json.dumps(expected_idx),
