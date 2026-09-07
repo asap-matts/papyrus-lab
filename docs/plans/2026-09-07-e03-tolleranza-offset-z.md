@@ -461,6 +461,12 @@ Il piano è stato congelato il 7 settembre 2026 (`docs: freeze E03 plan (R01)`, 
 - **Correzione.** Nessuna modifica al codice: lo script resta una riproduzione fedele di quello ufficiale, che non ha ritentativi. Si è **ripetuto il run**, come prescrive la procedura di E02, fino a tre tentativi. Tempi effettivi: 102 s, 95 s, 95 s; 0,8 GB letti per pooling.
 - **Esito.** `--z-start 13` produce l'albero con impronta **`bc7423431221bf24b247a8ba80d264b0306f816c52b4ecc0d08115a82305ac52`**, identica a quella ufficiale di E02: lo script riproduce il pooling di villa byte per byte. Gli input spostati hanno impronte `f73364dc…` (−3) e `8406e615…` (+3); le 18 slice condivise coincidono esattamente con l'input ufficiale e le tre slice nuove differiscono, come atteso.
 
+### A12 — assemblatore del manifest (`scripts/e03_manifest.py`) e prima stesura del manifest (7 settembre 2026, in attesa del socio)
+
+- Come in E02, il manifest si assembla con uno script che **verifica prima di scrivere**: per ognuno dei 24 punti, JSON di Kaggle e TIFF contro `SHA256SUMS`, report locale sullo stesso TIFF alla soglia congelata, AUROC uguale fra Kaggle e locale, `e03_point` coerente con `offsets.json` e `datasets.json`, gate superati, nessuna menzione del segmento sigillato; per i 5 pooling, manifest di sorgente, uguaglianza slice a slice e lista bianca lette dal log del kernel. Elenca anche i tentativi falliti (cartelle senza `VERIFIED.json`) con la durata dal log.
+- Il file `docs/reports/2026-09-07-e03-r01-manifest.json` è stato generato una prima volta prima del rientro del socio: contiene solo fatti (impronte, tempi, quota, esiti dei gate, `curve.json` riassunto), nessuna interpretazione. Verrà rigenerato al passo 12 con l'esito dei compiti del socio.
+- Perimetro esteso di un file, come in A3 e A8.
+
 ### A9, A10, A11 — tre difetti del generatore trovati dai run GPU (7 settembre 2026)
 
 Tutti e tre hanno la stessa forma: una cella scriveva o cercava un nome diverso da quello che un'altra cella si aspettava, oppure usava qualcosa che in quel punto del notebook non esisteva ancora. Tutti e tre sono stati fermati dalle guardie prima di spendere inferenza; costo complessivo **4,7 minuti** di quota. Per ciascuno esiste ora un test che lo avrebbe intercettato.

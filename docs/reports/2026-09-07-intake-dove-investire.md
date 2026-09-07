@@ -37,6 +37,8 @@ Fonte: https://scrollprize.org/prizes, letta il 7 settembre 2026.
 
 La scadenza dei Progress Prizes riportata in [fonti e verifiche](../fonti-e-verifiche.md) (31 agosto 2026) è superata: la pagina ne indica ora una successiva.
 
+**Modulo di submission dei Progress Prizes** (Google Form collegato dalla pagina dei premi, letto il 7 settembre 2026, intestato "September 2026 Progress Prizes"). Campi obbligatori: e-mail; nome completo; descrizione del team (individuale o gruppo, con i membri); **URL del contributo** (repository GitHub o PR, anche più d'uno); **"What is your contribution?"**, testo libero in cui indicare (1) quali dati dei rotoli sono stati usati, (2) l'impatto sulla lettura dei rotoli, (3) le novità abilitate, (4) le prove fornite; accettazione dei Terms and Conditions. Facoltativo: nome su Discord. Condizioni richiamate dal modulo: impegno ad aprire il metodo con licenza permissiva **in caso di vittoria**; trenta giorni per i dati di pagamento dopo l'annuncio; premi a discrezione di Scroll Prize, Inc. Conseguenza pratica: la candidatura richiede un URL raggiungibile dai valutatori, quindi la decisione sulla pubblicazione del repository (oggi privato) precede la submission.
+
 ## 3. Catalogo ufficiale dei progetti della community (L0 per la presenza nel catalogo, L1 per i contenuti)
 
 Fonte: https://scrollprize.org/community_projects, letta il 7 settembre 2026. Voci pertinenti alla nostra catena, oltre a quelle già nel [registro](../06-ricerca-community.md):
