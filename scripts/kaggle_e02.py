@@ -192,8 +192,12 @@ def output(mode: str) -> None:
 
 def create_or_version(ds_dir: Path, message: str) -> None:
     out = run([*KAGGLE, "datasets", "create", "-p", str(ds_dir)], check=False)
-    if "already exists" in out.lower() or "409" in out:
+    low = out.lower()
+    if "already exists" in low or "already in use" in low or "409" in out:
+        # Kaggle CLI 2.2.4 answers 'The requested title ... is already in use by a dataset' on a second create
         run([*KAGGLE, "datasets", "version", "-p", str(ds_dir), "-m", message])
+    elif "error" in low:
+        sys.exit("creazione del dataset fallita (vedi sopra)")
 
 
 def publish_labels() -> None:

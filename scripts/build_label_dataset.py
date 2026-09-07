@@ -80,6 +80,28 @@ def fetch(item: tuple[str, int], prefix: str, dest: Path) -> int:
     raise RuntimeError(f"download failed for {path}: {last}")
 
 
+def verify_decompress(seg_dir: Path) -> list[Path]:
+    """Read every chunk of every zarr array under seg_dir; return the chunk files that fail to decompress.
+
+    A size check alone accepts a chunk whose bytes are wrong but whose length matches (observed on 2026-09-07:
+    17 chunks of pherc1667-w029_supervision_mask, 78 bytes each, unreadable; R02 docs/13 reports the same trap)."""
+    import zarr
+
+    bad: list[Path] = []
+    for zpath in sorted(p for p in seg_dir.iterdir() if p.is_dir() and p.suffix == ".zarr"):
+        node = zarr.open(str(zpath), mode="r")
+        for level in sorted(node.array_keys(), key=int):
+            a = node[level]
+            cz, cy, cx = a.chunks
+            for iy in range(0, a.shape[1], cy):
+                for ix in range(0, a.shape[2], cx):
+                    try:
+                        a[:, iy:iy + cy, ix:ix + cx]
+                    except Exception:  # noqa: BLE001 - any decompression error marks the chunk
+                        bad.append(zpath / level / f"0.{iy // cy}.{ix // cx}")
+    return bad
+
+
 def tree_sha256(root: Path) -> tuple[str, dict[str, str]]:
     """Same definition as scripts/build_w035_label_dataset.py: sha256 over sorted 'relpath\\nsha256(file)\\n' lines."""
     per_file = {}
@@ -115,9 +137,19 @@ def build_segment(segment: str, stage: Path, out: Path, data_dir: Path, workers:
         print(f"[{name}] WARNING: no expected counts for this segment; recording measured values", flush=True)
     src = stage / "labels" / family / name
     t0 = time.time()
-    with cf.ThreadPoolExecutor(max_workers=workers) as ex:
-        got = sum(ex.map(lambda it: fetch(it, prefix, src), listing))
-    print(f"[{name}] downloaded/verified {got} bytes in {time.time() - t0:.0f} s", flush=True)
+    for attempt in range(1, 4):
+        with cf.ThreadPoolExecutor(max_workers=workers) as ex:
+            got = sum(ex.map(lambda it: fetch(it, prefix, src), listing))
+        print(f"[{name}] downloaded/verified {got} bytes in {time.time() - t0:.0f} s (pass {attempt})", flush=True)
+        bad = verify_decompress(src)
+        if not bad:
+            print(f"[{name}] every chunk decompresses", flush=True)
+            break
+        print(f"[{name}] {len(bad)} chunk(s) fail to decompress, e.g. {[str(b.relative_to(src)) for b in bad[:3]]}: re-downloading", flush=True)
+        for b in bad:
+            b.unlink(missing_ok=True)
+    else:
+        raise RuntimeError(f"{name}: chunks still corrupted after 3 passes")
     for path, size in listing:
         p = src / path[len(prefix):]
         assert p.is_file() and p.stat().st_size == size, f"mismatch for {path}"

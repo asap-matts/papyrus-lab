@@ -1,0 +1,101 @@
+{
+ "annotated_plane": "shape[0] // 2",
+ "disjoint_check": {
+  "n_px_held_and_train": 0
+ },
+ "edges": [
+  0,
+  64,
+  128,
+  256
+ ],
+ "generated_at": "2026-09-07T08:26:19+00:00",
+ "geometry": {
+  "annotated_plane_shape": [
+   9500,
+   7830
+  ],
+  "annotated_regions": 8,
+  "distance_stats": {
+   "max": 985.7124327104736,
+   "median": 283.0,
+   "min": 1.0,
+   "p25": 138.0,
+   "p75": 690.4201619304001
+  },
+  "edges": [
+   0,
+   64,
+   128,
+   256
+  ],
+  "held_share_of_annotation": 0.23954118215324124,
+  "n_ink_held": 88034,
+  "n_ink_train": 356351,
+  "n_px_held": 382353,
+  "n_px_held_and_train": 0,
+  "n_px_train": 1213836,
+  "patch": 128,
+  "regions": [
+   {
+    "bbox_yyxx": [
+     3110,
+     3725,
+     6940,
+     7219
+    ],
+    "ink_fraction": 0.288458782340456,
+    "n_ink": 42267,
+    "n_px": 146527,
+    "region": 1
+   },
+   {
+    "bbox_yyxx": [
+     4471,
+     5173,
+     4917,
+     5302
+    ],
+    "ink_fraction": 0.19407105238608127,
+    "n_ink": 45767,
+    "n_px": 235826,
+    "region": 2
+   }
+  ],
+  "regions_held": 2,
+  "regions_mixing_held_and_training": 1,
+  "strata": [
+   {
+    "ink_density": 0.11897070040830977,
+    "n_ink": 5303,
+    "n_px": 44574,
+    "stratum": "<64"
+   },
+   {
+    "ink_density": 0.0,
+    "n_ink": 0,
+    "n_px": 43985,
+    "stratum": "64-128"
+   },
+   {
+    "ink_density": 0.3160124391245673,
+    "n_ink": 26929,
+    "n_px": 85215,
+    "stratum": "128-256"
+   },
+   {
+    "ink_density": 0.26753412376126073,
+    "n_ink": 55802,
+    "n_px": 208579,
+    "stratum": ">=256"
+   }
+  ],
+  "within_patch": 0.23161581052064453,
+  "within_two_patches": 0.4544857762329575
+ },
+ "labels_dir": "C:\\dev\\PapyrusLab\\data\\labels\\aligned-scrollprizeorg-21slices\\pherc1667-w029",
+ "patch": 128,
+ "segment": "pherc1667-w029",
+ "threshold_arg": null,
+ "version": "e02_metrics/1.0"
+}

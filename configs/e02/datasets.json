@@ -1,22 +1,79 @@
 {
-  "_note": "Identita' e hash dei dataset Kaggle privati usati dai notebook E02 (plan step 4-6). I valori null vengono riempiti da scripts/build_label_dataset.py (label) e scripts/kaggle_e02.py publish-input / publish-seed42-out; il generatore rifiuta di produrre un notebook che richiede una costante ancora null.",
+  "_note": "Identita' e hash dei dataset Kaggle privati usati dai notebook E02 (plan step 4-6). I valori null vengono riempiti da scripts/build_label_dataset.py (label) e scripts/kaggle_e02.py publish-input / publish-seed42-out; il generatore rifiuta di produrre un notebook che richiede una costante ancora null. Slug delle label = papyruslab-<run-id>-labels, come lo crea scripts/build_label_dataset.py.",
   "owner": "matteopontesilli",
   "labels": {
-    "slug": "papyruslab-e02-labels",
+    "slug": "papyruslab-e02-r01-labels",
     "segments": {
-      "pherc0814-46527": {"family": "aligned-scrollprizeorg-21slices", "file_count": null, "byte_total": null, "tree_sha256": null, "tar_sha256": null},
-      "pherc0139-w016": {"family": "aligned-scrollprizeorg-21slices", "file_count": null, "byte_total": null, "tree_sha256": null, "tar_sha256": null},
-      "pherc1667-w029": {"family": "aligned-scrollprizeorg-21slices", "file_count": null, "byte_total": null, "tree_sha256": null, "tar_sha256": null}
+      "pherc0814-46527": {
+        "family": "aligned-scrollprizeorg-21slices",
+        "file_count": 1386,
+        "byte_total": 118869,
+        "tree_sha256": "5659236870d7d0408e330f05f6275bd821fc1d7bdea8c9c8f072dfd4ae8b54f0",
+        "tar_sha256": "32d3842a824a443e09b81414c5713a106e1010c1253a2dccf7eeb22b580e0e84"
+      },
+      "pherc0139-w016": {
+        "family": "aligned-scrollprizeorg-21slices",
+        "file_count": 9414,
+        "byte_total": 746565,
+        "tree_sha256": "a62d3e0ecfc9305758fae3bc0d74d99ecf675bcf846aa910ee4a876ee26ccfd5",
+        "tar_sha256": "27f3e6ae9cecccde847fe806c4ba0371a0e68b52093441e92f3eeaad87236ed9"
+      },
+      "pherc1667-w029": {
+        "family": "aligned-scrollprizeorg-21slices",
+        "file_count": 13959,
+        "byte_total": 1108191,
+        "tree_sha256": "26cf3c17c202957f6c8c7fe1d9ded9a4d40b335d97091b012b8cd9ed92c99ee2",
+        "tar_sha256": "537975f217a1da24c6945955d46bd97a5b6e73bda9b0166dc60bb52f0b61c3b4"
+      }
     }
   },
   "inputs": {
-    "pherc0814-46527": {"slug": "papyruslab-e02-input-46527", "tree_sha256": null, "tar_sha256": null, "tar_bytes": null, "shape": [21, 2130, 3455]},
-    "pherc0139-w016": {"slug": "papyruslab-e02-input-w016", "tree_sha256": null, "tar_sha256": null, "tar_bytes": null, "shape": [21, 7020, 7220]},
-    "pherc1667-w029": {"slug": "papyruslab-e02-input-w029", "tree_sha256": null, "tar_sha256": null, "tar_bytes": null, "shape": [21, 9500, 7830]}
+    "pherc0814-46527": {
+      "slug": "papyruslab-e02-input-46527",
+      "tree_sha256": null,
+      "tar_sha256": null,
+      "tar_bytes": null,
+      "shape": [
+        21,
+        2130,
+        3455
+      ]
+    },
+    "pherc0139-w016": {
+      "slug": "papyruslab-e02-input-w016",
+      "tree_sha256": null,
+      "tar_sha256": null,
+      "tar_bytes": null,
+      "shape": [
+        21,
+        7020,
+        7220
+      ]
+    },
+    "pherc1667-w029": {
+      "slug": "papyruslab-e02-input-w029",
+      "tree_sha256": null,
+      "tar_sha256": null,
+      "tar_bytes": null,
+      "shape": [
+        21,
+        9500,
+        7830
+      ]
+    }
   },
   "seed42_outputs": {
-    "pherc0814-46527": {"slug": "papyruslab-e02-46527-seed42-out", "sha256_tif": null},
-    "pherc0139-w016": {"slug": "papyruslab-e02-w016-seed42-out", "sha256_tif": null},
-    "pherc1667-w029": {"slug": "papyruslab-e02-w029-seed42-out", "sha256_tif": null}
+    "pherc0814-46527": {
+      "slug": "papyruslab-e02-46527-seed42-out",
+      "sha256_tif": null
+    },
+    "pherc0139-w016": {
+      "slug": "papyruslab-e02-w016-seed42-out",
+      "sha256_tif": null
+    },
+    "pherc1667-w029": {
+      "slug": "papyruslab-e02-w029-seed42-out",
+      "sha256_tif": null
+    }
   }
 }

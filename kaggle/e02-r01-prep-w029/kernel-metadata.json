@@ -1,0 +1,16 @@
+{
+  "id": "matteopontesilli/papyruslab-e02-r01-prep-w029",
+  "title": "papyruslab-e02-r01-prep-w029",
+  "code_file": "papyruslab-e02-r01-prep-w029.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [
+    "matteopontesilli/papyruslab-e02-r01-labels"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}
