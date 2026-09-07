@@ -29,27 +29,48 @@
         "slug": "papyruslab-e02-input-w016",
         "reused_from": "E02",
         "z_start": 13,
-        "source_z_slice": [13, 97],
+        "source_z_slice": [
+          13,
+          97
+        ],
         "tree_sha256": "7c0c7006a6a6e14269988b29aa39e257beb4bf8f7b8abb2091e5b01d821dc712",
-        "shape": [21, 7020, 7220]
+        "shape": [
+          21,
+          7020,
+          7220
+        ]
       },
       "shifted_zm3": {
         "slug": "papyruslab-e03-input-w016-zm3",
         "z_start": 1,
-        "source_z_slice": [1, 85],
-        "tree_sha256": null,
-        "tar_sha256": null,
-        "tar_bytes": null,
-        "shape": [21, 7020, 7220]
+        "source_z_slice": [
+          1,
+          85
+        ],
+        "tree_sha256": "f8eb2b312acf163d9818b750eb554d262abaff83b946618db5785bf6a0722359",
+        "tar_sha256": "407e6b65c317bc93ac5d0aa91bbe78ec8d285bbcb7bb454b29f5ff80001ec637",
+        "tar_bytes": 727296000,
+        "shape": [
+          21,
+          7020,
+          7220
+        ]
       },
       "shifted_zp3": {
         "slug": "papyruslab-e03-input-w016-zp3",
         "z_start": 25,
-        "source_z_slice": [25, 109],
-        "tree_sha256": null,
-        "tar_sha256": null,
-        "tar_bytes": null,
-        "shape": [21, 7020, 7220]
+        "source_z_slice": [
+          25,
+          109
+        ],
+        "tree_sha256": "bf61e3b36061945a8dd2269ab548d7da317a1f71d1242cd4343c9bc5fcf42f2e",
+        "tar_sha256": "717eb6da5d6bc0f3ba5e5063e0a0b2192cefaa0f2bf2faaaaca16cc9dc9e49cc",
+        "tar_bytes": 729159680,
+        "shape": [
+          21,
+          7020,
+          7220
+        ]
       }
     },
     "pherc0814-46527": {
@@ -57,29 +78,50 @@
         "slug": "papyruslab-e02-input-46527",
         "reused_from": "E02",
         "z_start": 13,
-        "source_z_slice": [13, 97],
+        "source_z_slice": [
+          13,
+          97
+        ],
         "tree_sha256": "bc7423431221bf24b247a8ba80d264b0306f816c52b4ecc0d08115a82305ac52",
-        "shape": [21, 2130, 3455]
+        "shape": [
+          21,
+          2130,
+          3455
+        ]
       },
       "shifted_zm3": {
         "slug": "papyruslab-e03-input-46527-zm3",
         "z_start": 1,
-        "source_z_slice": [1, 85],
-        "tree_sha256": null,
-        "tar_sha256": null,
-        "tar_bytes": null,
-        "shape": [21, 2130, 3455],
+        "source_z_slice": [
+          1,
+          85
+        ],
+        "tree_sha256": "f73364dcb813487ab9c30d6f0292f90f6364059b28ce83dc82c1c2827f88407d",
+        "tar_sha256": "21512f396ab64f3b71ed1d5e86dbf18384e50dbc63a3cff6b59f78c1b57bae6f",
+        "tar_bytes": 81254400,
+        "shape": [
+          21,
+          2130,
+          3455
+        ],
         "local_tree_sha256": "f73364dcb813487ab9c30d6f0292f90f6364059b28ce83dc82c1c2827f88407d",
         "local_note": "prodotto sul portatile il 7 settembre 2026 con scripts/e03_pool_shifted.py; il valore su Kaggle deve coincidere"
       },
       "shifted_zp3": {
         "slug": "papyruslab-e03-input-46527-zp3",
         "z_start": 25,
-        "source_z_slice": [25, 109],
-        "tree_sha256": null,
-        "tar_sha256": null,
-        "tar_bytes": null,
-        "shape": [21, 2130, 3455],
+        "source_z_slice": [
+          25,
+          109
+        ],
+        "tree_sha256": "8406e6150c306fd8ac5ac81fceefe290eabc1dd7f88ebc43ecf8bb630aeea85f",
+        "tar_sha256": "f15012c07141c0e84e4c547df319de7ef8f3dcca7016513928d9c9046a2cbc3b",
+        "tar_bytes": 81295360,
+        "shape": [
+          21,
+          2130,
+          3455
+        ],
         "local_tree_sha256": "8406e6150c306fd8ac5ac81fceefe290eabc1dd7f88ebc43ecf8bb630aeea85f",
         "local_note": "prodotto sul portatile il 7 settembre 2026; il valore su Kaggle deve coincidere"
       }
