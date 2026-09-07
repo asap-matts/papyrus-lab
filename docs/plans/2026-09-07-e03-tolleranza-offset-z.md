@@ -417,7 +417,37 @@ Nessun secondo giro di R1: le correzioni sono di piano, non di codice, e saranno
 
 ---
 
-## 11. Al termine
+## 11. Emendamenti dopo il congelamento
+
+Il piano è stato congelato il 7 settembre 2026 (`docs: freeze E03 plan (R01)`, commit `9e7f1d0`). Ciò che segue è stato scoperto eseguendo i passi 0–5 e corretto con un commit dedicato, come chiede [docs/07 §2](../07-procedura-operativa.md): nessuna correzione silenziosa. Nessuno di questi emendamenti tocca il disegno scientifico (offset, segmenti, seed, metriche, regole di lettura).
+
+### A1 — i report per run passano da `scripts/e03_metrics.py --run`
+
+- **Cosa è successo.** Il piano (passo 6) prescriveva di produrre i report locali con `scripts/e02_metrics.py --threshold 91`. Ma la revisione R1, finding 3, richiede che ogni report porti il blocco `e03_point` con segmento, seed, offset, impronte e finestra: `e02_metrics.py` è congelato e non può produrlo.
+- **Correzione.** `scripts/e03_metrics.py --run` **avvolge** `e02_metrics.build_report()` (importato, non modificato) e vi aggiunge `e03_point`, dopo aver verificato che indici di layer e finestra sorgente siano quelli attesi per quel `k`. I numeri restano quelli di E02: i quattro punti a offset zero, ricalcolati così il 7 settembre 2026, riproducono la scheda E02 **esattamente** (differenza 0 su AUROC, best-F1 e F1 a τ\* = 91, held e train, per entrambi i segmenti e i due seed).
+- **Conseguenza.** I comandi dei passi 4, 6 e 9 usano `e03_metrics.py --run` invece di `e02_metrics.py`.
+
+### A2 — un quinto run CPU, `prep-w016-z13`, per il manifest di sorgente
+
+- **Cosa è successo.** Il passo 2b (introdotto da R1, finding 2) vuole un manifest di identità dei 109 piani sorgente prodotto "durante il primo pooling a `--z-start 13` di ciascun segmento". Per `pherc0814-46527` quel pooling si fa in locale (passo 2), ma per `pherc0139-w016` in E03 non era previsto alcun pooling ufficiale: l'input ufficiale arriva dal dataset di E02. Senza quel run, il manifest di w016 non esisterebbe e i due pooling spostati non avrebbero nulla da verificare.
+- **Correzione.** Si aggiunge il run CPU `prep-w016-z13`, che produce il manifest e **riproduce l'input ufficiale**: la sua impronta deve coincidere con quella congelata di E02 (`7c0c7006…`), altrimenti si ferma tutto. È quindi anche una replica indipendente dell'input di E02 su una nuova sessione Kaggle. I run CPU passano da 4 a 5; nessun costo GPU.
+- **Conseguenza.** Il pilota ha il comando `publish-manifest`, che scrive il manifest di w016 in `configs/e03/source_manifest.json` dopo aver verificato quell'uguaglianza. Il generatore rifiuta i notebook `prep-*-z{m3,p3}` finché il manifest del segmento non esiste.
+
+### A3 — perimetro: un file di test e due comandi del pilota in più
+
+- `tests/test_e03_generator.py` (non elencato in §3): verifica che i notebook generati non scrivano nelle cartelle di E02, che nessun segnaposto resti irrisolto, che ogni notebook porti la propria finestra Z e il proprio input, che monti solo i dataset che gli servono, che la guardia della lista bianca preceda ogni lettura di maschera e che la prenotazione del budget rifiuti al confine.
+- `scripts/kaggle_e03.py` ha, oltre ai comandi previsti, `publish-manifest` (A2) e `budget`.
+- `configs/e03/source_manifest.json` è dichiarato in §3 come artefatto del passo 2b.
+
+### A4 — il pooling locale ha richiesto due ripetizioni per disconnessione S3
+
+- **Cosa è successo.** Sul portatile, i tre pooling di `pherc0814-46527` hanno incontrato `aiohttp ServerDisconnectedError: Server disconnected` (lo stesso errore che R02 aveva osservato e che il piano E02 prevedeva): un tentativo perso per `--z-start 13`, uno per `1`, uno per `25`.
+- **Correzione.** Nessuna modifica al codice: lo script resta una riproduzione fedele di quello ufficiale, che non ha ritentativi. Si è **ripetuto il run**, come prescrive la procedura di E02, fino a tre tentativi. Tempi effettivi: 102 s, 95 s, 95 s; 0,8 GB letti per pooling.
+- **Esito.** `--z-start 13` produce l'albero con impronta **`bc7423431221bf24b247a8ba80d264b0306f816c52b4ecc0d08115a82305ac52`**, identica a quella ufficiale di E02: lo script riproduce il pooling di villa byte per byte. Gli input spostati hanno impronte `f73364dc…` (−3) e `8406e615…` (+3); le 18 slice condivise coincidono esattamente con l'input ufficiale e le tre slice nuove differiscono, come atteso.
+
+---
+
+## 12. Al termine
 
 - [ ] Passi 0–12 eseguiti, **oppure** stop documentato al passo N con causa
 - [ ] Criteri A e B di §5 verificati per 24 run e 4 prep (manifest di sorgente, lista bianca, matrice completa compresi); letture di §5 C compilate nella scheda

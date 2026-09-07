@@ -1,0 +1,18 @@
+{
+  "id": "matteopontesilli/papyruslab-e03-r01-infer-46527-s43-zm2",
+  "title": "papyruslab-e03-r01-infer-46527-s43-zm2",
+  "code_file": "papyruslab-e03-r01-infer-46527-s43-zm2.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [
+    "matteopontesilli/papyruslab-e02-input-46527",
+    "matteopontesilli/papyruslab-e02-r01-labels"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": [],
+  "machine_shape": "NvidiaTeslaT4"
+}

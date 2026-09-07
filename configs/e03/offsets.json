@@ -1,0 +1,306 @@
+{
+ "_note": "Matrice degli offset Z di E03 (piano docs/plans/2026-09-07-e03-tolleranza-offset-z.md, sezione 2.2 e passo 1). Fa fede questo file insieme al piano congelato: il generatore dei notebook ha autorita' solo sull'espansione meccanica (revisione R1, finding 7). k = offset in slice poolate; una slice poolata = 4 piani sorgente da 2,399 um = 9,596 um.",
+ "plan": "docs/plans/2026-09-07-e03-tolleranza-offset-z.md",
+ "slice_um": 9.596,
+ "source_planes": 109,
+ "pooled_slices": 21,
+ "model_slices": 17,
+ "official_z_start": 13,
+ "annotation_center_channel": 10,
+ "centre_plane_at_k0": 55,
+ "z_start_allowed": [
+  0,
+  25
+ ],
+ "segments": [
+  "pherc0139-w016",
+  "pherc0814-46527"
+ ],
+ "seeds": [
+  42,
+  43
+ ],
+ "sealed_segment_never_touched": "pherc1667-w029",
+ "offsets": [
+  {
+   "k": -5,
+   "tag": "zm5",
+   "stage": 2,
+   "input": "shifted_m3",
+   "pool_shift_slices": -3,
+   "z_start": 1,
+   "source_z_slice": [
+    1,
+    85
+   ],
+   "layer_start": 0,
+   "layer_end": 17,
+   "expected_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+   ],
+   "source_planes_seen": [
+    1,
+    69
+   ],
+   "centre_plane": 35,
+   "micrometres": -47.98,
+   "orientation_gate": "registrato"
+  },
+  {
+   "k": -3,
+   "tag": "zm3",
+   "stage": 2,
+   "input": "shifted_m3",
+   "pool_shift_slices": -3,
+   "z_start": 1,
+   "source_z_slice": [
+    1,
+    85
+   ],
+   "layer_start": null,
+   "layer_end": null,
+   "expected_indices": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+   ],
+   "source_planes_seen": [
+    9,
+    77
+   ],
+   "centre_plane": 43,
+   "micrometres": -28.788,
+   "orientation_gate": "registrato"
+  },
+  {
+   "k": -2,
+   "tag": "zm2",
+   "stage": 1,
+   "input": "official",
+   "pool_shift_slices": 0,
+   "z_start": 13,
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "layer_start": 0,
+   "layer_end": 17,
+   "expected_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+   ],
+   "source_planes_seen": [
+    13,
+    81
+   ],
+   "centre_plane": 47,
+   "micrometres": -19.192,
+   "orientation_gate": "bloccante"
+  },
+  {
+   "k": 0,
+   "tag": "z0",
+   "stage": 0,
+   "input": "official",
+   "pool_shift_slices": 0,
+   "z_start": 13,
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "layer_start": null,
+   "layer_end": null,
+   "expected_indices": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+   ],
+   "source_planes_seen": [
+    21,
+    89
+   ],
+   "centre_plane": 55,
+   "micrometres": 0.0,
+   "orientation_gate": "baseline E02"
+  },
+  {
+   "k": 2,
+   "tag": "zp2",
+   "stage": 1,
+   "input": "official",
+   "pool_shift_slices": 0,
+   "z_start": 13,
+   "source_z_slice": [
+    13,
+    97
+   ],
+   "layer_start": 4,
+   "layer_end": 21,
+   "expected_indices": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+   ],
+   "source_planes_seen": [
+    29,
+    97
+   ],
+   "centre_plane": 63,
+   "micrometres": 19.192,
+   "orientation_gate": "bloccante"
+  },
+  {
+   "k": 3,
+   "tag": "zp3",
+   "stage": 2,
+   "input": "shifted_p3",
+   "pool_shift_slices": 3,
+   "z_start": 25,
+   "source_z_slice": [
+    25,
+    109
+   ],
+   "layer_start": null,
+   "layer_end": null,
+   "expected_indices": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+   ],
+   "source_planes_seen": [
+    33,
+    101
+   ],
+   "centre_plane": 67,
+   "micrometres": 28.788,
+   "orientation_gate": "registrato"
+  },
+  {
+   "k": 5,
+   "tag": "zp5",
+   "stage": 2,
+   "input": "shifted_p3",
+   "pool_shift_slices": 3,
+   "z_start": 25,
+   "source_z_slice": [
+    25,
+    109
+   ],
+   "layer_start": 4,
+   "layer_end": 21,
+   "expected_indices": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+   ],
+   "source_planes_seen": [
+    41,
+    109
+   ],
+   "centre_plane": 75,
+   "micrometres": 47.98,
+   "orientation_gate": "registrato"
+  }
+ ]
+}

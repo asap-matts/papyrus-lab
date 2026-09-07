@@ -1,0 +1,93 @@
+{
+  "_note": "Identita' dei dataset Kaggle usati dai notebook E03 (piano docs/plans/2026-09-07-e03-tolleranza-offset-z.md, passi 5-9). Le label e gli input UFFICIALI sono quelli di E02, riusati senza ripubblicarli: i loro hash sono copiati da configs/e02/datasets.json e non vanno modificati. Gli input SPOSTATI sono nuovi: i valori null vengono riempiti da scripts/kaggle_e03.py publish-input dopo il run prep corrispondente, e il generatore rifiuta di produrre un notebook che richiede una costante ancora null.",
+  "owner": "matteopontesilli",
+  "run_id": "e03-r01",
+  "labels": {
+    "slug": "papyruslab-e02-r01-labels",
+    "reused_from": "E02",
+    "segments": {
+      "pherc0139-w016": {
+        "family": "aligned-scrollprizeorg-21slices",
+        "file_count": 9414,
+        "byte_total": 746565,
+        "tree_sha256": "a62d3e0ecfc9305758fae3bc0d74d99ecf675bcf846aa910ee4a876ee26ccfd5",
+        "tar_sha256": "27f3e6ae9cecccde847fe806c4ba0371a0e68b52093441e92f3eeaad87236ed9"
+      },
+      "pherc0814-46527": {
+        "family": "aligned-scrollprizeorg-21slices",
+        "file_count": 1386,
+        "byte_total": 118869,
+        "tree_sha256": "5659236870d7d0408e330f05f6275bd821fc1d7bdea8c9c8f072dfd4ae8b54f0",
+        "tar_sha256": "32d3842a824a443e09b81414c5713a106e1010c1253a2dccf7eeb22b580e0e84"
+      }
+    }
+  },
+  "inputs": {
+    "pherc0139-w016": {
+      "official": {
+        "slug": "papyruslab-e02-input-w016",
+        "reused_from": "E02",
+        "z_start": 13,
+        "source_z_slice": [13, 97],
+        "tree_sha256": "7c0c7006a6a6e14269988b29aa39e257beb4bf8f7b8abb2091e5b01d821dc712",
+        "shape": [21, 7020, 7220]
+      },
+      "shifted_zm3": {
+        "slug": "papyruslab-e03-input-w016-zm3",
+        "z_start": 1,
+        "source_z_slice": [1, 85],
+        "tree_sha256": null,
+        "tar_sha256": null,
+        "tar_bytes": null,
+        "shape": [21, 7020, 7220]
+      },
+      "shifted_zp3": {
+        "slug": "papyruslab-e03-input-w016-zp3",
+        "z_start": 25,
+        "source_z_slice": [25, 109],
+        "tree_sha256": null,
+        "tar_sha256": null,
+        "tar_bytes": null,
+        "shape": [21, 7020, 7220]
+      }
+    },
+    "pherc0814-46527": {
+      "official": {
+        "slug": "papyruslab-e02-input-46527",
+        "reused_from": "E02",
+        "z_start": 13,
+        "source_z_slice": [13, 97],
+        "tree_sha256": "bc7423431221bf24b247a8ba80d264b0306f816c52b4ecc0d08115a82305ac52",
+        "shape": [21, 2130, 3455]
+      },
+      "shifted_zm3": {
+        "slug": "papyruslab-e03-input-46527-zm3",
+        "z_start": 1,
+        "source_z_slice": [1, 85],
+        "tree_sha256": null,
+        "tar_sha256": null,
+        "tar_bytes": null,
+        "shape": [21, 2130, 3455],
+        "local_tree_sha256": "f73364dcb813487ab9c30d6f0292f90f6364059b28ce83dc82c1c2827f88407d",
+        "local_note": "prodotto sul portatile il 7 settembre 2026 con scripts/e03_pool_shifted.py; il valore su Kaggle deve coincidere"
+      },
+      "shifted_zp3": {
+        "slug": "papyruslab-e03-input-46527-zp3",
+        "z_start": 25,
+        "source_z_slice": [25, 109],
+        "tree_sha256": null,
+        "tar_sha256": null,
+        "tar_bytes": null,
+        "shape": [21, 2130, 3455],
+        "local_tree_sha256": "8406e6150c306fd8ac5ac81fceefe290eabc1dd7f88ebc43ecf8bb630aeea85f",
+        "local_note": "prodotto sul portatile il 7 settembre 2026; il valore su Kaggle deve coincidere"
+      }
+    }
+  },
+  "budget": {
+    "gpu_minutes_cap": 240,
+    "session_minutes_per_run": 60,
+    "manual_entries": [],
+    "_note": "Il pilota rifiuta un push quando consumato + session_minutes_per_run supera gpu_minutes_cap (prenotazione, non consuntivo: revisione R1, finding 5). manual_entries elenca eventuali versioni non scaricabili, come {mode, version, minutes, why}."
+  }
+}
