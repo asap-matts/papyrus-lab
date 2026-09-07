@@ -1,0 +1,37 @@
+{
+ "annotated_plane": "shape[0] // 2",
+ "comparison": "zm3 vs z0, seed 43",
+ "disjoint_check": {
+  "n_px_held_and_train": 0
+ },
+ "edges": [
+  0,
+  64,
+  128,
+  256
+ ],
+ "generated_at": "2026-09-07T16:57:15+00:00",
+ "inputs": [
+  {
+   "path": "runs\\E03-R01\\infer-46527-s43-zm3\\20260907T165643Z\\e03\\out\\pherc0814-46527_seed43_step075000_zm3.tif",
+   "sha256": "0796fb498a6a6842fc9ff7ede51e4f21d9019b328304aff0fe5e38bfb8860ddd"
+  },
+  {
+   "path": "runs\\E02-R01\\infer-46527-seed43\\20260907T094503Z\\e02\\out\\pherc0814-46527_seed43_step075000.tif",
+   "sha256": "cc2002cc911f741218b0e2197b48308d4e8cb9c14aca257139805c3fcb55ff60"
+  }
+ ],
+ "labels_dir": "data\\labels\\aligned-scrollprizeorg-21slices\\pherc0814-46527",
+ "labels_tree_sha256": "5659236870d7d0408e330f05f6275bd821fc1d7bdea8c9c8f072dfd4ae8b54f0",
+ "patch": 128,
+ "segment": "pherc0814-46527",
+ "sets_requested": [
+  "held",
+  "train"
+ ],
+ "spearman": {
+  "held": 0.8807810354070109,
+  "train": 0.9579091873009711
+ },
+ "version": "e03_metrics/1.0"
+}

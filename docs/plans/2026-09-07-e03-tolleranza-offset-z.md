@@ -461,6 +461,15 @@ Il piano è stato congelato il 7 settembre 2026 (`docs: freeze E03 plan (R01)`, 
 - **Correzione.** Nessuna modifica al codice: lo script resta una riproduzione fedele di quello ufficiale, che non ha ritentativi. Si è **ripetuto il run**, come prescrive la procedura di E02, fino a tre tentativi. Tempi effettivi: 102 s, 95 s, 95 s; 0,8 GB letti per pooling.
 - **Esito.** `--z-start 13` produce l'albero con impronta **`bc7423431221bf24b247a8ba80d264b0306f816c52b4ecc0d08115a82305ac52`**, identica a quella ufficiale di E02: lo script riproduce il pooling di villa byte per byte. Gli input spostati hanno impronte `f73364dc…` (−3) e `8406e615…` (+3); le 18 slice condivise coincidono esattamente con l'input ufficiale e le tre slice nuove differiscono, come atteso.
 
+### A9, A10, A11 — tre difetti del generatore trovati dai run GPU (7 settembre 2026)
+
+Tutti e tre hanno la stessa forma: una cella scriveva o cercava un nome diverso da quello che un'altra cella si aspettava, oppure usava qualcosa che in quel punto del notebook non esisteva ancora. Tutti e tre sono stati fermati dalle guardie prima di spendere inferenza; costo complessivo **4,7 minuti** di quota. Per ciascuno esiste ora un test che lo avrebbe intercettato.
+
+- **A9 — `import zarr` nella guardia dell'input** (`infer-46527-s42-zm2` v1, 36 s). La guardia gira prima della cella di installazione, apposta, e importava una libreria non ancora presente. Ora legge `.zattrs` e `0/.zarray` come JSON. Test: nessuna cella prima dell'installazione importa librerie di terze parti.
+- **A10 — segnaposto adiacenti** (`infer-46527-s42-zm2` v2, 3,2 min: l'inferenza è girata, il TIFF è stato scritto, ma non persistito). `__SEED____TAG__` perdeva il separatore: il log si chiamava `infer_seed42zm2.log` e la cella dei controlli cercava `infer_seed42_zm2.log`. I nomi dei file ora si calcolano in Python e arrivano alla cella come segnaposto unici. Test: la cella bash e le celle Python concordano sui nomi.
+- **A11 — nome dell'input derivato dall'offset** (`infer-46527-s42-zm5` v1, 51 s). Gli offset ±5 usano l'input spostato di ±3 con la finestra spostata di ±2; la guardia cercava `…_pooled_zm5.zarr`. Il nome dello store ora segue il pooling (`INPUT_NAME`), non l'offset. Test: la corrispondenza offset → input per tutti i 24 run.
+- **Registro del budget.** Un run fallito dopo pochi secondi costava l'intera prenotazione di 60 minuti: `output` ora chiude la prenotazione con la durata misurata (da `run_info.txt`, o dall'ultimo istante del log del kernel se il run non ha raggiunto la persistenza). Quota reale consumata dai 24 run più i 3 tentativi falliti: **128,2 minuti** su 240.
+
 ### A8 — il manifest del dataset delle label deve avere l'elenco per file (7 settembre 2026)
 
 - **Cosa è successo.** Il run `prep-w016-z13` **tentativo 2** è arrivato fino alla cella delle label (checkout, installazione e mount corretti) e si è fermato con `KeyError: 'files'`: la cella riusata da E02 verifica il dataset **file per file** contro `manifest['segments'][<seg>]['files']`, e il manifest che avevo costruito aveva solo i totali.

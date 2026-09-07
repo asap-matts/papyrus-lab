@@ -283,3 +283,21 @@ def test_the_bash_cell_and_the_python_cells_agree_on_file_names():
         assert f"infer_seed{seed}{tag}" not in src and f"step075000{tag}" not in src
         names = set(_re.findall(r"infer_seed[\w.]*\.log", src))
         assert names == {f"infer_seed{seed}_{tag}.log"}, names
+
+
+@pytest.mark.skipif(not GENERATED, reason="notebook non ancora generati")
+def test_the_input_name_follows_the_pooling_not_the_offset():
+    """Gli offset +-5 usano l'input spostato di +-3 con la finestra spostata: il nome dello store non si deriva
+    dal tag (run infer-46527-s42-zm5 v1, 7 settembre 2026)."""
+    rows = {r["tag"]: r for r in gen.OFFSETS["offsets"]}
+    for folder in GENERATED:
+        mode = folder.name[len("e03-r01-"):]
+        kind, seg, seed, tag = gen.parse_mode(mode)
+        if kind != "infer":
+            continue
+        row = rows[tag]
+        expected = (f"{seg}_pooled.zarr" if row["input"] == "official"
+                    else f"{seg}_pooled_" + ("zm3" if row["input"] == "shifted_m3" else "zp3") + ".zarr")
+        src = _source(folder)
+        assert f'INPUT_NAME = "{expected}"' in src, f"{folder.name}: atteso {expected}"
+        assert f"{seg}_pooled_{tag}.zarr" not in src or tag in ("zm3", "zp3")

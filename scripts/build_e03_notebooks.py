@@ -127,6 +127,7 @@ LABEL_TREE_SHA256 = "__LABEL_TREE__"
 LABEL_FILES, LABEL_BYTES = __LABEL_FILES__, __LABEL_BYTES__
 LABEL_ALLOWLIST = __LABEL_ALLOWLIST__      # nome -> impronta congelata: il sigillo non dipende dai nomi
 INPUT_TREE_SHA256 = "__INPUT_TREE__"       # input da usare in questo run (ufficiale o spostato)
+INPUT_NAME = "__INPUT_NAME__"              # nome dello store: dipende dal pooling, non dall'offset
 OFFICIAL_INPUT_TREE_SHA256 = "__OFFICIAL_INPUT_TREE__"
 SEALED_SEGMENT = "__SEALED__"
 assert SEG in LABEL_ALLOWLIST and SEG != SEALED_SEGMENT, f"STOP: {SEG} non e' un segmento di sviluppo"
@@ -180,7 +181,9 @@ print("lista bianca superata")
 CELL_GUARD_INPUT_PY = r'''# Guardia dell'input (run GPU): l'input poolato di questo offset deve essere montato con l'impronta congelata,
 # PRIMA di qualunque installazione. Nessun pooling in sessione GPU (piano E02 R1, finding 6).
 import glob, json, os
-name = f"{SEG}_pooled.zarr" if TAG in ("z0", "zm2", "zp2") else f"{SEG}_pooled_{TAG}.zarr"
+# Il nome dell'input dipende dal POOLING, non dall'offset: gli offset +-5 usano l'input spostato di +-3 con
+# la finestra spostata (run infer-46527-s42-zm5 v1 fallito il 7 settembre 2026 cercando ..._pooled_zm5.zarr).
+name = INPUT_NAME
 hits = glob.glob(f"/kaggle/input/**/{name}/0/.zarray", recursive=True)
 assert hits, f"STOP: input {name} non montato sotto /kaggle/input: ripararlo con un run prep (CPU), mai qui"
 INPUT_ZARR = os.path.dirname(os.path.dirname(hits[0]))
@@ -460,6 +463,8 @@ def build(mode: str, ds: dict, user: str, run_id: str) -> tuple[dict, dict]:
         "__SOURCE_Z_SLICE__": json.dumps(source_z), "__LAYER_ARGS__": layer_args,
         # nomi dei file calcolati qui e non composti nel testo della cella: due segnaposto adiacenti
         # perdono il separatore (run infer-46527-s42-zm2 v2, 7 settembre 2026: infer_seed42zm2.log)
+        "__INPUT_NAME__": f"{seg}_pooled.zarr" if (row is None or row["input"] == "official")
+                          else f"{seg}_pooled_" + ("zm3" if row["input"] == "shifted_m3" else "zp3") + ".zarr",
         "__TIF_NAME__": f"{seg}_seed{seed}_step075000_{tag}.tif",
         "__LOG_NAME__": f"infer_seed{seed}_{tag}.log",
         # attenzione: le costanti finiscono in codice Python, non in JSON. json.dumps(None) darebbe 'null',
