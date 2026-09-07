@@ -151,7 +151,8 @@ assert r42.get("gate_A") == "superato" and r42.get("gate_B") == "superato", f"ST
 TIF42 = os.path.join(SRC42, f"{SEG}_seed42_step075000.tif")
 assert os.path.exists(TIF42), f"STOP: TIFF del seed42 assente accanto a {hits[0]}"
 sha42 = hashlib.sha256(open(TIF42, "rb").read()).hexdigest()
-assert sha42 == r42["sha256_tif"], f"STOP: SHA-256 del TIFF seed42 montato ({sha42}) diverso da quello registrato ({r42['sha256_tif']})"
+# la chiave del report di e02_metrics e' sha256_pred (revisione R2, finding 1: 'sha256_tif' non esiste nel JSON)
+assert sha42 == r42["sha256_pred"], f"STOP: SHA-256 del TIFF seed42 montato ({sha42}) diverso da quello registrato ({r42['sha256_pred']})"
 print("guardia seed43 superata: seed42 gate_A/B =", r42["gate_A"], r42["gate_B"], "| TIFF verificato in", SRC42)
 '''
 

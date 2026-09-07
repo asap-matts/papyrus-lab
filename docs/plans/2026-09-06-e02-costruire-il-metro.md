@@ -510,6 +510,19 @@ Per ogni revisione registrare: modello ed effort effettivi riportati dal plugin,
 - **Secondo giro (verifica di chiusura, 21:04–21:06 UTC, ≈2 minuti, stesso canale):** F2–F8 **chiusi**; F1 **riaperto** con un'osservazione nuova e corretta: il test di orientamento di E00 indicizza la predizione con la maschera *trasformata*, che può cadere su coordinate held-out; Codex lo ha dimostrato con un controesempio sintetico (modificando solo predizioni held-out, `flipX` passava da 0,5 a 1). **Accettato:** in E02 ogni variante usa l'intersezione fra maschera di training originale e trasformata (passo 3, M3), con il test `test_held_out_pixels_are_never_read`. Claude ha rieseguito il controesempio con la funzione AUROC di E00: con la regola E00 le AUROC trasformate cambiano al variare dei soli pixel held-out; con la regola E02 restano identiche. Nessun nuovo finding P0–P1. Terzo giro non eseguito: la correzione è una definizione in una funzione, verificata con il test sintetico sopra.
 - **Commit di congelamento:** `docs: freeze E02 plan (R01)` (verifica nell'intestazione del piano).
 
+### Revisione R2 (codice, 7 settembre 2026)
+
+- **Canale:** stesso plugin, `adversarial-review --base 68bc1b8` (diff completo di E02 dal congelamento), focus sul sigillo di w029, sulle metriche, sui gate dei notebook, sul determinismo e sul pilota. Eseguita **dopo** il primo run GPU (deviazione registrata nell'emendamento A1) e prima di ogni altro. Codex ha eseguito 9 test in sola lettura e riprodotto ogni finding.
+- **Verdetto Codex:** da correggere prima dei run GPU. **3 finding: 1 P1, 2 P2. Accettati 3**, rifiutati 0, differiti 0.
+
+| # | Sev. | Finding (sintesi) | Esito | Correzione |
+|---|---|---|---|---|
+| 1 | P1 | La guardia del seed 43 leggeva `r42["sha256_tif"]`, chiave inesistente nel report di `e02_metrics` (`sha256_pred`): ogni run seed 43 si sarebbe fermato dopo l'allocazione GPU | accettato | guardia corretta nel generatore; verifica di compilazione e della chiave nel collaudo a secco |
+| 2 | P2 | F1 calcolata da precision e recall arrotondate: due plateau con F1 identica (2/7) differivano di un ulp e la regola "soglia più bassa" sceglieva 101 invece di 1 | accettato | F1 = 2·tp / (2·tp + fp + fn) in un solo quoziente; test con il controesempio di Codex (`threshold == 1`) |
+| 3 | P2 | La sovrapposizione held ∧ train veniva registrata ma non rifiutata prima di leggere la predizione: con maschere locali errate `--sets train` leggerebbe pixel held-out | accettato | `build_report` rifiuta la sovrapposizione prima di aprire il TIFF (`ValueError`, CLI exit 3); la modalità `--geometry` conserva la diagnostica; test dedicato |
+
+- `scripts/e02_metrics.py` → versione 1.2; 14 test superati; notebook rigenerati. Nessun secondo giro: le tre correzioni sono locali e coperte da test.
+
 ---
 
 ## 11. Emendamenti dopo il congelamento

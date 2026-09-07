@@ -33,6 +33,35 @@ def test_best_f1_threshold_and_floor():
     assert m.trivial_floor(0.0) == 0.0
 
 
+def test_best_f1_plateau_is_exact_lowest_threshold():
+    # controesempio di R2 (finding 2): F1 = 2/7 esatto sia per t in 1..100 sia per t in 101..200; con precision e
+    # recall arrotondati il secondo plateau risultava maggiore di un ulp e vinceva la soglia 101
+    pos = np.bincount([100, 200], minlength=256)
+    neg = np.bincount([0] * 200 + [100] * 6 + [200] * 4, minlength=256)
+    s = m.sweep(pos, neg)
+    assert s["f1"][1] == s["f1"][101] == 2 / 7
+    assert m.best_f1(s)["threshold"] == 1
+
+
+def test_overlapping_masks_are_refused_before_reading_prediction(tmp_path):
+    import tifffile
+    import zarr
+
+    name = "segov"; seg = tmp_path / name; seg.mkdir()
+    ink = np.zeros((3, 16, 16), np.uint8); ink[1, 2:6, 2:6] = 1
+    sup = np.zeros((3, 16, 16), np.uint8); sup[1, :, :9] = 1
+    val = np.zeros((3, 16, 16), np.uint8); val[1, :, 7:] = 1          # colonne 7 e 8 in entrambe le maschere
+    for kind, arr in (("inklabels", ink), ("supervision_mask", sup), ("validation_mask", val)):
+        zarr.open_group(str(seg / f"{name}_{kind}.zarr"), mode="w").create_dataset("0", data=arr, chunks=(3, 16, 16))
+    tifffile.imwrite(str(tmp_path / "p.tif"), np.zeros((16, 16), np.uint8))
+    with pytest.raises(ValueError):
+        m.build_report(tmp_path / "p.tif", seg, sets=("train",))
+    assert m.main(["--pred", str(tmp_path / "p.tif"), "--labels", str(seg), "--out", str(tmp_path / "o.json"), "--sets", "train"]) == 3
+    assert not (tmp_path / "o.json").exists()
+    g = m.build_report(None, seg, geometry_only=True)                  # la geometria conserva la diagnostica
+    assert g["geometry"]["n_px_held_and_train"] == 32
+
+
 def test_strata_partition_held_pixels():
     sup = np.zeros((64, 64), bool); sup[:, :8] = True
     held = np.zeros((64, 64), bool); held[:, 16:] = True

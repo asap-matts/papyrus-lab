@@ -30,7 +30,7 @@ from pathlib import Path
 
 import numpy as np
 
-VERSION = "e02_metrics/1.1"      # 1.1: orientation transforms inside the bbox of the mask (plan amendment A1)
+VERSION = "e02_metrics/1.2"      # 1.1: orientation inside the mask bbox (amendment A1); 1.2: exact F1 plateaus, overlap refused (R2)
 DEFAULT_EDGES = (0, 64, 128, 256)
 DEFAULT_PATCH = 128
 TRANSFORMS = {
@@ -77,7 +77,10 @@ def sweep(pos_hist: np.ndarray, neg_hist: np.ndarray) -> dict:
     with np.errstate(divide="ignore", invalid="ignore"):
         precision = np.where(tp + fp > 0, tp / np.maximum(tp + fp, 1.0), 0.0)
         recall = np.where(total_pos > 0, tp / max(total_pos, 1.0), 0.0)
-        f1 = np.where(precision + recall > 0, 2 * precision * recall / np.maximum(precision + recall, 1e-300), 0.0)
+        # F1 direttamente dai conteggi (un solo quoziente): plateau esattamente uguali, cosi' la regola della soglia
+        # piu' bassa non dipende dall'arrotondamento di precision e recall (revisione R2, finding 2)
+        denom = 2 * tp + fp + fn
+        f1 = np.where(denom > 0, 2 * tp / np.maximum(denom, 1.0), 0.0)
         iou = np.where(tp + fp + fn > 0, tp / np.maximum(tp + fp + fn, 1.0), 0.0)
     return {"tp": tp, "fp": fp, "fn": fn, "tn": tn, "precision": precision, "recall": recall, "f1": f1, "iou": iou,
             "total_pos": total_pos, "total_neg": total_neg}
@@ -286,6 +289,11 @@ def build_report(pred_path: Path | None, labels_dir: Path, sets=("held", "train"
         report["geometry"] = geometry_report(masks, edges, patch)
         return report
 
+    # Held-out and training pixels must be disjoint BEFORE the prediction is read: with overlapping masks the
+    # 'train' set would read held-out coordinates (revisione R2, finding 3). Geometry mode keeps the diagnostic.
+    if masks["held"] is not None and report["disjoint_check"]["n_px_held_and_train"] > 0:
+        raise ValueError(f"STOP: {report['disjoint_check']['n_px_held_and_train']} px belong to both validation_mask and "
+                         "supervision_mask: refusing to read the prediction")
     assert pred_path is not None
     pred = read_prediction(pred_path)
     report.update({"prediction": str(pred_path), "sha256_pred": hashlib.sha256(pred_path.read_bytes()).hexdigest(),
@@ -339,7 +347,11 @@ def main(argv=None) -> int:
     assert set(sets) <= {"held", "train"} and sets, f"--sets must be held and/or train, got {a.sets}"
     if not a.geometry and a.pred is None:
         ap.error("--pred is required unless --geometry")
-    report = build_report(a.pred, a.labels.resolve(), sets, a.threshold, a.edges, a.patch, a.geometry)
+    try:
+        report = build_report(a.pred, a.labels.resolve(), sets, a.threshold, a.edges, a.patch, a.geometry)
+    except ValueError as ex:
+        print(str(ex), file=sys.stderr)
+        return 3
     a.out.parent.mkdir(parents=True, exist_ok=True)
     with open(a.out, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(dumps(report))
