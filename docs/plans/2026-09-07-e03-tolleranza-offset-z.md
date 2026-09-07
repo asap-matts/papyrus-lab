@@ -461,6 +461,13 @@ Il piano è stato congelato il 7 settembre 2026 (`docs: freeze E03 plan (R01)`, 
 - **Correzione.** Nessuna modifica al codice: lo script resta una riproduzione fedele di quello ufficiale, che non ha ritentativi. Si è **ripetuto il run**, come prescrive la procedura di E02, fino a tre tentativi. Tempi effettivi: 102 s, 95 s, 95 s; 0,8 GB letti per pooling.
 - **Esito.** `--z-start 13` produce l'albero con impronta **`bc7423431221bf24b247a8ba80d264b0306f816c52b4ecc0d08115a82305ac52`**, identica a quella ufficiale di E02: lo script riproduce il pooling di villa byte per byte. Gli input spostati hanno impronte `f73364dc…` (−3) e `8406e615…` (+3); le 18 slice condivise coincidono esattamente con l'input ufficiale e le tre slice nuove differiscono, come atteso.
 
+### A6 — due difetti del pilota scoperti pubblicando il dataset delle label (7 settembre 2026)
+
+- **Titolo troppo lungo.** Kaggle rifiuta un titolo oltre i 50 caratteri ("The dataset title must be between 6 and 50 characters"). I titoli dei dataset di E03 sono stati accorciati: `PapyrusLab E03-R01 labels (dev segments)` e `PapyrusLab E03-R01 input <tag> <segmento breve>`.
+- **Esito dedotto dal testo.** `create_or_version` deduceva il successo cercando la parola "error" nell'output: il messaggio sopra non la contiene, quindi il pilota ha **dichiarato riuscita una pubblicazione fallita**. Ora l'esito si verifica interrogando lo stato del dataset dopo la chiamata, e la pubblicazione fallisce rumorosamente se non risulta `ready`.
+- **403 transitorio.** Subito dopo un caricamento l'API risponde `403 Forbidden` allo stato per qualche secondo (già osservato in E01; qui due volte, poi `ready`). `dataset_status` ritenta fino a quattro volte a distanza di dieci secondi prima di dichiarare un errore.
+- **Esito.** Dataset `papyruslab-e03-r01-labels` pubblicato e verificato: `ready`, con i soli due segmenti di sviluppo e **zero file** del segmento sigillato (controllato sull'elenco dei file pubblicati).
+
 ### A5 — dataset delle label proprio di E03 (dalla revisione R2, finding 1)
 
 - **Cosa è successo.** Il piano riusava il dataset delle label di E02. Quello contiene anche `pherc1667-w029`: montarlo avrebbe portato l'artefatto sigillato dentro il perimetro di ogni notebook e, per via della guardia stessa, avrebbe fatto fallire ogni run.

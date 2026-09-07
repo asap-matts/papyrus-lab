@@ -126,9 +126,21 @@ def latest_download(mode: str) -> Path | None:
     return cands[-1] if cands else None
 
 
-def dataset_status(ds_id: str) -> str:
-    out = run([*KAGGLE, "datasets", "status", ds_id], check=False)
-    return "ready" if "ready" in out.lower() else (out.strip().splitlines()[-1] if out.strip() else "unknown")
+def dataset_status(ds_id: str, attempts: int = 4, pause: int = 10) -> str:
+    """Stato del dataset. L'API risponde 403 in modo transitorio subito dopo un caricamento (osservato in E01 e
+    di nuovo il 7 settembre 2026: due 403 e poi 'ready'): si ritenta prima di dichiarare un errore."""
+    last = "unknown"
+    for i in range(attempts):
+        out = run([*KAGGLE, "datasets", "status", ds_id], check=False)
+        if "ready" in out.lower():
+            return "ready"
+        last = out.strip().splitlines()[-1] if out.strip() else "unknown"
+        if "403" not in last:
+            return last
+        if i < attempts - 1:
+            print(f"403 transitorio su {ds_id}: nuovo tentativo fra {pause} s", flush=True)
+            time.sleep(pause)
+    return last
 
 
 # ------------------------------------------------------------------------------------ budget
@@ -326,12 +338,18 @@ def output(mode: str) -> None:
 
 # ------------------------------------------------------------------------------------ publish
 def create_or_version(ds_dir: Path, message: str) -> None:
+    """Crea il dataset, o ne pubblica una nuova versione se esiste gia'. L'esito NON si deduce dal testo del
+    comando (la CLI stampa messaggi di errore senza la parola 'error': per esempio 'The dataset title must be
+    between 6 and 50 characters'): si verifica interrogando lo stato del dataset dopo la chiamata."""
+    ds_id = json.loads((ds_dir / "dataset-metadata.json").read_text(encoding="utf-8"))["id"]
     out = run([*KAGGLE, "datasets", "create", "-p", str(ds_dir)], check=False)
     low = out.lower()
     if "already exists" in low or "already in use" in low or "409" in out:
         run([*KAGGLE, "datasets", "version", "-p", str(ds_dir), "-m", message])
-    elif "error" in low:
-        sys.exit("creazione del dataset fallita (vedi sopra)")
+    st = dataset_status(ds_id)
+    if st != "ready":
+        sys.exit(f"pubblicazione di {ds_id} non riuscita: stato '{st}'. Output del comando sopra.")
+    print(f"dataset {ds_id}: {st}")
 
 
 def publish_labels() -> None:
@@ -384,7 +402,7 @@ def publish_input(short: str, tag: str) -> None:
     shutil.copy2(tar, ds_dir / tar.name)
     shutil.copy2(d / "e03" / "out" / f"input_{seg}_{tag}.json", ds_dir / "manifest.json")
     (ds_dir / "dataset-metadata.json").write_text(json.dumps(
-        {"title": f"PapyrusLab {RUN_ID.upper()} shifted input {seg} {tag}",
+        {"title": f"PapyrusLab {RUN_ID.upper()} input {tag} {seg[-5:]}",
          "id": f"{ds['owner']}/{entry['slug']}", "licenses": [{"name": "other"}]}, indent=2) + "\n", encoding="utf-8")
     create_or_version(ds_dir, f"update shifted input {seg} {tag}")
     entry.update({"tree_sha256": info["tree_sha256"], "tar_sha256": info["tar_sha256"], "tar_bytes": info["tar_bytes"]})
