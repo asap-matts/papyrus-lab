@@ -30,9 +30,9 @@
   "inputs": {
     "pherc0814-46527": {
       "slug": "papyruslab-e02-input-46527",
-      "tree_sha256": null,
-      "tar_sha256": null,
-      "tar_bytes": null,
+      "tree_sha256": "bc7423431221bf24b247a8ba80d264b0306f816c52b4ecc0d08115a82305ac52",
+      "tar_sha256": "473897efd8637f36a670e79ee2138cd6649117b5c4a76946fc64509d7cd42f3f",
+      "tar_bytes": 81223680,
       "shape": [
         21,
         2130,
