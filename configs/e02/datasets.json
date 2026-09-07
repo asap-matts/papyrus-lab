@@ -52,9 +52,9 @@
     },
     "pherc1667-w029": {
       "slug": "papyruslab-e02-input-w029",
-      "tree_sha256": null,
-      "tar_sha256": null,
-      "tar_bytes": null,
+      "tree_sha256": "c77ed53f9238aa8768aa6b6fa260a5cf219e1c3edb2b94d8a86638825dcfae78",
+      "tar_sha256": "d6e6609f4a092663f71b980600f98b818e3d4b29851f8603c892dd26b1e0247b",
+      "tar_bytes": 1023610880,
       "shape": [
         21,
         9500,
