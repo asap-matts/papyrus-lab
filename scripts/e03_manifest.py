@@ -154,6 +154,7 @@ PARTNER_FILES = ("docs/reports/2026-09-07-e03-socio-s1-fonti.json", "docs/report
                  "docs/reports/2026-09-07-e03-socio-s2-pooling-46527.md", "docs/reports/2026-09-07-e03-socio-s3-ricalcolo.md",
                  "scripts/socio/e03_socio_curve.py")
 TOL_NONE = "nessun decadimento di 0,05 rilevato fino a 5 slice agli offset campionati"
+CONTROL_STRICT = 0.0     # "aiuta" per riga = miglioramento stretto su entrambi i segmenti (scelta 5 del socio)
 IT = {"pherc0139-w016": "w016", "pherc0814-46527": "0814"}
 
 
@@ -171,13 +172,47 @@ def _show(commit: str, path: str) -> str:
     return out.stdout
 
 
-def _table(text: str, heading: str) -> list[list[str]]:
-    """Righe (celle già ripulite) della prima tabella markdown sotto `heading`; intestazione e separatore esclusi."""
-    m = re.search(r"^" + re.escape(heading) + r"\n\n((?:\|.*\n)+)", text, re.M)
+TOL_CELL = 5e-6          # il socio stampa sei decimali: scarto ammesso per cella
+S1_VERDICTS = ("nessun lavoro equivalente trovato", "trovato lavoro parziale", "trovato lavoro equivalente")
+COMBOS = ("w016/s42", "w016/s43", "0814/s42", "0814/s43")
+KS = (-5, -3, -2, 0, 2, 3, 5)
+KS_HEAD = ("−5", "−3", "−2", "0", "+2", "+3", "+5")
+
+
+def _section(text: str, heading: str) -> str:
+    """Corpo della sezione markdown che inizia con la riga `heading`, fino al titolo successivo di pari o superiore livello."""
+    level = len(heading) - len(heading.lstrip("#"))
+    m = re.search(r"^" + re.escape(heading) + r"\n(.*?)(?=^#{1," + str(level) + r"} |\Z)", text, re.M | re.S)
     if not m:
-        raise ValueError(f"tabella mancante nel rapporto del socio: {heading!r}")
+        raise ValueError(f"sezione mancante nel rapporto del socio: {heading!r}")
+    return m.group(1)
+
+
+def _table(body: str, header: tuple[str, ...]) -> list[list[str]]:
+    """Righe della prima tabella markdown di `body`; l'intestazione deve coincidere esattamente con `header`."""
+    m = re.search(r"^((?:\|.*\n)+)", body, re.M)
+    if not m:
+        raise ValueError("tabella mancante nel rapporto del socio")
     rows = [[c.strip() for c in ln.strip().strip("|").split("|")] for ln in m.group(1).splitlines()]
+    if len(rows) < 3 or tuple(rows[0]) != tuple(header):
+        raise ValueError(f"intestazione di tabella diversa dall'attesa: {rows[0] if rows else None} contro {list(header)}")
+    if len(rows[1]) != len(header) or not all(re.fullmatch(r":?-+:?", c) for c in rows[1]):
+        raise ValueError("separatore di tabella non valido")
+    for r in rows[2:]:
+        if len(r) != len(header):
+            raise ValueError(f"riga con {len(r)} celle invece di {len(header)}: {r}")
     return rows[2:]
+
+
+def _close(a: float, b: float, what: str) -> None:
+    if abs(a - b) > TOL_CELL:
+        raise ValueError(f"S3: {what}: {a} contro {b}")
+
+
+def _yesno(cell: str) -> bool:
+    if cell not in ("sì", "no"):
+        raise ValueError(f"cella sì/no non riconosciuta: {cell!r}")
+    return cell == "sì"
 
 
 def _tol(cell: str):
@@ -189,23 +224,35 @@ def _tol(cell: str):
     return int(m.group(1))
 
 
-S1_VERDICTS = ("nessun lavoro equivalente trovato", "trovato lavoro parziale", "trovato lavoro equivalente")
-COMBOS = ("w016/s42", "w016/s43", "0814/s42", "0814/s43")
-KS = (-5, -3, -2, 0, 2, 3, 5)
-H1_HEADING = "## H1 — piatta entro ±2\n\n**Violata su 6 coppie combinazione-offset su 8.** Violazioni di `|Δ| ≤ 0,02`:"
-
-
 def _combo(short: str) -> tuple[str, str]:
     seg, s = short.split("/s")
     return next(g for g, sh in IT.items() if sh == seg), s
+
+
+def _offset_rows(body: str, header: tuple[str, ...]) -> dict[int, list[str]]:
+    """Tabella indicizzata dall'offset: esattamente i 7 offset, ciascuno una volta."""
+    out = {}
+    for r in _table(body, header):
+        k = int(_num(r[0]))
+        if k in out:
+            raise ValueError(f"S3: offset {k} duplicato")
+        out[k] = r[1:]
+    if set(out) != set(KS):
+        raise ValueError(f"S3: offset {sorted(out)} diversi da {list(KS)}")
+    return out
 
 
 def check_s1(s1: dict, s1_md: str) -> dict:
     v = s1.get("verdict")
     if v not in S1_VERDICTS:
         raise ValueError(f"verdetto S1 non riconosciuto: {v!r}")
-    if v not in s1_md:
-        raise ValueError("verdetto S1 del JSON assente dal rapporto S1")
+    body = _section(s1_md, "## Verdetto")
+    lines = [ln.strip() for ln in body.splitlines() if ln.strip()]
+    if not lines or lines[0] != f"**{v}**":
+        raise ValueError(f"S1: la sezione Verdetto non dichiara {v!r} come prima riga")
+    others = [w for w in S1_VERDICTS if w != v and w in body]
+    if others:
+        raise ValueError(f"S1: la sezione Verdetto contiene anche {others}")
     counts = s1["counts"]
     return {"verdict": v, "pertinent_sources": int(counts["pertinent_sources"]),
             "network_queries": int(counts["network_queries"]), "queried_at_utc": s1["queried_at_utc"]}
@@ -214,9 +261,10 @@ def check_s1(s1: dict, s1_md: str) -> dict:
 def check_s2(s2: str, ds: dict, script_sha: str) -> dict:
     seg = "pherc0814-46527"
     got = {}
-    for r in _table(s2, "## Risultati"):
-        if len(r) != 9 or not re.fullmatch(r"`[0-9a-f]{64}`", r[5]):
-            raise ValueError(f"riga S2 non riconosciuta: {r}")
+    for r in _table(_section(s2, "## Risultati"),
+                    ("`z-start`", "offset", "intervallo sorgente", "formato", "forma", "tree SHA-256", "file / byte", "tempo reale", "spazio (`du -sh`)")):
+        if not re.fullmatch(r"`[0-9a-f]{64}`", r[5]):
+            raise ValueError(f"riga S2 senza impronta: {r}")
         z = int(r[0])
         if z in got:
             raise ValueError(f"S2: z-start {z} duplicato")
@@ -228,8 +276,9 @@ def check_s2(s2: str, ds: dict, script_sha: str) -> dict:
     m = re.search(r"`scripts/e03_pool_shifted.py`: SHA-256 `([0-9a-f]{64})`", s2)
     if not m or m.group(1) != script_sha:
         raise ValueError("S2: impronta dello script assente o diversa da quella in main")
-    eq_m3 = "offset −3 (`z-start 1`): le slice 3..20 dello spostato sono identiche alle slice 0..17 del centrale — `True`." in s2
-    eq_p3 = "offset +3 (`z-start 25`): le slice 0..17 dello spostato sono identiche alle slice 3..20 del centrale — `True`." in s2
+    eq = _section(s2, "## Uguaglianza slice a slice")
+    eq_m3 = "offset −3 (`z-start 1`): le slice 3..20 dello spostato sono identiche alle slice 0..17 del centrale — `True`." in eq
+    eq_p3 = "offset +3 (`z-start 25`): le slice 0..17 dello spostato sono identiche alle slice 3..20 del centrale — `True`." in eq
     if not (eq_m3 and eq_p3):
         raise ValueError("S2: uguaglianza slice a slice non dichiarata per entrambi gli spostamenti")
     return {"segment": seg, "tree_sha256": {f"z{z}": h for z, h in sorted(got.items())},
@@ -237,27 +286,38 @@ def check_s2(s2: str, ds: dict, script_sha: str) -> dict:
 
 
 def check_s3(s3: str, curve: dict) -> dict:
-    # AUROC held-out: esattamente i 7 offset, ciascuno una volta, 4 colonne nell'ordine atteso, valori finiti
-    seen, max_diff = set(), 0.0
-    for r in _table(s3, "## AUROC held-out"):
-        if len(r) != 5:
-            raise ValueError(f"riga AUROC S3 con {len(r)} celle")
-        k = int(_num(r[0]))
-        if k in seen:
-            raise ValueError(f"S3: offset {k} duplicato nella tabella AUROC")
-        seen.add(k)
-        for short, cell in zip(COMBOS, r[1:]):
-            g, s = _combo(short)
-            max_diff = max(max_diff, abs(_num(cell) - float(curve["auroc_held"][s][str(k)][g])))
-    if seen != set(KS):
-        raise ValueError(f"S3: offset della tabella AUROC {sorted(seen)} diversi da {list(KS)}")
-    if max_diff > 5e-6:
-        raise ValueError(f"S3: scarto AUROC massimo {max_diff} oltre 5e-6")
+    """Confronta ogni cella numerica e ogni verdetto del rapporto S3 con curve.json. Ogni divergenza è un errore."""
+    cells = 0
+    head = ("offset",) + COMBOS
+    # AUROC held-out, F1 alla soglia, Δ rispetto allo zero: 7 offset × 4 combinazioni ciascuna
+    for heading, pick in (("## AUROC held-out", lambda s, k, g: curve["auroc_held"][s][str(k)][g]),
+                          ("## F1 held-out alla soglia 91", lambda s, k, g: curve["f1_at_frozen_threshold"][s][str(k)][g]),
+                          ("## Differenze AUROC rispetto allo zero dello stesso seed",
+                           lambda s, k, g: 0.0 if k == 0 else curve["delta"][s][str(k)]["per_segment"][g])):
+        for k, vals in _offset_rows(_section(s3, heading), head).items():
+            for short, cell in zip(COMBOS, vals):
+                g, s = _combo(short)
+                _close(_num(cell), float(pick(s, k, g)), f"{heading[3:]} {short} k={k}"); cells += 1
+    # media di Δ sui due segmenti: 2 seed × 7 offset
+    body = _section(s3, "## Differenze AUROC rispetto allo zero dello stesso seed")
+    mean_tab = body.split("Media di Δ sui due segmenti", 1)
+    if len(mean_tab) != 2:
+        raise ValueError("S3: tabella delle medie di Δ assente")
+    seeds_seen = set()
+    for r in _table(mean_tab[1].split("\n\n", 1)[1], ("seed",) + KS_HEAD):
+        s = r[0]
+        if s not in ("42", "43") or s in seeds_seen:
+            raise ValueError(f"S3: riga delle medie non valida o duplicata: {r}")
+        seeds_seen.add(s)
+        for k, cell in zip(KS, r[1:]):
+            _close(_num(cell), 0.0 if k == 0 else float(curve["delta"][s][str(k)]["mean"]), f"media Δ seed {s} k={k}"); cells += 1
+    if seeds_seen != {"42", "43"}:
+        raise ValueError("S3: medie di Δ non per entrambi i seed")
     # tolleranza: le 6 chiavi (aggregazione, seed), una volta ciascuna
     tol = {}
-    for r in _table(s3, "## Tolleranza preregistrata"):
-        if len(r) != 4 or (r[0], r[1]) in tol:
-            raise ValueError(f"S3: riga di tolleranza non valida o duplicata: {r}")
+    for r in _table(_section(s3, "## Tolleranza preregistrata"), ("aggregazione", "seed", "verso −", "verso +")):
+        if (r[0], r[1]) in tol:
+            raise ValueError(f"S3: riga di tolleranza duplicata: {r}")
         tol[(r[0], r[1])] = (_tol(r[2]), _tol(r[3]))
     want = {("media dei due segmenti", s) for s in ("42", "43")} | {(sh, s) for sh in IT.values() for s in ("42", "43")}
     if set(tol) != want:
@@ -267,44 +327,78 @@ def check_s3(s3: str, curve: dict) -> dict:
             curve["tolerance"][s]["per_segment"][next(g for g, sh in IT.items() if sh == agg)]
         if (mn, pl) != (ours["minus"], ours["plus"]):
             raise ValueError(f"S3: tolleranza diversa per {agg} seed {s}: {(mn, pl)} contro {(ours['minus'], ours['plus'])}")
-    # H1: insieme completo delle violazioni (segmento, seed, offset, delta)
-    theirs = set()
-    for r in _table(s3, H1_HEADING):
-        if len(r) != 4:
-            raise ValueError(f"S3: riga H1 non valida: {r}")
-        g, s = _combo(r[0])
-        theirs.add((g, s, int(_num(r[1])), round(_num(r[2]), 5)))
-    ours_h1 = {(v["segment"], str(v["seed"]), int(v["k"]), round(float(v["delta"]), 5)) for v in curve["H1"]["violations"]}
-    if len(theirs) != len(_table(s3, H1_HEADING)) or theirs != ours_h1:
+        cells += 2
+    # H1: conteggio dichiarato, insieme completo delle violazioni con Δ e margine
+    h1 = _section(s3, "## H1 — piatta entro ±2")
+    m = re.search(r"\*\*Violata su (\d+) coppie combinazione-offset su (\d+)\.\*\*", h1)
+    if not m or (int(m.group(1)), int(m.group(2))) != (len(curve["H1"]["violations"]), 2 * len(COMBOS)):
+        raise ValueError("S3: conteggio H1 assente o diverso")
+    band = float(curve["H1"]["band"])
+    theirs = {}
+    for r in _table(h1, ("combinazione", "offset", "Δ", f"oltre il limite di {str(band).replace('.', ',')}")):
+        g, s = _combo(r[0]); k = int(_num(r[1])); d = _num(r[2])
+        if (g, s, k) in theirs:
+            raise ValueError(f"S3: violazione H1 duplicata: {r}")
+        _close(_num(r[3]), abs(d) - band, f"margine H1 {r[0]} k={k}")
+        theirs[(g, s, k)] = d
+    ours_h1 = {(v["segment"], str(v["seed"]), int(v["k"])): float(v["delta"]) for v in curve["H1"]["violations"]}
+    if set(theirs) != set(ours_h1):
         raise ValueError(f"S3: violazioni H1 diverse: {sorted(theirs)} contro {sorted(ours_h1)}")
-    # H2: le 4 righe (seed, verso), una volta ciascuna, con esito
+    for key, d in theirs.items():
+        _close(d, ours_h1[key], f"Δ H1 {key}"); cells += 2
+    # H2: 4 righe (seed, verso) con i tre Δ̄, i due confronti e l'esito, tutti derivati dai numeri
     h2 = {}
-    for r in _table(s3, "## H2 — decadimento oltre ±2"):
-        if len(r) != 8 or (r[0], r[1]) in h2 or r[7] not in ("**sì**", "**no**"):
-            raise ValueError(f"S3: riga H2 non valida o duplicata: {r}")
-        h2[(r[0], r[1])] = r[7] == "**sì**"
-    ours_h2 = {(str(r["seed"]), "−" if r["direction"] == "minus" else "+"): bool(r["monotone"]) for r in curve["H2"]["rows"]}
-    if h2 != ours_h2:
-        raise ValueError(f"S3: H2 diversa: {h2} contro {ours_h2}")
-    # anomalia e controlli, letti ciascuno nella propria sezione
-    anom = re.search(r"^## Regola di anomalia\n\n\*\*(Non attivata|Attivata)\.\*\*", s3, re.M)
+    for r in _table(_section(s3, "## H2 — decadimento oltre ±2"),
+                    ("seed", "verso", "Δ̄ a 2", "Δ̄ a 3", "Δ̄ a 5", "3 < 2", "5 < 3", "H2 nel verso")):
+        key = (r[0], r[1])
+        if key in h2:
+            raise ValueError(f"S3: riga H2 duplicata: {r}")
+        d2, d3, d5 = _num(r[2]), _num(r[3]), _num(r[4])
+        c32, c53 = _yesno(r[5]), _yesno(r[6])
+        if r[7] not in ("**sì**", "**no**"):
+            raise ValueError(f"S3: esito H2 non riconosciuto: {r[7]!r}")
+        h2[key] = (d2, d3, d5, c32, c53, r[7] == "**sì**")
+    ours_h2 = {(str(r["seed"]), "−" if r["direction"] == "minus" else "+"): r for r in curve["H2"]["rows"]}
+    if set(h2) != set(ours_h2):
+        raise ValueError(f"S3: righe H2 {sorted(h2)} diverse da {sorted(ours_h2)}")
+    for key, (d2, d3, d5, c32, c53, mono) in h2.items():
+        o = ours_h2[key]
+        _close(d2, float(o["delta_2"]), f"H2 Δ̄2 {key}"); _close(d3, float(o["delta_3"]), f"H2 Δ̄3 {key}"); _close(d5, float(o["delta_5"]), f"H2 Δ̄5 {key}")
+        if c32 != (o["delta_3"] < o["delta_2"]) or c53 != (o["delta_5"] < o["delta_3"]) or mono != (c32 and c53) or mono != bool(o["monotone"]):
+            raise ValueError(f"S3: confronti H2 non coerenti con i numeri per {key}")
+        cells += 6
+    # anomalia
+    anom = re.search(r"^\*\*(Non attivata|Attivata)\.\*\*", _section(s3, "## Regola di anomalia"), re.M)
     if not anom or (anom.group(1) == "Attivata") != bool(curve["anomaly"]["triggered"]):
         raise ValueError("S3: regola di anomalia assente o diversa")
-    verdicts = {}
-    for heading, key in (("### Media dei seed", "seed_mean"), ("### Media delle finestre −2/+2", "z_mean_m2p2")):
-        sec = re.search(r"^" + re.escape(heading) + r"\n(.*?)(?=^###|^## |\Z)", s3, re.M | re.S)
-        if not sec:
-            raise ValueError(f"S3: sezione {heading!r} assente")
-        vm = re.findall(r"\*\*Verdetto complessivo: (aiuta|non aiuta)\.\*\*", sec.group(1))
-        if len(vm) != 1:
-            raise ValueError(f"S3: verdetto del controllo {key} assente o multiplo")
-        verdicts[key] = vm[0] == "aiuta"
-    ours_c = {k: bool(v["helps"]) for k, v in curve["controls"].items() if v}
-    if verdicts != ours_c:
-        raise ValueError(f"S3: controlli diversi: {verdicts} contro {ours_c}")
-    return {"auroc_cells_compared": 28, "auroc_table_max_abs_diff": max_diff, "tolerance_identical": True,
-            "H1_identical": True, "H1_violations_compared": len(ours_h1), "H2_identical": True,
-            "anomaly_identical": True, "controls_identical": True}
+    # controlli a costo zero: ogni Δ, ogni "aiuta?" derivato dai numeri, verdetto complessivo coerente con le righe e con la curva
+    ctrl = _section(s3, "## Controlli a costo zero")
+    sm = curve["controls"]["seed_mean"]; zm = curve["controls"]["z_mean_m2p2"]
+    for heading, header, rows_expected, pick, ours_help in (
+            ("### Media dei seed", ("riferimento a offset 0", "Δ w016", "Δ 0814", "aiuta?"), {"seed 42": "42", "seed 43": "43"},
+             lambda s, g: sm["per_segment"][g]["vs"][s], bool(sm["helps"])),
+            ("### Media delle finestre −2/+2", ("seed", "Δ w016", "Δ 0814", "aiuta?"), {"42": "42", "43": "43"},
+             lambda s, g: zm["per_combination"][f"{g}|{s}"]["vs_zero"], bool(zm["helps"]))):
+        sec = _section(ctrl, heading)
+        seen, row_helps = set(), []
+        for r in _table(sec, header):
+            if r[0] not in rows_expected or r[0] in seen:
+                raise ValueError(f"S3: riga del controllo non valida o duplicata: {r}")
+            seen.add(r[0]); s = rows_expected[r[0]]
+            ds_ = [_num(r[1]), _num(r[2])]
+            for g, d in zip(("pherc0139-w016", "pherc0814-46527"), ds_):
+                _close(d, float(pick(s, g)), f"controllo {heading[4:]} {r[0]} {g}"); cells += 1
+            helps_row = all(float(pick(s, g)) > CONTROL_STRICT for g in ("pherc0139-w016", "pherc0814-46527"))
+            if _yesno(r[3]) != helps_row:
+                raise ValueError(f"S3: 'aiuta?' non coerente con i numeri per {heading[4:]} {r[0]}")
+            row_helps.append(helps_row)
+        if seen != set(rows_expected):
+            raise ValueError(f"S3: righe del controllo {heading[4:]} incomplete")
+        vm = re.findall(r"\*\*Verdetto complessivo: (aiuta|non aiuta)\.\*\*", sec)
+        if len(vm) != 1 or (vm[0] == "aiuta") != all(row_helps) or (vm[0] == "aiuta") != ours_help:
+            raise ValueError(f"S3: verdetto del controllo {heading[4:]} assente, multiplo o non coerente")
+    return {"cells_compared": cells, "tolerance_identical": True, "H1_identical": True,
+            "H1_violations_compared": len(ours_h1), "H2_identical": True, "anomaly_identical": True, "controls_identical": True}
 
 
 def partner_block(ds: dict, curve: dict) -> dict:

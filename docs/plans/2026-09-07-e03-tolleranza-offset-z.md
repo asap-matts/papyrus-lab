@@ -464,7 +464,17 @@ Nel registro corrente: 27 prenotazioni tutte chiuse, 24 output verificati, uno p
 | 2 | medio | Osservazione 3: «dipende dal segmento misurato, non dal modello» escludeva il modello senza poterlo fare (in w016 il massimo cambia fra seed) | accettato | Riformulata come osservazione: versi diversi fra segmenti e, in w016, fra seed; con 2 × 2 non si separano segmento, modello e interazione; conclusione allineata |
 | 3 | medio | La voce R3 dichiarava «fallisce su ogni divergenza» e «cella per cella» oltre l'implementazione di allora | accettato | Voci del piano e della scheda riscritte dopo la correzione del finding 1 |
 
-- **Terzo giro (chiusura):** *in corso*.
+- **Terzo giro** (`gpt-5.6-sol`, `--base 9f2a53d`, job `review-mtrr0dfp-dfbt4w`): osservazione 3, conclusione e consolidamento confermati corretti; **NO-SHIP, 3 finding (2 alti, 1 medio), accettati 3.**
+
+| # | Sev. | Finding (sintesi) | Esito | Correzione |
+|---|---|---|---|---|
+| 1 | alto | Le intestazioni delle tabelle non erano validate: permutando le sole intestazioni AUROC il rapporto passava, attribuendo i valori a segmenti/seed sbagliati | accettato | `_table` riceve l'intestazione attesa e la confronta cella per cella, controlla il separatore e il numero di celle di ogni riga; test per intestazioni permutate e rinominate |
+| 2 | alto | H1 ignorava il margine, H2 confrontava solo seed, verso e verdetto (non i tre Δ̄ né i due confronti), i controlli leggevano solo il verdetto testuale: `nan`, 999 e booleani invertiti passavano | accettato | Confronto cella per cella con `curve.json` di AUROC, F1 alla soglia, Δ, medie di Δ, tolleranza, H1 (Δ e margine = |Δ| − 0,02), H2 (Δ̄ a 2/3/5, confronti "3 < 2" e "5 < 3" ricavati dai numeri, esito = entrambi), controlli (ogni Δ, "aiuta?" per riga ricavato dai numeri, verdetto complessivo coerente con le righe e con la curva); 154 celle confrontate, `isfinite` su ogni numero |
+| 3 | medio | Il verdetto S1 era accettato ovunque nel file, anche in un commento HTML con un verdetto visibile opposto | accettato | Letto solo dalla sezione `## Verdetto`: prima riga `**<verdetto>**`, nessun altro verdetto ammesso nella sezione |
+
+30 test negativi in `tests/test_e03_manifest.py` (riga duplicata, offset mancante, `nan`/`inf`, colonne e intestazioni permutate o rinominate, F1/Δ/medie alterate, margine H1 falso, H2 con `nan`, booleano invertito o Δ̄ alterato, celle dei controlli alterate o incoerenti, verdetto fuori sezione, S1 in commento HTML, S2 alterato, curva alterata, modo sul sigillato). Suite completa: 126 test verdi.
+
+- **Quarto giro (chiusura):** *in corso*.
 
 ---
 

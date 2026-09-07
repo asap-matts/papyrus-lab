@@ -1,4 +1,4 @@
-"""Il manifest di E03 deve fallire su ogni rapporto del socio alterato, incompleto o non numerico (revisione R3, secondo giro).
+"""Il manifest di E03 deve fallire su ogni rapporto del socio alterato, incompleto o non numerico (revisione R3, secondo e terzo giro).
 
 I rapporti reali si leggono dal branch `origin/e03-socio`; se il branch non è disponibile i test che ne dipendono
 vengono saltati, non superati.
@@ -57,7 +57,7 @@ def _auroc_rows(s3: str) -> list[str]:
 
 def test_s3_reale_passa(s3, curve):
     out = m.check_s3(s3, curve)
-    assert out["auroc_cells_compared"] == 28 and out["auroc_table_max_abs_diff"] < 5e-6
+    assert out["cells_compared"] >= 28
     assert out["H1_violations_compared"] == 6
 
 
@@ -85,7 +85,7 @@ def test_s3_valore_non_finito_fallisce(s3, curve, token):
 
 def test_s3_auroc_alterata_fallisce(s3, curve):
     bad = s3.replace("0,813722", "0,813822", 1)
-    with pytest.raises(ValueError, match="scarto AUROC"):
+    with pytest.raises(ValueError, match="AUROC held-out"):
         m.check_s3(bad, curve)
 
 
@@ -96,13 +96,13 @@ def test_s3_colonne_permutate_falliscono(s3, curve):
         c = [x.strip() for x in r.strip().strip("|").split("|")]
         swapped.append("| " + " | ".join([c[0], c[2], c[1], c[3], c[4]]) + " |")
     bad = s3.replace("\n".join(rows), "\n".join(swapped))
-    with pytest.raises(ValueError, match="scarto AUROC"):
+    with pytest.raises(ValueError, match="AUROC held-out"):
         m.check_s3(bad, curve)
 
 
 def test_s3_h1_stesso_numero_ma_violazione_diversa_fallisce(s3, curve):
     # stesso conteggio (6), ma una combinazione sostituita da una che non viola
-    bad = s3.replace("| w016/s43 | +2 | −0,026046 | 0,006046 |", "| 0814/s43 | +2 | +0,013821 | 0,000000 |")
+    bad = s3.replace("| w016/s43 | +2 | −0,026046 | 0,006046 |", "| 0814/s43 | +2 | +0,013821 | −0,006179 |")
     with pytest.raises(ValueError, match="violazioni H1 diverse"):
         m.check_s3(bad, curve)
 
@@ -139,7 +139,7 @@ def test_s1_verdetto_vuoto_o_sconosciuto_fallisce():
         m.check_s1({"verdict": "", "counts": {}}, "")
     with pytest.raises(ValueError, match="verdetto S1"):
         m.check_s1({"verdict": "tutto bene", "counts": {}}, "tutto bene")
-    with pytest.raises(ValueError, match="assente dal rapporto"):
+    with pytest.raises(ValueError, match="sezione mancante"):
         m.check_s1({"verdict": "trovato lavoro parziale", "counts": {}}, "altro testo")
 
 
@@ -168,3 +168,90 @@ def test_curva_alterata_fallisce(curve):
 def test_sigillo_su_modo_fallisce():
     with pytest.raises(ValueError, match="sigillato"):
         m.sealed_scan({f"infer_{m.SEALED}_s42_z0": {}})
+
+
+# --- terzo giro R3: intestazioni, celle numeriche di H1/H2/controlli, sezione Verdetto di S1 ---
+
+def test_s3_reale_conta_tutte_le_celle(s3, curve):
+    out = m.check_s3(s3, curve)
+    # 3 tabelle × 28 + medie 14 + tolleranza 12 + H1 6×2 + H2 4×6 + controlli 8
+    assert out["cells_compared"] == 3 * 28 + 14 + 12 + 12 + 24 + 8
+
+
+def test_s3_intestazioni_permutate_falliscono(s3, curve):
+    bad = s3.replace("| offset | w016/s42 | w016/s43 | 0814/s42 | 0814/s43 |", "| offset | w016/s43 | w016/s42 | 0814/s42 | 0814/s43 |", 1)
+    with pytest.raises(ValueError, match="intestazione"):
+        m.check_s3(bad, curve)
+
+
+def test_s3_intestazione_rinominata_fallisce(s3, curve):
+    bad = s3.replace("| offset | w016/s42 | w016/s43 | 0814/s42 | 0814/s43 |", "| offset | w016/s42 | w016/s43 | 0814/s42 | 0814/s44 |", 1)
+    with pytest.raises(ValueError, match="intestazione"):
+        m.check_s3(bad, curve)
+
+
+def test_s3_f1_alterata_fallisce(s3, curve):
+    bad = s3.replace("0,582537", "0,582637", 1)
+    with pytest.raises(ValueError, match="F1 held-out"):
+        m.check_s3(bad, curve)
+
+
+def test_s3_delta_e_media_alterate_falliscono(s3, curve):
+    with pytest.raises(ValueError, match="Differenze AUROC"):
+        m.check_s3(s3.replace("| −5 | +0,039713 |", "| −5 | +0,039813 |", 1), curve)
+    with pytest.raises(ValueError, match="media Δ"):
+        m.check_s3(s3.replace("| 42 | −0,005946 |", "| 42 | −0,005846 |", 1), curve)
+
+
+def test_s3_h1_margine_falso_fallisce(s3, curve):
+    bad = s3.replace("| w016/s42 | −2 | +0,053524 | 0,033524 |", "| w016/s42 | −2 | +0,053524 | 999 |")
+    with pytest.raises(ValueError, match="margine H1"):
+        m.check_s3(bad, curve)
+
+
+def test_s3_h2_nan_fallisce(s3, curve):
+    bad = s3.replace("| 42 | − | −0,007142 | −0,000335 | −0,005946 | no | sì | **no** |",
+                     "| 42 | − | nan | −0,000335 | −0,005946 | no | sì | **no** |")
+    with pytest.raises(ValueError, match="non finito"):
+        m.check_s3(bad, curve)
+
+
+def test_s3_h2_booleano_invertito_fallisce(s3, curve):
+    bad = s3.replace("| 42 | − | −0,007142 | −0,000335 | −0,005946 | no | sì | **no** |",
+                     "| 42 | − | −0,007142 | −0,000335 | −0,005946 | sì | sì | **sì** |")
+    with pytest.raises(ValueError, match="H2"):
+        m.check_s3(bad, curve)
+
+
+def test_s3_h2_delta_alterato_fallisce(s3, curve):
+    bad = s3.replace("| 43 | − | −0,027476 |", "| 43 | − | −0,027376 |", 1)
+    with pytest.raises(ValueError, match="H2 Δ̄2"):
+        m.check_s3(bad, curve)
+
+
+@pytest.mark.parametrize("cell", ["nan", "999", "−0,023447 | no | no"])
+def test_s3_controlli_celle_alterate_falliscono(s3, curve, cell):
+    bad = s3.replace("| seed 43 | −0,023447 | +0,025884 | no |", f"| seed 43 | {cell} | +0,025884 | no |")
+    with pytest.raises(ValueError):
+        m.check_s3(bad, curve)
+
+
+def test_s3_controllo_aiuta_incoerente_fallisce(s3, curve):
+    bad = s3.replace("| seed 43 | −0,023447 | +0,025884 | no |", "| seed 43 | −0,023447 | +0,025884 | sì |")
+    with pytest.raises(ValueError, match="aiuta"):
+        m.check_s3(bad, curve)
+
+
+def test_s1_verdetto_in_commento_html_fallisce():
+    s1_md = _git_show("docs/reports/2026-09-07-e03-socio-s1-novita.md")
+    if s1_md is None:
+        pytest.skip("branch origin/e03-socio non disponibile")
+    j = json.loads(_git_show("docs/reports/2026-09-07-e03-socio-s1-fonti.json"))
+    assert m.check_s1(j, s1_md)["verdict"] == "trovato lavoro parziale"
+    bad = s1_md.replace("**trovato lavoro parziale**", "**trovato lavoro equivalente**\n\n<!-- trovato lavoro parziale -->", 1)
+    with pytest.raises(ValueError, match="Verdetto"):
+        m.check_s1(j, bad)
+    # verdetto giusto in prima riga ma un secondo verdetto nella stessa sezione
+    bad2 = s1_md.replace("**trovato lavoro parziale**", "**trovato lavoro parziale**\n\nOppure: trovato lavoro equivalente.", 1)
+    with pytest.raises(ValueError, match="contiene anche"):
+        m.check_s1(j, bad2)
