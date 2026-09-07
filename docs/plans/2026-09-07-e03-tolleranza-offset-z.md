@@ -461,6 +461,19 @@ Il piano è stato congelato il 7 settembre 2026 (`docs: freeze E03 plan (R01)`, 
 - **Correzione.** Nessuna modifica al codice: lo script resta una riproduzione fedele di quello ufficiale, che non ha ritentativi. Si è **ripetuto il run**, come prescrive la procedura di E02, fino a tre tentativi. Tempi effettivi: 102 s, 95 s, 95 s; 0,8 GB letti per pooling.
 - **Esito.** `--z-start 13` produce l'albero con impronta **`bc7423431221bf24b247a8ba80d264b0306f816c52b4ecc0d08115a82305ac52`**, identica a quella ufficiale di E02: lo script riproduce il pooling di villa byte per byte. Gli input spostati hanno impronte `f73364dc…` (−3) e `8406e615…` (+3); le 18 slice condivise coincidono esattamente con l'input ufficiale e le tre slice nuove differiscono, come atteso.
 
+### A8 — il manifest del dataset delle label deve avere l'elenco per file (7 settembre 2026)
+
+- **Cosa è successo.** Il run `prep-w016-z13` **tentativo 2** è arrivato fino alla cella delle label (checkout, installazione e mount corretti) e si è fermato con `KeyError: 'files'`: la cella riusata da E02 verifica il dataset **file per file** contro `manifest['segments'][<seg>]['files']`, e il manifest che avevo costruito aveva solo i totali.
+- **Correzione.** Il dataset viene ora costruito da `scripts/build_e03_label_dataset.py` (nuovo, perimetro esteso come in A3), che riusa le funzioni congelate di `scripts/build_label_dataset.py`, scrive lo **stesso schema** di E02 (elenco di `{path, size, sha256}` per ogni file) e si ferma se le impronte non coincidono con quelle congelate o se il segmento sigillato compare. Un test verifica che il manifest costruito soddisfi ciò che la cella riusata pretende.
+- **Verifica.** Manifest ripubblicato: 10.800 file elencati, 0 percorsi del segmento sigillato; i tar restano identici byte per byte a quelli di E02.
+- **Costo.** Una seconda sessione CPU persa, nessuna quota GPU.
+
+### A7 — `null` invece di `None` nelle costanti dei notebook CPU (7 settembre 2026)
+
+- **Cosa è successo.** Il run `prep-w016-z13` **tentativo 1** è fallito alla prima cella: `EXPECTED_INDICES = null`, `NameError: name 'null' is not defined`. Il generatore scriveva le costanti con `json.dumps`, che per un valore assente produce `null`: valido in JSON, inesistente in Python. Nei run `infer-*` la costante non è mai nulla, quindi il difetto colpiva solo i run CPU, dove gli indici non servono.
+- **Correzione.** Il generatore scrive `None` quando il valore è assente. Due test nuovi, che il difetto avrebbe fatto fallire: uno **compila** ogni cella Python di ogni notebook generato, l'altro **esegue** la cella delle costanti da sola e verifica che definisca tutti i nomi usati dalle celle successive.
+- **Costo.** Una sessione CPU persa, nessuna quota GPU. Il run è stato ripetuto con lo stesso ID come tentativo 2, secondo la procedura.
+
 ### A6 — due difetti del pilota scoperti pubblicando il dataset delle label (7 settembre 2026)
 
 - **Titolo troppo lungo.** Kaggle rifiuta un titolo oltre i 50 caratteri ("The dataset title must be between 6 and 50 characters"). I titoli dei dataset di E03 sono stati accorciati: `PapyrusLab E03-R01 labels (dev segments)` e `PapyrusLab E03-R01 input <tag> <segmento breve>`.

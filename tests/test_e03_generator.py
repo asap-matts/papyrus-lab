@@ -179,3 +179,56 @@ def test_reservation_is_counted_before_the_download(tmp_path, monkeypatch):
     assert pilot.consumed_minutes() == 60
     pilot.reserve("infer-46527-s42-zm2", 60)          # secondo push dello stesso modo: si somma
     assert pilot.consumed_minutes() == 120
+
+
+@pytest.mark.skipif(not GENERATED, reason="notebook non ancora generati")
+def test_every_python_cell_compiles():
+    """Le costanti finiscono in codice Python, non in JSON: un None reso come 'null' fa fallire il run alla
+    prima cella (successo il 7 settembre 2026 nel run prep-w016-z13 v1). Compilare ogni cella lo intercetta."""
+    for folder in GENERATED:
+        nb = json.loads(next(folder.glob("*.ipynb")).read_text(encoding="utf-8"))
+        for i, cell in enumerate(nb["cells"]):
+            if cell["cell_type"] != "code":
+                continue
+            src = "".join(cell["source"])
+            if src.lstrip().startswith("%%"):          # celle bash: non sono Python
+                continue
+            try:
+                compile(src, f"{folder.name}#cell{i}", "exec")
+            except SyntaxError as exc:
+                raise AssertionError(f"{folder.name} cella {i} non compila: {exc}") from exc
+
+
+@pytest.mark.skipif(not GENERATED, reason="notebook non ancora generati")
+def test_constants_cell_defines_every_name_the_other_cells_use():
+    """La cella delle costanti deve produrre nomi Python validi anche quando un valore e' assente."""
+    for folder in GENERATED:
+        nb = json.loads(next(folder.glob("*.ipynb")).read_text(encoding="utf-8"))
+        const = next("".join(c["source"]) for c in nb["cells"]
+                     if c["cell_type"] == "code" and "WORK = " in "".join(c["source"]))
+        ns: dict = {}
+        exec(compile(const, "constants", "exec"), ns)          # deve eseguirsi da sola, senza contesto
+        for name in ("MODE", "KIND", "SEG", "TAG", "K", "Z_START", "SOURCE_Z_SLICE", "LAYER_ARGS",
+                     "EXPECTED_INDICES", "WORK", "HEAVY", "LABEL_ALLOWLIST"):
+            assert name in ns, f"{folder.name}: la cella delle costanti non definisce {name}"
+        assert ns["SEG"] in ns["LABEL_ALLOWLIST"] and ns["SEG"] != ns["SEALED_SEGMENT"]
+
+
+def test_the_label_manifest_has_the_schema_the_reused_cell_needs():
+    """La cella delle label riusata da E02 verifica il dataset file per file contro
+    manifest['segments'][SEG]['files']: senza quell'elenco il run si ferma con KeyError
+    (run prep-w016-z13 v2, 7 settembre 2026)."""
+    built = ROOT / "runs" / "E03-R01" / "dataset-labels" / "manifest.json"
+    if not built.exists():
+        pytest.skip("dataset delle label non ancora costruito")
+    man = json.loads(built.read_text(encoding="utf-8"))
+    cell = gen.reuse("CELL_5A_LABEL_PY")
+    assert 'man["files"]' in cell                      # cio' che la cella pretende
+    e02 = json.loads((ROOT / "configs" / "e02" / "datasets.json").read_text(encoding="utf-8"))["labels"]["segments"]
+    for seg, s in man["segments"].items():
+        assert {"files", "file_count", "byte_total", "tree_sha256", "source_prefix"} <= set(s)
+        assert len(s["files"]) == s["file_count"] == e02[seg]["file_count"]
+        assert sum(f["size"] for f in s["files"]) == s["byte_total"] == e02[seg]["byte_total"]
+        assert all({"path", "size", "sha256"} <= set(f) for f in s["files"][:20])
+        assert all(f["path"].startswith(s["source_prefix"]) for f in s["files"][:20])
+        assert gen.SEALED not in json.dumps(s["files"][:50])

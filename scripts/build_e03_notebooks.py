@@ -455,7 +455,10 @@ def build(mode: str, ds: dict, user: str, run_id: str) -> tuple[dict, dict]:
         "__SEED__": "None" if seed is None else str(seed), "__TAG__": tag,
         "__K__": "None" if k is None else str(k), "__Z_START__": str(z_start),
         "__SOURCE_Z_SLICE__": json.dumps(source_z), "__LAYER_ARGS__": layer_args,
-        "__EXPECTED_INDICES__": json.dumps(expected_idx), "__SRC_URL__": info["source"],
+        # attenzione: le costanti finiscono in codice Python, non in JSON. json.dumps(None) darebbe 'null',
+        # che in Python non esiste (run prep-w016-z13 v1 fallito cosi' il 7 settembre 2026).
+        "__EXPECTED_INDICES__": "None" if expected_idx is None else json.dumps(expected_idx),
+        "__SRC_URL__": info["source"],
         "__LABEL_SHAPE__": json.dumps(info["label_shape"]), "__TORCH__": TORCH_EXPECTED["gpu" if gpu else "cpu"],
         "__LABEL_TREE__": lab["tree_sha256"], "__LABEL_FILES__": str(lab["file_count"]),
         "__LABEL_BYTES__": str(lab["byte_total"]), "__LABEL_ALLOWLIST__": json.dumps(LABEL_ALLOWLIST),
