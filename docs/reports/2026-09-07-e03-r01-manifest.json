@@ -1,7 +1,7 @@
 {
  "commits_papyruslab": {
   "curve": "d85ee42",
-  "manifest_head": "1cb603e",
+  "manifest_head": "9f2a53d",
   "partner_delivery": "f579f5b",
   "partner_start": "8cfdc35",
   "plan_frozen": "9e7f1d0",
@@ -875,6 +875,7 @@
   },
   "S3_blind_recomputation": {
    "H1_identical": true,
+   "H1_violations_compared": 6,
    "H2_identical": true,
    "anomaly_identical": true,
    "auroc_cells_compared": 28,

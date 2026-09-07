@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import re
 import subprocess
 import sys
@@ -157,7 +158,10 @@ IT = {"pherc0139-w016": "w016", "pherc0814-46527": "0814"}
 
 
 def _num(s: str) -> float:
-    return float(s.replace("−", "-").replace(",", ".").replace("+", ""))
+    v = float(s.strip().replace("−", "-").replace(",", ".").replace("+", ""))
+    if not math.isfinite(v):
+        raise ValueError(f"valore non finito nel rapporto del socio: {s!r}")
+    return v
 
 
 def _show(commit: str, path: str) -> str:
@@ -167,8 +171,16 @@ def _show(commit: str, path: str) -> str:
     return out.stdout
 
 
+def _table(text: str, heading: str) -> list[list[str]]:
+    """Righe (celle già ripulite) della prima tabella markdown sotto `heading`; intestazione e separatore esclusi."""
+    m = re.search(r"^" + re.escape(heading) + r"\n\n((?:\|.*\n)+)", text, re.M)
+    if not m:
+        raise ValueError(f"tabella mancante nel rapporto del socio: {heading!r}")
+    rows = [[c.strip() for c in ln.strip().strip("|").split("|")] for ln in m.group(1).splitlines()]
+    return rows[2:]
+
+
 def _tol(cell: str):
-    cell = cell.strip()
     if cell == TOL_NONE:
         return None
     m = re.fullmatch(r"(\d) slice", cell)
@@ -177,8 +189,127 @@ def _tol(cell: str):
     return int(m.group(1))
 
 
+S1_VERDICTS = ("nessun lavoro equivalente trovato", "trovato lavoro parziale", "trovato lavoro equivalente")
+COMBOS = ("w016/s42", "w016/s43", "0814/s42", "0814/s43")
+KS = (-5, -3, -2, 0, 2, 3, 5)
+H1_HEADING = "## H1 — piatta entro ±2\n\n**Violata su 6 coppie combinazione-offset su 8.** Violazioni di `|Δ| ≤ 0,02`:"
+
+
+def _combo(short: str) -> tuple[str, str]:
+    seg, s = short.split("/s")
+    return next(g for g, sh in IT.items() if sh == seg), s
+
+
+def check_s1(s1: dict, s1_md: str) -> dict:
+    v = s1.get("verdict")
+    if v not in S1_VERDICTS:
+        raise ValueError(f"verdetto S1 non riconosciuto: {v!r}")
+    if v not in s1_md:
+        raise ValueError("verdetto S1 del JSON assente dal rapporto S1")
+    counts = s1["counts"]
+    return {"verdict": v, "pertinent_sources": int(counts["pertinent_sources"]),
+            "network_queries": int(counts["network_queries"]), "queried_at_utc": s1["queried_at_utc"]}
+
+
+def check_s2(s2: str, ds: dict, script_sha: str) -> dict:
+    seg = "pherc0814-46527"
+    got = {}
+    for r in _table(s2, "## Risultati"):
+        if len(r) != 9 or not re.fullmatch(r"`[0-9a-f]{64}`", r[5]):
+            raise ValueError(f"riga S2 non riconosciuta: {r}")
+        z = int(r[0])
+        if z in got:
+            raise ValueError(f"S2: z-start {z} duplicato")
+        got[z] = r[5].strip("`")
+    expected = {13: ds["inputs"][seg]["official"]["tree_sha256"], 1: ds["inputs"][seg]["shifted_zm3"]["tree_sha256"],
+                25: ds["inputs"][seg]["shifted_zp3"]["tree_sha256"]}
+    if got != expected:
+        raise ValueError(f"impronte S2 del socio diverse da datasets.json: {got}")
+    m = re.search(r"`scripts/e03_pool_shifted.py`: SHA-256 `([0-9a-f]{64})`", s2)
+    if not m or m.group(1) != script_sha:
+        raise ValueError("S2: impronta dello script assente o diversa da quella in main")
+    eq_m3 = "offset −3 (`z-start 1`): le slice 3..20 dello spostato sono identiche alle slice 0..17 del centrale — `True`." in s2
+    eq_p3 = "offset +3 (`z-start 25`): le slice 0..17 dello spostato sono identiche alle slice 3..20 del centrale — `True`." in s2
+    if not (eq_m3 and eq_p3):
+        raise ValueError("S2: uguaglianza slice a slice non dichiarata per entrambi gli spostamenti")
+    return {"segment": seg, "tree_sha256": {f"z{z}": h for z, h in sorted(got.items())},
+            "identical_to_datasets_json": True, "slice_equality_declared": True, "script_sha256_identical_to_main": True}
+
+
+def check_s3(s3: str, curve: dict) -> dict:
+    # AUROC held-out: esattamente i 7 offset, ciascuno una volta, 4 colonne nell'ordine atteso, valori finiti
+    seen, max_diff = set(), 0.0
+    for r in _table(s3, "## AUROC held-out"):
+        if len(r) != 5:
+            raise ValueError(f"riga AUROC S3 con {len(r)} celle")
+        k = int(_num(r[0]))
+        if k in seen:
+            raise ValueError(f"S3: offset {k} duplicato nella tabella AUROC")
+        seen.add(k)
+        for short, cell in zip(COMBOS, r[1:]):
+            g, s = _combo(short)
+            max_diff = max(max_diff, abs(_num(cell) - float(curve["auroc_held"][s][str(k)][g])))
+    if seen != set(KS):
+        raise ValueError(f"S3: offset della tabella AUROC {sorted(seen)} diversi da {list(KS)}")
+    if max_diff > 5e-6:
+        raise ValueError(f"S3: scarto AUROC massimo {max_diff} oltre 5e-6")
+    # tolleranza: le 6 chiavi (aggregazione, seed), una volta ciascuna
+    tol = {}
+    for r in _table(s3, "## Tolleranza preregistrata"):
+        if len(r) != 4 or (r[0], r[1]) in tol:
+            raise ValueError(f"S3: riga di tolleranza non valida o duplicata: {r}")
+        tol[(r[0], r[1])] = (_tol(r[2]), _tol(r[3]))
+    want = {("media dei due segmenti", s) for s in ("42", "43")} | {(sh, s) for sh in IT.values() for s in ("42", "43")}
+    if set(tol) != want:
+        raise ValueError(f"S3: chiavi di tolleranza {sorted(tol)} diverse dalle 6 attese")
+    for (agg, s), (mn, pl) in tol.items():
+        ours = curve["tolerance"][s] if agg.startswith("media") else \
+            curve["tolerance"][s]["per_segment"][next(g for g, sh in IT.items() if sh == agg)]
+        if (mn, pl) != (ours["minus"], ours["plus"]):
+            raise ValueError(f"S3: tolleranza diversa per {agg} seed {s}: {(mn, pl)} contro {(ours['minus'], ours['plus'])}")
+    # H1: insieme completo delle violazioni (segmento, seed, offset, delta)
+    theirs = set()
+    for r in _table(s3, H1_HEADING):
+        if len(r) != 4:
+            raise ValueError(f"S3: riga H1 non valida: {r}")
+        g, s = _combo(r[0])
+        theirs.add((g, s, int(_num(r[1])), round(_num(r[2]), 5)))
+    ours_h1 = {(v["segment"], str(v["seed"]), int(v["k"]), round(float(v["delta"]), 5)) for v in curve["H1"]["violations"]}
+    if len(theirs) != len(_table(s3, H1_HEADING)) or theirs != ours_h1:
+        raise ValueError(f"S3: violazioni H1 diverse: {sorted(theirs)} contro {sorted(ours_h1)}")
+    # H2: le 4 righe (seed, verso), una volta ciascuna, con esito
+    h2 = {}
+    for r in _table(s3, "## H2 — decadimento oltre ±2"):
+        if len(r) != 8 or (r[0], r[1]) in h2 or r[7] not in ("**sì**", "**no**"):
+            raise ValueError(f"S3: riga H2 non valida o duplicata: {r}")
+        h2[(r[0], r[1])] = r[7] == "**sì**"
+    ours_h2 = {(str(r["seed"]), "−" if r["direction"] == "minus" else "+"): bool(r["monotone"]) for r in curve["H2"]["rows"]}
+    if h2 != ours_h2:
+        raise ValueError(f"S3: H2 diversa: {h2} contro {ours_h2}")
+    # anomalia e controlli, letti ciascuno nella propria sezione
+    anom = re.search(r"^## Regola di anomalia\n\n\*\*(Non attivata|Attivata)\.\*\*", s3, re.M)
+    if not anom or (anom.group(1) == "Attivata") != bool(curve["anomaly"]["triggered"]):
+        raise ValueError("S3: regola di anomalia assente o diversa")
+    verdicts = {}
+    for heading, key in (("### Media dei seed", "seed_mean"), ("### Media delle finestre −2/+2", "z_mean_m2p2")):
+        sec = re.search(r"^" + re.escape(heading) + r"\n(.*?)(?=^###|^## |\Z)", s3, re.M | re.S)
+        if not sec:
+            raise ValueError(f"S3: sezione {heading!r} assente")
+        vm = re.findall(r"\*\*Verdetto complessivo: (aiuta|non aiuta)\.\*\*", sec.group(1))
+        if len(vm) != 1:
+            raise ValueError(f"S3: verdetto del controllo {key} assente o multiplo")
+        verdicts[key] = vm[0] == "aiuta"
+    ours_c = {k: bool(v["helps"]) for k, v in curve["controls"].items() if v}
+    if verdicts != ours_c:
+        raise ValueError(f"S3: controlli diversi: {verdicts} contro {ours_c}")
+    return {"auroc_cells_compared": 28, "auroc_table_max_abs_diff": max_diff, "tolerance_identical": True,
+            "H1_identical": True, "H1_violations_compared": len(ours_h1), "H2_identical": True,
+            "anomaly_identical": True, "controls_identical": True}
+
+
 def partner_block(ds: dict, curve: dict) -> dict:
-    """Legge i rapporti S1–S3 dal branch del socio e li confronta con i nostri valori (R3, finding 4). Fallisce su ogni divergenza."""
+    """Legge i rapporti S1–S3 dal branch del socio e li confronta con i nostri valori (R3, finding 4).
+    Il confronto è strutturale (tabelle con chiavi esatte, senza duplicati, valori finiti) e ogni divergenza è un errore."""
     header = re.search(r"\*\*Commit di partenza:\*\* `branch e03-socio` — (.+)", PARTNER_PLAN.read_text(encoding="utf-8"))
     if not header:
         raise ValueError("piano del socio senza 'Commit di partenza' compilato")
@@ -190,65 +321,12 @@ def partner_block(ds: dict, curve: dict) -> dict:
     delivered = sorted(git("diff", "--name-only", start, tip).splitlines())
     if delivered != sorted(PARTNER_FILES):
         raise ValueError(f"file consegnati dal socio diversi dall'atteso: {delivered}")
-
-    s1 = json.loads(_show(tip, PARTNER_FILES[0]))
-    s1_md = _show(tip, PARTNER_FILES[1])
-    if s1.get("verdict") not in s1_md:
-        raise ValueError("verdetto S1 del JSON assente dal rapporto S1")
-    s2 = _show(tip, PARTNER_FILES[2])
-    rows = {int(m.group(1)): m.group(2) for m in re.finditer(r"^\|\s*(\d+)\s*\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|\s*`([0-9a-f]{64})`", s2, re.M)}
-    seg = "pherc0814-46527"
-    expected = {13: ds["inputs"][seg]["official"]["tree_sha256"], 1: ds["inputs"][seg]["shifted_zm3"]["tree_sha256"],
-                25: ds["inputs"][seg]["shifted_zp3"]["tree_sha256"]}
-    if rows != expected:
-        raise ValueError(f"impronte S2 del socio diverse da datasets.json: {rows}")
-    m = re.search(r"`scripts/e03_pool_shifted.py`: SHA-256 `([0-9a-f]{64})`", s2)
-    script_same = bool(m) and m.group(1) == sha256_file(ROOT / "scripts" / "e03_pool_shifted.py")
-    slice_eq = s2.count("— `True`") == 2
-    if not (script_same and slice_eq):
-        raise ValueError("S2: script diverso o uguaglianza slice non dichiarata")
-
-    s3 = _show(tip, PARTNER_FILES[3])
-    table = re.search(r"## AUROC held-out\n\n(.*?)\n\n", s3, re.S).group(1).splitlines()[2:]
-    cols = ["pherc0139-w016|42", "pherc0139-w016|43", "pherc0814-46527|42", "pherc0814-46527|43"]
-    max_diff, n = 0.0, 0
-    for line in table:
-        cells = [c.strip() for c in line.strip("|").split("|")]
-        k = int(_num(cells[0]))
-        for col, cell in zip(cols, cells[1:]):
-            g, s = col.split("|")
-            max_diff = max(max_diff, abs(_num(cell) - curve["auroc_held"][s][str(k)][g])); n += 1
-    if n != 28 or max_diff > 5e-6:
-        raise ValueError(f"tabella AUROC S3: {n} celle, scarto massimo {max_diff}")
-    tol_rows = re.findall(r"^\| (media dei due segmenti|w016|0814) \| (4[23]) \| (.+?) \| (.+?) \|$", s3, re.M)
-    if len(tol_rows) != 6:
-        raise ValueError("tabella di tolleranza S3 incompleta")
-    for agg, s, minus, plus in tol_rows:
-        ours = curve["tolerance"][s] if agg.startswith("media") else \
-            curve["tolerance"][s]["per_segment"][next(g for g, short in IT.items() if short == agg)]
-        if (_tol(minus), _tol(plus)) != (ours["minus"], ours["plus"]):
-            raise ValueError(f"tolleranza S3 diversa: {agg} seed {s}")
-    h1 = re.search(r"\*\*Violata su (\d) coppie", s3)
-    if not h1 or int(h1.group(1)) != len(curve["H1"]["violations"]):
-        raise ValueError("H1 S3 diversa")
-    h2 = re.findall(r"^\| (4[23]) \| ([−+]) \|.*\| \*\*(sì|no)\*\* \|$", s3, re.M)
-    ours_h2 = {(str(r["seed"]), "−" if r["direction"] == "minus" else "+"): r["monotone"] for r in curve["H2"]["rows"]}
-    if len(h2) != 4 or any(ours_h2[(s, d)] != (v == "sì") for s, d, v in h2):
-        raise ValueError("H2 S3 diversa")
-    if "## Regola di anomalia\n\n**Non attivata.**" not in s3 or curve["anomaly"]["triggered"]:
-        raise ValueError("anomalia S3 diversa")
-    if s3.count("**Verdetto complessivo: non aiuta.**") != 2 or any(v["helps"] for v in curve["controls"].values() if v):
-        raise ValueError("controlli S3 diversi")
+    s1 = check_s1(json.loads(_show(tip, PARTNER_FILES[0])), _show(tip, PARTNER_FILES[1]))
+    s2 = check_s2(_show(tip, PARTNER_FILES[2]), ds, sha256_file(ROOT / "scripts" / "e03_pool_shifted.py"))
+    s3 = check_s3(_show(tip, PARTNER_FILES[3]), curve)
     return {"branch": "e03-socio", "start_commit": start, "delivery_commit": tip, "files": list(PARTNER_FILES),
             "executor": "Codex (gpt-5.6-sol) sul Mac del socio, procedura unica",
-            "S1_novelty": {"verdict": s1["verdict"], "pertinent_sources": s1["counts"]["pertinent_sources"],
-                           "network_queries": s1["counts"]["network_queries"], "queried_at_utc": s1["queried_at_utc"]},
-            "S2_pooling": {"segment": seg, "tree_sha256": {f"z{z}": h for z, h in rows.items()},
-                           "identical_to_datasets_json": True, "slice_equality_declared": slice_eq,
-                           "script_sha256_identical_to_main": script_same},
-            "S3_blind_recomputation": {"auroc_cells_compared": n, "auroc_table_max_abs_diff": max_diff,
-                                       "tolerance_identical": True, "H1_identical": True, "H2_identical": True,
-                                       "anomaly_identical": True, "controls_identical": True}}
+            "S1_novelty": s1, "S2_pooling": s2, "S3_blind_recomputation": s3}
 
 
 def main() -> int:
