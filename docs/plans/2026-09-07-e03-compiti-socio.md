@@ -2,9 +2,9 @@
 
 **Scritto da:** Claude Code (writer, su incarico di Matteo) · **Esecutore previsto:** Codex del socio, sul Mac M3 Pro, cartella `~/dev/papyrus-lab`, modello `gpt-5.6-sol` · **Revisore:** Claude Code in sola lettura, poi decisione di fusione di Matteo
 **Data:** 2026-09-07 · **Branch:** `e03-socio`
-**Commit di partenza:** `DA COMPILARE`
+**Commit di partenza:** `branch e03-socio` — docs: E03 partner tasks ready (start of S1-S2-S3)
 
-> Questa riga si compila al passo 10 del piano madre, con il commit che contiene i JSON delle metriche di E03, nel formato letto da `scripts/e03_bootstrap_mac.sh`: due asterischi, `Commit di partenza:`, due asterischi, lo sha breve fra apici inversi, un trattino lungo, il messaggio esatto del commit. Finché resta `DA COMPILARE`, lo script di avvio si ferma e il piano non va consegnato.
+> Compilata il 7 settembre 2026 (passo 10 del piano madre). Il branch `e03-socio` punta al commit con il messaggio sopra, che contiene i 61 JSON delle metriche in `docs/reports/e03-r01/metrics/` (compreso `curve.json`, da **non** aprire), gli script e questo piano. Lo script di avvio confronta il messaggio dell'ultimo commit del branch con quello dopo il trattino lungo.
 **Piano madre:** [E03 — tolleranza all'offset Z](2026-09-07-e03-tolleranza-offset-z.md), §9
 **Prompt da incollare in Codex:** [e03-prompt-codex-socio.md](e03-prompt-codex-socio.md)
 
