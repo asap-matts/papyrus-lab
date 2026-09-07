@@ -1,0 +1,101 @@
+{
+ "annotated_plane": "shape[0] // 2",
+ "disjoint_check": {
+  "n_px_held_and_train": 0
+ },
+ "edges": [
+  0,
+  64,
+  128,
+  256
+ ],
+ "generated_at": "2026-09-07T00:06:11+00:00",
+ "geometry": {
+  "annotated_plane_shape": [
+   7020,
+   7220
+  ],
+  "annotated_regions": 2,
+  "distance_stats": {
+   "max": 273.9069184960467,
+   "median": 106.10372283760829,
+   "min": 1.0,
+   "p25": 52.23983154643591,
+   "p75": 165.13025161974412
+  },
+  "edges": [
+   0,
+   64,
+   128,
+   256
+  ],
+  "held_share_of_annotation": 0.2625481373622568,
+  "n_ink_held": 41253,
+  "n_ink_train": 116584,
+  "n_px_held": 178146,
+  "n_px_held_and_train": 0,
+  "n_px_train": 500381,
+  "patch": 128,
+  "regions": [
+   {
+    "bbox_yyxx": [
+     4944,
+     5425,
+     3655,
+     3955
+    ],
+    "ink_fraction": 0.21061985212864126,
+    "n_ink": 18488,
+    "n_px": 87779,
+    "region": 1
+   },
+   {
+    "bbox_yyxx": [
+     4955,
+     5322,
+     1803,
+     2131
+    ],
+    "ink_fraction": 0.2519171821572034,
+    "n_ink": 22765,
+    "n_px": 90367,
+    "region": 2
+   }
+  ],
+  "regions_held": 2,
+  "regions_mixing_held_and_training": 2,
+  "strata": [
+   {
+    "ink_density": 0.12503903451569648,
+    "n_ink": 6807,
+    "n_px": 54439,
+    "stratum": "<64"
+   },
+   {
+    "ink_density": 0.2774895658618403,
+    "n_ink": 14228,
+    "n_px": 51274,
+    "stratum": "64-128"
+   },
+   {
+    "ink_density": 0.28533525269204174,
+    "n_ink": 20218,
+    "n_px": 70857,
+    "stratum": "128-256"
+   },
+   {
+    "ink_density": 0.0,
+    "n_ink": 0,
+    "n_px": 1576,
+    "stratum": ">=256"
+   }
+  ],
+  "within_patch": 0.5934065317211725,
+  "within_two_patches": 0.9911533236783313
+ },
+ "labels_dir": "/Users/micheleghisa/dev/papyrus-lab/data/labels/aligned-scrollprizeorg-21slices/pherc0139-w016",
+ "patch": 128,
+ "segment": "pherc0139-w016",
+ "threshold_arg": null,
+ "version": "e02_metrics/1.0"
+}
