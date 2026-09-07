@@ -1,8 +1,9 @@
 {
  "commits_papyruslab": {
   "curve": "d85ee42",
-  "manifest_head": "3e07bc8",
-  "partner_start": "f579f5b",
+  "manifest_head": "1cb603e",
+  "partner_delivery": "f579f5b",
+  "partner_start": "8cfdc35",
   "plan_frozen": "9e7f1d0",
   "review_R2_fixes": "4520815",
   "steps_0_5": "4c60e43"
@@ -124,6 +125,8 @@
    "seed_mean": false,
    "z_mean_m2p2": false
   },
+  "matches_curve_json": true,
+  "points_recomputed": 28,
   "tolerance": {
    "42": {
     "delta_at_5": {
@@ -854,35 +857,42 @@
  },
  "partner_tasks": {
   "S1_novelty": {
-   "equivalent_on_held_out_pixels": false,
-   "sources": [
-    "model card ink_9um (qualitativo)",
-    "tutorial5 (qualitativo)",
-    "hilalitvak/inkalign @ c11177a: sweep Z di ink_9um su ROI w025 con punteggio senza etichette (line_score), migliore -4",
-    "flummoxjr/measure-before-you-hunt @ e508085 (2026-08-17): curva AUC(offset) -6..+5 di ink_9um seed 42 su w035, segmento di TRAINING; conclude 'depth-offset hypothesis refuted within +-6'"
-   ],
+   "network_queries": 41,
+   "pertinent_sources": 4,
+   "queried_at_utc": "2026-09-07T20:20:38Z",
    "verdict": "trovato lavoro parziale"
   },
   "S2_pooling": {
-   "identical_to_laptop_and_kaggle": true,
-   "script_sha256_identical": true,
-   "slice_equality": true,
-   "z1": "f73364dcb813487ab9c30d6f0292f90f6364059b28ce83dc82c1c2827f88407d",
-   "z13": "bc7423431221bf24b247a8ba80d264b0306f816c52b4ecc0d08115a82305ac52",
-   "z25": "8406e6150c306fd8ac5ac81fceefe290eabc1dd7f88ebc43ecf8bb630aeea85f"
+   "identical_to_datasets_json": true,
+   "script_sha256_identical_to_main": true,
+   "segment": "pherc0814-46527",
+   "slice_equality_declared": true,
+   "tree_sha256": {
+    "z1": "f73364dcb813487ab9c30d6f0292f90f6364059b28ce83dc82c1c2827f88407d",
+    "z13": "bc7423431221bf24b247a8ba80d264b0306f816c52b4ecc0d08115a82305ac52",
+    "z25": "8406e6150c306fd8ac5ac81fceefe290eabc1dd7f88ebc43ecf8bb630aeea85f"
+   }
   },
   "S3_blind_recomputation": {
    "H1_identical": true,
    "H2_identical": true,
-   "ambiguities_recorded": 10,
    "anomaly_identical": true,
-   "auroc_table_max_abs_diff": 4.9e-07,
+   "auroc_cells_compared": 28,
+   "auroc_table_max_abs_diff": 4.91637290656044e-07,
    "controls_identical": true,
    "tolerance_identical": true
   },
   "branch": "e03-socio",
-  "commit": "f579f5b",
-  "executor": "Codex (gpt-5.6-sol) sul Mac del socio, procedura unica"
+  "delivery_commit": "f579f5b",
+  "executor": "Codex (gpt-5.6-sol) sul Mac del socio, procedura unica",
+  "files": [
+   "docs/reports/2026-09-07-e03-socio-s1-fonti.json",
+   "docs/reports/2026-09-07-e03-socio-s1-novita.md",
+   "docs/reports/2026-09-07-e03-socio-s2-pooling-46527.md",
+   "docs/reports/2026-09-07-e03-socio-s3-ricalcolo.md",
+   "scripts/socio/e03_socio_curve.py"
+  ],
+  "start_commit": "8cfdc35"
  },
  "plan": "docs/plans/2026-09-07-e03-tolleranza-offset-z.md",
  "points_validated": 24,
@@ -9641,8 +9651,8 @@
  },
  "runs_missing": [],
  "sealed_segment": {
+  "json_scanned": 61,
   "mentioned_in_any_report": false,
-  "opened_in": "E05",
   "runs_on_it": 0,
   "segment": "pherc1667-w029"
  },

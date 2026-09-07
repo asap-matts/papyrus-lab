@@ -120,6 +120,137 @@ def validate_point(mode: str, seg: str, seed: int, tag: str, kaggle_rep: dict, l
         raise ValueError(f"{mode}: gates not passed ({kaggle_rep.get('gate_A')}, {kaggle_rep.get('gate_B')})")
 
 
+def recompute_curve(curve_file: dict) -> dict:
+    """Ricalcola la curva dai 28 report e la confronta con curve.json (R3, finding 4): il manifest attesta solo ciò che ha rifatto."""
+    import e03_curve as ec  # noqa: E402
+    points = ec.load_points(METRICS)
+    ec.validate_matrix(points)
+    fresh = ec.compute(points, ec.load_extras(METRICS))
+    diff = [k for k in set(fresh) | set(curve_file) if k != "generated_at" and fresh.get(k) != curve_file.get(k)]
+    if diff:
+        raise ValueError(f"curve.json non coincide con il ricalcolo dai report: campi {sorted(diff)}")
+    return {"points_recomputed": len(points), "matches_curve_json": True,
+            "tolerance": fresh["tolerance"], "H1": {"holds": fresh["H1"]["holds"], "violations": len(fresh["H1"]["violations"])},
+            "H2_holds": fresh["H2"]["holds"], "anomaly_triggered": fresh["anomaly"]["triggered"],
+            "controls": {k: (v["helps"] if v else None) for k, v in fresh["controls"].items()},
+            "auroc_held": fresh["auroc_held"]}
+
+
+def sealed_scan(runs: dict) -> dict:
+    """Cerca il nome del segmento sigillato in tutti i JSON di metriche e nei modi eseguiti; nessun valore è presunto."""
+    files = sorted(METRICS.glob("*.json"))
+    hits = [f.name for f in files if SEALED in f.read_text(encoding="utf-8")]
+    modes_hit = [m for m in runs if SEALED in m]
+    if hits or modes_hit:
+        raise ValueError(f"segmento sigillato citato: file {hits}, modi {modes_hit}")
+    return {"segment": SEALED, "json_scanned": len(files), "mentioned_in_any_report": False,
+            "runs_on_it": len(modes_hit)}
+
+
+PARTNER_BRANCH = "origin/e03-socio"
+PARTNER_PLAN = ROOT / "docs" / "plans" / "2026-09-07-e03-compiti-socio.md"
+PARTNER_FILES = ("docs/reports/2026-09-07-e03-socio-s1-fonti.json", "docs/reports/2026-09-07-e03-socio-s1-novita.md",
+                 "docs/reports/2026-09-07-e03-socio-s2-pooling-46527.md", "docs/reports/2026-09-07-e03-socio-s3-ricalcolo.md",
+                 "scripts/socio/e03_socio_curve.py")
+TOL_NONE = "nessun decadimento di 0,05 rilevato fino a 5 slice agli offset campionati"
+IT = {"pherc0139-w016": "w016", "pherc0814-46527": "0814"}
+
+
+def _num(s: str) -> float:
+    return float(s.replace("−", "-").replace(",", ".").replace("+", ""))
+
+
+def _show(commit: str, path: str) -> str:
+    out = subprocess.run(["git", "show", f"{commit}:{path}"], capture_output=True, text=True, encoding="utf-8", cwd=ROOT)
+    if out.returncode != 0:
+        raise ValueError(f"file del socio assente in {commit}: {path}")
+    return out.stdout
+
+
+def _tol(cell: str):
+    cell = cell.strip()
+    if cell == TOL_NONE:
+        return None
+    m = re.fullmatch(r"(\d) slice", cell)
+    if not m:
+        raise ValueError(f"cella di tolleranza non riconosciuta: {cell!r}")
+    return int(m.group(1))
+
+
+def partner_block(ds: dict, curve: dict) -> dict:
+    """Legge i rapporti S1–S3 dal branch del socio e li confronta con i nostri valori (R3, finding 4). Fallisce su ogni divergenza."""
+    header = re.search(r"\*\*Commit di partenza:\*\* `branch e03-socio` — (.+)", PARTNER_PLAN.read_text(encoding="utf-8"))
+    if not header:
+        raise ValueError("piano del socio senza 'Commit di partenza' compilato")
+    subject = header.group(1).strip()
+    start = git("log", "--format=%h", "-1", "--fixed-strings", f"--grep={subject}", PARTNER_BRANCH)
+    if not start or git("log", "-1", "--format=%s", start) != subject:
+        raise ValueError(f"commit di partenza del socio non trovato su {PARTNER_BRANCH}: {subject!r}")
+    tip = git("rev-parse", "--short", PARTNER_BRANCH)
+    delivered = sorted(git("diff", "--name-only", start, tip).splitlines())
+    if delivered != sorted(PARTNER_FILES):
+        raise ValueError(f"file consegnati dal socio diversi dall'atteso: {delivered}")
+
+    s1 = json.loads(_show(tip, PARTNER_FILES[0]))
+    s1_md = _show(tip, PARTNER_FILES[1])
+    if s1.get("verdict") not in s1_md:
+        raise ValueError("verdetto S1 del JSON assente dal rapporto S1")
+    s2 = _show(tip, PARTNER_FILES[2])
+    rows = {int(m.group(1)): m.group(2) for m in re.finditer(r"^\|\s*(\d+)\s*\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|\s*`([0-9a-f]{64})`", s2, re.M)}
+    seg = "pherc0814-46527"
+    expected = {13: ds["inputs"][seg]["official"]["tree_sha256"], 1: ds["inputs"][seg]["shifted_zm3"]["tree_sha256"],
+                25: ds["inputs"][seg]["shifted_zp3"]["tree_sha256"]}
+    if rows != expected:
+        raise ValueError(f"impronte S2 del socio diverse da datasets.json: {rows}")
+    m = re.search(r"`scripts/e03_pool_shifted.py`: SHA-256 `([0-9a-f]{64})`", s2)
+    script_same = bool(m) and m.group(1) == sha256_file(ROOT / "scripts" / "e03_pool_shifted.py")
+    slice_eq = s2.count("— `True`") == 2
+    if not (script_same and slice_eq):
+        raise ValueError("S2: script diverso o uguaglianza slice non dichiarata")
+
+    s3 = _show(tip, PARTNER_FILES[3])
+    table = re.search(r"## AUROC held-out\n\n(.*?)\n\n", s3, re.S).group(1).splitlines()[2:]
+    cols = ["pherc0139-w016|42", "pherc0139-w016|43", "pherc0814-46527|42", "pherc0814-46527|43"]
+    max_diff, n = 0.0, 0
+    for line in table:
+        cells = [c.strip() for c in line.strip("|").split("|")]
+        k = int(_num(cells[0]))
+        for col, cell in zip(cols, cells[1:]):
+            g, s = col.split("|")
+            max_diff = max(max_diff, abs(_num(cell) - curve["auroc_held"][s][str(k)][g])); n += 1
+    if n != 28 or max_diff > 5e-6:
+        raise ValueError(f"tabella AUROC S3: {n} celle, scarto massimo {max_diff}")
+    tol_rows = re.findall(r"^\| (media dei due segmenti|w016|0814) \| (4[23]) \| (.+?) \| (.+?) \|$", s3, re.M)
+    if len(tol_rows) != 6:
+        raise ValueError("tabella di tolleranza S3 incompleta")
+    for agg, s, minus, plus in tol_rows:
+        ours = curve["tolerance"][s] if agg.startswith("media") else \
+            curve["tolerance"][s]["per_segment"][next(g for g, short in IT.items() if short == agg)]
+        if (_tol(minus), _tol(plus)) != (ours["minus"], ours["plus"]):
+            raise ValueError(f"tolleranza S3 diversa: {agg} seed {s}")
+    h1 = re.search(r"\*\*Violata su (\d) coppie", s3)
+    if not h1 or int(h1.group(1)) != len(curve["H1"]["violations"]):
+        raise ValueError("H1 S3 diversa")
+    h2 = re.findall(r"^\| (4[23]) \| ([−+]) \|.*\| \*\*(sì|no)\*\* \|$", s3, re.M)
+    ours_h2 = {(str(r["seed"]), "−" if r["direction"] == "minus" else "+"): r["monotone"] for r in curve["H2"]["rows"]}
+    if len(h2) != 4 or any(ours_h2[(s, d)] != (v == "sì") for s, d, v in h2):
+        raise ValueError("H2 S3 diversa")
+    if "## Regola di anomalia\n\n**Non attivata.**" not in s3 or curve["anomaly"]["triggered"]:
+        raise ValueError("anomalia S3 diversa")
+    if s3.count("**Verdetto complessivo: non aiuta.**") != 2 or any(v["helps"] for v in curve["controls"].values() if v):
+        raise ValueError("controlli S3 diversi")
+    return {"branch": "e03-socio", "start_commit": start, "delivery_commit": tip, "files": list(PARTNER_FILES),
+            "executor": "Codex (gpt-5.6-sol) sul Mac del socio, procedura unica",
+            "S1_novelty": {"verdict": s1["verdict"], "pertinent_sources": s1["counts"]["pertinent_sources"],
+                           "network_queries": s1["counts"]["network_queries"], "queried_at_utc": s1["queried_at_utc"]},
+            "S2_pooling": {"segment": seg, "tree_sha256": {f"z{z}": h for z, h in rows.items()},
+                           "identical_to_datasets_json": True, "slice_equality_declared": slice_eq,
+                           "script_sha256_identical_to_main": script_same},
+            "S3_blind_recomputation": {"auroc_cells_compared": n, "auroc_table_max_abs_diff": max_diff,
+                                       "tolerance_identical": True, "H1_identical": True, "H2_identical": True,
+                                       "anomaly_identical": True, "controls_identical": True}}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--out", type=Path, required=True)
@@ -195,10 +326,17 @@ def main() -> int:
     controls_summary = {n: {"auroc_held": c["sets"]["held"]["auroc"], "inputs": [i["sha256"] for i in c["inputs"]]}
                         for n, c in controls.items() if c}
 
+    if curve is None:
+        raise ValueError("curve.json assente")
+    curve_summary = recompute_curve(curve)
+    partner = partner_block(ds, curve)
+    sealed = sealed_scan(runs)
+
     manifest = {
         "experiment": "E03-R01", "plan": "docs/plans/2026-09-07-e03-tolleranza-offset-z.md",
         "commits_papyruslab": {"plan_frozen": "9e7f1d0", "steps_0_5": "4c60e43", "review_R2_fixes": "4520815",
-                               "curve": "d85ee42", "partner_start": git("rev-parse", "--short", "origin/e03-socio"),
+                               "curve": "d85ee42", "partner_start": partner["start_commit"],
+                               "partner_delivery": partner["delivery_commit"],
                                "manifest_head": git("rev-parse", "--short", "HEAD")},
         "offsets": offsets, "datasets_kaggle": ds,
         "source_manifest": {seg: {k: v for k, v in e.items() if k != "tiles"} | {"n_tiles": e["n_tiles"]}
@@ -209,29 +347,10 @@ def main() -> int:
         "controls_zero_gpu": controls_summary,
         "gpu_ledger": ledger,
         "gpu_minutes_total": round(sum(float(e.get("settled_minutes") or e["reserved_minutes"]) for e in ledger), 1),
-        "curve_summary": None if not curve else {
-            "tolerance": curve["tolerance"], "H1": {"holds": curve["H1"]["holds"], "violations": len(curve["H1"]["violations"])},
-            "H2_holds": curve["H2"]["holds"], "anomaly_triggered": curve["anomaly"]["triggered"],
-            "controls": {k: (v["helps"] if v else None) for k, v in curve["controls"].items()},
-            "auroc_held": curve["auroc_held"]},
-        "sealed_segment": {"segment": SEALED, "mentioned_in_any_report": False, "runs_on_it": 0, "opened_in": "E05"},
+        "curve_summary": curve_summary,
+        "sealed_segment": sealed,
         "frozen_threshold": FROZEN_THRESHOLD,
-        "partner_tasks": {
-            "branch": "e03-socio", "commit": "f579f5b", "executor": "Codex (gpt-5.6-sol) sul Mac del socio, procedura unica",
-            "S1_novelty": {"verdict": "trovato lavoro parziale",
-                           "sources": ["model card ink_9um (qualitativo)", "tutorial5 (qualitativo)",
-                                       "hilalitvak/inkalign @ c11177a: sweep Z di ink_9um su ROI w025 con punteggio senza etichette (line_score), migliore -4",
-                                       "flummoxjr/measure-before-you-hunt @ e508085 (2026-08-17): curva AUC(offset) -6..+5 di ink_9um seed 42 su w035, segmento di TRAINING; conclude 'depth-offset hypothesis refuted within +-6'"],
-                           "equivalent_on_held_out_pixels": False},
-            "S2_pooling": {"z13": "bc7423431221bf24b247a8ba80d264b0306f816c52b4ecc0d08115a82305ac52",
-                           "z1": "f73364dcb813487ab9c30d6f0292f90f6364059b28ce83dc82c1c2827f88407d",
-                           "z25": "8406e6150c306fd8ac5ac81fceefe290eabc1dd7f88ebc43ecf8bb630aeea85f",
-                           "identical_to_laptop_and_kaggle": True, "slice_equality": True,
-                           "script_sha256_identical": True},
-            "S3_blind_recomputation": {"auroc_table_max_abs_diff": 4.9e-07, "tolerance_identical": True,
-                                       "H1_identical": True, "H2_identical": True, "anomaly_identical": True,
-                                       "controls_identical": True, "ambiguities_recorded": 10},
-        },
+        "partner_tasks": partner,
     }
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(manifest, indent=1, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")

@@ -445,6 +445,21 @@ Nel registro corrente: 27 prenotazioni tutte chiuse, 24 output verificati, uno p
 
 ---
 
+### Revisione R3 (esito, 7 settembre 2026)
+
+- **Canale:** `adversarial-review --base 3e07bc8`, modello `gpt-5.6-sol`, sola lettura, sulla scheda, sul manifest e sul registro community committati in `1cb603e` (job `review-mtrpln2p-2kpx8g`). Focus del passo 12: regola preregistrata, numeri usati per scegliere, sigillo, formulazioni oltre le evidenze. **Verdetto: NO-SHIP, 4 finding P1, accettati 4.**
+
+| # | Sev. | Finding (sintesi) | Esito | Correzione |
+|---|---|---|---|---|
+| 1 | P1 | Il confronto con R14 era sbagliato nei numeri e nella causa: R14 perde 0,095 a +5 su w035 (non "quasi piatta, concordante"); la nostra perdita massima held-out rispetto allo zero è 0,111 (0,158 è l'escursione fra gli estremi di 0814/s43), non "0,16"; nessuna evidenza che R14 "non poteva vedere" l'effetto perché w035 è memorizzato | accettato | Scheda (osservazioni 1–2, sezione S1, conclusione) e riga R14 del registro riscritte: differenze di protocollo elencate, numeri corretti, nessuna conclusione causale |
+| 2 | P1 | "0814 migliora monotonamente con entrambi i seed, fino a +5 e oltre": falso per il seed 42, che ha il massimo campionato a +3 e cala a +5; "oltre" non è misurato | accettato | Formulazione: 0814 favorisce gli offset positivi in tutti i confronti campionati; massimo a +3 (s42) e all'ultimo punto misurato (s43); nessuna affermazione oltre +5 |
+| 3 | P1 | "Decisione successiva" assegnava a E04 una prova senza label, prescriveva l'aggiornamento del metro e generalizzava "ogni superficie ha una propria profondità ottimale" (§5 D) | accettato | Sezione riscritta: fatti misurati, poi **opzioni non approvate** fra cui mantenere E04 come deciso; nessuna scelta nella scheda |
+| 4 | P1 | Il manifest attestava senza verificare: `partner_start` preso dalla punta del branch (f579f5b invece di 8cfdc35), S1–S3 scritti a mano nel codice, `curve_summary` copiato da `curve.json`, sigillo dichiarato senza scansione, `opened_in: E05` fuori perimetro | accettato | `e03_manifest.py`: commit di partenza risolto dal soggetto scritto nel piano del socio e verificato; file consegnati confrontati con l'elenco atteso; S2 letto dal rapporto e confrontato con `datasets.json` e con l'impronta dello script; S3 letto dal rapporto e confrontato cella per cella (28 AUROC, 6 tolleranze, H1, H2, anomalia, controlli); curva ricalcolata dai 28 report e confrontata con `curve.json`; 61 JSON scanditi per il sigillo; `opened_in` rimosso. Ogni divergenza è un errore (provato alterando un AUROC, `curve.json`, un'impronta S2 e un modo) |
+
+- **Secondo giro:** *in corso*.
+
+---
+
 ## 11. Emendamenti dopo il congelamento
 
 Il piano è stato congelato il 7 settembre 2026 (`docs: freeze E03 plan (R01)`, commit `9e7f1d0`). Ciò che segue è stato scoperto eseguendo i passi 0–5 e corretto con un commit dedicato, come chiede [docs/07 §2](../07-procedura-operativa.md): nessuna correzione silenziosa. Nessuno di questi emendamenti tocca il disegno scientifico (offset, segmenti, seed, metriche, regole di lettura).
