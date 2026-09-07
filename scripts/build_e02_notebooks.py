@@ -304,13 +304,31 @@ PY = sys.executable
 torch_before = subprocess.run([PY, "-c", "import torch; print(torch.__version__)"], capture_output=True, text=True).stdout.strip()
 r = subprocess.run([PY, "-m", "pip", "install", "--no-deps", "zarr==2.18.7", "numcodecs==0.15.1"], capture_output=True, text=True)
 assert r.returncode == 0, "STOP: pip install zarr/numcodecs fallita\n" + r.stderr[-3000:]
-chk = subprocess.run([PY, "-c", "import zarr, numcodecs, numpy, fsspec, aiohttp; print(zarr.__version__, numcodecs.__version__, numpy.__version__, fsspec.__version__, aiohttp.__version__)"], capture_output=True, text=True)
-assert chk.returncode == 0, "STOP: import fallito dopo l'installazione\n" + chk.stderr[-2000:]
+# Tentativo 1 di prep-46527 (7 settembre 2026): zarr 2.18.7 importa `asciitree`, assente sull'immagine CPU di Kaggle.
+# Stesso ciclo di E00: ogni modulo mancante si installa con --no-deps nella versione del lock di villa (max 10).
+lock = open(f"{HEAVY}/villa/ink-detection/uv.lock", encoding="utf-8").read()
+def locked_version(dist):
+    m = re.search(r'\[\[package\]\]\nname = "' + re.escape(dist.lower()) + r'"\nversion = "([^"]+)"', lock)
+    return m.group(1) if m else None
+added = []
+for attempt in range(10):
+    chk = subprocess.run([PY, "-c", "import zarr, numcodecs, numpy, fsspec, aiohttp; print(zarr.__version__, numcodecs.__version__, numpy.__version__, fsspec.__version__, aiohttp.__version__)"], capture_output=True, text=True)
+    if chk.returncode == 0:
+        break
+    m = re.search(r"No module named '([^'.]+)", chk.stderr)
+    assert m, "STOP: import fallito per motivo diverso da modulo mancante\n" + chk.stderr[-2000:]
+    mod = m.group(1); assert re.fullmatch(r"[A-Za-z0-9_]+", mod), mod
+    dist = next((c for c in (mod, mod.replace("_", "-")) if locked_version(c)), None)
+    assert dist, f"STOP: modulo mancante '{mod}' non presente in uv.lock"
+    r2 = subprocess.run([PY, "-m", "pip", "install", "--no-deps", f"{dist}=={locked_version(dist)}"], capture_output=True, text=True)
+    assert r2.returncode == 0, f"STOP: pip install {dist} fallita\n" + r2.stderr[-2000:]
+    added.append({"module": mod, "dist": dist, "version": locked_version(dist)}); print("aggiunto", dist, locked_version(dist))
+assert chk.returncode == 0, "STOP: import ancora fallito dopo i tentativi ammessi\n" + chk.stderr[-2000:]
 torch_after = subprocess.run([PY, "-c", "import torch; print(torch.__version__)"], capture_output=True, text=True).stdout.strip()
 assert torch_after == torch_before == TORCH_EXPECTED, f"STOP: PyTorch cambiato da {torch_before} a {torch_after}"
 vers = chk.stdout.strip().split()
 assert vers[0] == "2.18.7", f"STOP: zarr {vers[0]} invece di 2.18.7"
-info = {"torch_before": torch_before, "torch_after": torch_after, "zarr": vers[0], "numcodecs": vers[1], "numpy": vers[2], "fsspec": vers[3], "aiohttp": vers[4]}
+info = {"torch_before": torch_before, "torch_after": torch_after, "zarr": vers[0], "numcodecs": vers[1], "numpy": vers[2], "fsspec": vers[3], "aiohttp": vers[4], "added_packages": added}
 json.dump(info, open(f"{WORK}/logs/install.json", "w"), indent=1); print(info)
 '''
 
