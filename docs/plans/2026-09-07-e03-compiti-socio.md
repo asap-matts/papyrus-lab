@@ -2,7 +2,7 @@
 
 **Scritto da:** Claude Code (writer, su incarico di Matteo) · **Esecutore previsto:** Codex del socio, sul Mac M3 Pro, cartella `~/dev/papyrus-lab`, modello `gpt-5.6-sol` · **Revisore:** Claude Code in sola lettura, poi decisione di fusione di Matteo
 **Data:** 2026-09-07 · **Branch:** `e03-socio`
-**Commit di partenza:** `branch e03-socio` — docs: E03 partner tasks ready (start of S1-S2-S3)
+**Commit di partenza:** `branch e03-socio` — docs: E03 partner prompt self-sufficient (Codex runs the whole procedure)
 
 > Compilata il 7 settembre 2026 (passo 10 del piano madre). Il branch `e03-socio` punta al commit con il messaggio sopra, che contiene i 61 JSON delle metriche in `docs/reports/e03-r01/metrics/` (compreso `curve.json`, da **non** aprire), gli script e questo piano. Lo script di avvio confronta il messaggio dell'ultimo commit del branch con quello dopo il trattino lungo.
 **Piano madre:** [E03 — tolleranza all'offset Z](2026-09-07-e03-tolleranza-offset-z.md), §9
@@ -95,13 +95,16 @@ Si **possono** leggere: `AGENTS.md`, questo piano, `docs/07-procedura-operativa.
 
 ## 4. Passi
 
-### Passo 0 — Avvio (persona: il socio)
+### Passo 0 — Avvio (Codex; al socio resta solo l'eventuale login GitHub nel browser)
+
+Il socio non lancia comandi: incolla in Codex il blocco di [e03-prompt-codex-socio.md](e03-prompt-codex-socio.md), che contiene anche questa fase. Codex:
 
 ```bash
-gh auth status || gh auth login
-bash ~/dev/papyrus-lab/scripts/e03_bootstrap_mac.sh     # repository, branch e03-socio, Python >= 3.11, .venv
+# se ~/dev/papyrus-lab/.git non esiste: gh auth status (login nel browser a carico del socio, se richiesto), poi
+gh repo clone asap-matts/papyrus-lab ~/dev/papyrus-lab
+bash ~/dev/papyrus-lab/scripts/e03_bootstrap_mac.sh     # repository, branch e03-socio al commit giusto, Python >= 3.11, .venv
 ```
-**Fatto quando:** lo script stampa "Tutto pronto". Poi apri Codex nella cartella `~/dev/papyrus-lab` e incolla il prompt di [e03-prompt-codex-socio.md](e03-prompt-codex-socio.md).
+**Fatto quando:** lo script stampa "Tutto pronto". Una riga "DA FARE" con `gh auth login` va girata al socio (unica azione umana); una riga "STOP" ferma tutto e va riportata a Matteo così com'è.
 
 ### Passo 1 — Verifica dello stato (Codex)
 
