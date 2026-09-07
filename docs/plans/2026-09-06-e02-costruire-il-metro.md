@@ -409,7 +409,7 @@ Tutte le misure sui pixel del piano annotato (`shape[0] // 2`); `held` = `valida
 **B. Metro valido** (tutti, altrimenti E02 non superato):
 - M1 inventario: tutte le asserzioni del passo 1 passano; la tabella generata coincide con §2.2.
 - M2 dati: per ciascuno dei tre segmenti `n_px(held ∧ train) = 0`, `n_px(held) > 0`, forma label = forma input, `source_z_slice = [13, 97]`, `annotation_center_channel = 10`.
-- M3 orientamento: su `train`, l'AUROC con la label originale è strettamente maggiore di ogni variante confrontabile (calcolate sull'intersezione fra maschera di training originale e trasformata, così nessuna coordinata held-out viene letta), per ogni segmento e seed; almeno una variante deve essere confrontabile. Se una trasformata vince, l'input poolato è disallineato: E02 fallito, qualunque sia il valore.
+- M3 orientamento: su `train`, l'AUROC con la label originale è strettamente maggiore di ogni variante confrontabile (calcolate sull'intersezione fra maschera di training originale e trasformata, così nessuna coordinata held-out viene letta; le trasformate sono applicate **dentro il bounding box della maschera**, emendamento A1 in §11), per ogni segmento e seed; almeno una variante deve essere confrontabile. Se una trasformata vince, l'input poolato è disallineato: E02 fallito, qualunque sia il valore.
 - M4 determinismo: `scripts/e02_metrics.py` eseguito due volte sullo stesso TIFF produce JSON identici (esclusa `generated_at`); i test unitari passano; la cella Kaggle e lo script locale danno la stessa AUROC al decimale.
 - M5 separazione dichiarata: il manifest riporta per ogni segmento (w029 compreso: è geometria delle maschere, non una lettura della predizione) la quota di pixel held-out a distanza < 128 px e < 256 px dal training più vicino e, per i segmenti di sviluppo, i numeri per strato.
 - M6 sigillo: nessun file di metriche di E02 contiene valori calcolati sui pixel held-out di w029; il TIFF di w029 ha SHA-256 registrato nel manifest.
@@ -512,7 +512,18 @@ Per ogni revisione registrare: modello ed effort effettivi riportati dal plugin,
 
 ---
 
-## 11. Al termine
+## 11. Emendamenti dopo il congelamento
+
+Il piano è stato congelato il 6 settembre 2026 (`docs: freeze E02 plan (R01)`). Ciò che segue è stato scoperto in esecuzione e corretto con un commit dedicato, come chiede [docs/07 §2](../07-procedura-operativa.md): nessuna correzione silenziosa.
+
+### A1 — trasformate di orientamento dentro il bounding box della maschera (7 settembre 2026)
+
+- **Che cosa è successo.** Run `infer-46527-seed42`, tentativo 1 (Kaggle v1, sessione 08:45:57–08:48:27 UTC, inferenza 46 s, ≈3 minuti di quota): gate A superato, ma il gate di orientamento è risultato **non valutabile**: la supervisione di `pherc0814-46527` è un'unica regione compatta e le sue copie ruotate o specchiate sull'intera immagine (regola del secondo giro di R1) non la intersecano. La cella del verdetto ha reso il run `error`, con metriche e log persistiti (23 file verificati). Gli altri numeri del run sono validi: AUROC held 0,8743, train 0,9998; best-F1 held **0,753** e train **0,989**, identici a R02 (differenza 0,000: replica concordante, §5 C).
+- **Correzione.** Le tre trasformate (rot180, flipY, flipX) si applicano **dentro il bounding box della maschera di training**, cioè sono ribaltamenti rispetto al centro della regione annotata; ogni variante resta valutata solo su `valid ∧ T(valid)`, quindi lo script continua a leggere la predizione soltanto su coordinate di training (il sigillo di w029 è intatto). Sul TIFF del tentativo 1: originale 0,9998 contro 0,471 / 0,643 / 0,527, con intersezioni di 258–339 mila pixel. `scripts/e02_metrics.py` passa alla versione 1.1; i test coprono il caso della regione compatta e il caso non valutabile residuo (maschera di una sola classe).
+- **Conseguenze.** I notebook `infer-*` vengono rigenerati con lo script 1.1; il run `infer-46527-seed42` si ripete come **tentativo 2** (≈3 minuti di quota) perché la guardia del seed 43 legge il verdetto dal JSON delle metriche pubblicato dal run stesso; il TIFF del tentativo 1 resta conservato con il suo hash.
+- **Deviazione registrata.** La revisione Codex R2 (codice, prima dei run GPU) non era stata eseguita prima del tentativo 1: viene eseguita ora, prima di ogni altro run GPU, sul diff completo di E02 dal commit di congelamento.
+
+## 12. Al termine
 
 - [ ] Esecuzione completata: passi 0–9 eseguiti, **oppure** stop documentato al passo N con causa
 - [ ] Criteri A–C di §5 verificati per i tre segmenti; §5 D compilato

@@ -30,7 +30,7 @@ from pathlib import Path
 
 import numpy as np
 
-VERSION = "e02_metrics/1.0"
+VERSION = "e02_metrics/1.1"      # 1.1: orientation transforms inside the bbox of the mask (plan amendment A1)
 DEFAULT_EDGES = (0, 64, 128, 256)
 DEFAULT_PATCH = 128
 TRANSFORMS = {
@@ -106,16 +106,39 @@ def _num(x: float) -> float | None:
     return None if x != x else float(x)        # NaN -> None (JSON-safe, comparable)
 
 
+def _bbox(mask: np.ndarray) -> tuple[int, int, int, int]:
+    ys, xs = np.where(mask)
+    return int(ys.min()), int(ys.max()) + 1, int(xs.min()), int(xs.max()) + 1
+
+
+def _transform_in_bbox(a: np.ndarray, kind: str, box: tuple[int, int, int, int]) -> np.ndarray:
+    """Apply a transform inside `box` only (the rest is zero): a flip/rotation about the box centre."""
+    y0, y1, x0, x1 = box
+    out = np.zeros_like(a)
+    out[y0:y1, x0:x1] = TRANSFORMS[kind](a[y0:y1, x0:x1])
+    return out
+
+
 def orientation(pred: np.ndarray, ink: np.ndarray, valid: np.ndarray) -> dict:
-    """AUROC with the label as is and under three transforms. Each variant is evaluated ONLY on
-    valid & T(valid): the prediction is never read outside the original mask (review R1, round 2).
+    """AUROC with the label as is and under three transforms applied INSIDE the bounding box of `valid`
+    (rot180 / flipY / flipX about the box centre; plan amendment A1). Each variant is evaluated only on
+    valid & T(valid): the prediction is never read outside the original mask (review R1, round 2), and the
+    box-centred transform keeps the intersection large even for one compact annotated region (whole-image
+    transforms had an empty intersection on pherc0814-46527, run infer-46527-seed42 v1).
     `orientamento_ok` is True when the original is strictly above every comparable variant, False when a
     variant ties or wins, None when no variant is comparable (empty or single-class intersection)."""
     out: dict = {}
-    for k, f in TRANSFORMS.items():
-        v = valid & f(valid)
-        p = f(ink) & v
+    if not valid.any():
+        out.update({k: None for k in TRANSFORMS})
+        out.update({"comparabili": [], "orientamento_ok": None, "bbox_yyxx": None})
+        return out
+    box = _bbox(valid)
+    out["originale"] = _num(auroc(pred, ink & valid, valid))
+    for k in ("rot180", "flipY", "flipX"):
+        v = valid & _transform_in_bbox(valid, k, box)
+        p = _transform_in_bbox(ink, k, box) & v
         out[k] = _num(auroc(pred, p, v))
+    out["bbox_yyxx"] = list(box)
     comparable = [k for k in ("rot180", "flipY", "flipX") if out[k] is not None]
     if out["originale"] is None or not comparable:
         ok = None

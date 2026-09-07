@@ -41,9 +41,9 @@
     },
     "pherc0139-w016": {
       "slug": "papyruslab-e02-input-w016",
-      "tree_sha256": null,
-      "tar_sha256": null,
-      "tar_bytes": null,
+      "tree_sha256": "7c0c7006a6a6e14269988b29aa39e257beb4bf8f7b8abb2091e5b01d821dc712",
+      "tar_sha256": "db0a4ee89a3eb0372f8ecb43a62f52dae20a3f18cef0d29cf4b4ae2a8068f5f1",
+      "tar_bytes": 728053760,
       "shape": [
         21,
         7020,

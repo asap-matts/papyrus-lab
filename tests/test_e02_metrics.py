@@ -61,13 +61,27 @@ def test_orientation_detects_flip():
     assert m.orientation(pred2, ink2, np.ones((16, 16), bool))["orientamento_ok"] is False
 
 
-def test_orientation_not_evaluable_when_no_variant_is_comparable():
-    # maschera in un angolo: nessuna trasformata la interseca -> nessuna variante confrontabile
+def test_orientation_compact_region_is_evaluable_with_bbox_transforms():
+    # maschera compatta in un angolo (come la supervisione di pherc0814-46527): con le trasformate applicate
+    # nel bounding box della maschera (emendamento A1) le varianti restano confrontabili, e leggono solo la maschera
     valid = np.zeros((16, 16), bool); valid[:4, :4] = True
     ink = np.zeros((16, 16), bool); ink[:2, :2] = True
     pred = np.zeros((16, 16), np.uint8); pred[:2, :2] = 200
     o = m.orientation(pred, ink, valid)
-    assert o["originale"] == 1.0 and o["comparabili"] == [] and o["orientamento_ok"] is None
+    assert o["originale"] == 1.0 and o["comparabili"] == ["rot180", "flipY", "flipX"] and o["orientamento_ok"] is True
+    assert o["bbox_yyxx"] == [0, 4, 0, 4]
+    # cambiare la predizione FUORI dalla maschera non cambia nulla
+    pred2 = pred.copy(); pred2[4:, :] = 255; pred2[:, 4:] = 255
+    assert m.orientation(pred2, ink, valid) == o
+
+
+def test_orientation_not_evaluable_when_single_class():
+    # tutta la maschera e' inchiostro: AUROC indefinita per ogni variante -> gate non valutabile
+    valid = np.zeros((16, 16), bool); valid[:4, :4] = True
+    ink = valid.copy()
+    pred = np.full((16, 16), 200, np.uint8)
+    o = m.orientation(pred, ink, valid)
+    assert o["originale"] is None and o["comparabili"] == [] and o["orientamento_ok"] is None
 
 
 def test_held_out_pixels_are_never_read():
@@ -104,7 +118,9 @@ def synthetic_segment(tmp_path):
     seg = tmp_path / name
     seg.mkdir()
     H = W = 64
-    ink = np.zeros((H, W), np.uint8); ink[8:24, 8:24] = 1; ink[40:56, 40:56] = 1
+    # blocco di training fuori centro in X rispetto al bbox della supervisione (colonne 0..31): con l'emendamento A1
+    # le trasformate sono centrate sul bbox, e un blocco centrato in X pareggerebbe l'originale sotto flipX
+    ink = np.zeros((H, W), np.uint8); ink[8:24, 4:14] = 1; ink[40:56, 40:56] = 1
     sup = np.zeros((H, W), np.uint8); sup[:, :32] = 1
     val = np.zeros((H, W), np.uint8); val[:, 36:] = 1
     for kind, plane in (("inklabels", ink), ("supervision_mask", sup), ("validation_mask", val)):
