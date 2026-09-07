@@ -147,15 +147,15 @@ def main() -> int:
             m = read_json(d / "e03" / "out" / f"input_{seg}_{tag}.json")
             info["prep"] = m
             log = (d / "e03" / "logs" / f"prep_{seg}_{tag}.log").read_text(encoding="utf-8", errors="replace")
-            mm = re.search(r"durata_s=(\d+)", log)
-            info["prep"]["duration_s"] = int(mm.group(1)) if mm else None
-            # queste due conferme le stampa la cella del notebook, quindi stanno nel log del kernel, non nel log del pooling
+            # durata e conferme le stampa la cella del notebook: stanno nel log del kernel, non in quello del pooling
             klog = ""
             for lf in d.glob("*.log"):
                 try:
                     klog += "\n".join(str(x.get("data", "")) for x in json.loads(lf.read_text(encoding="utf-8", errors="replace")))
                 except ValueError:
                     pass
+            mm = re.search(r"durata_s=(\d+)", log + "\n" + klog)
+            info["prep"]["duration_s"] = int(mm.group(1)) if mm else None
             info["prep"]["source_manifest"] = ("prodotto" if "manifest di sorgente: produzione" in klog
                                                else "verificato" if "manifest di sorgente: verifica" in klog else None)
             info["prep"]["slice_equality_with_official"] = (("uguaglianza slice a slice con l'ufficiale: verificata" in klog)
@@ -216,7 +216,22 @@ def main() -> int:
             "auroc_held": curve["auroc_held"]},
         "sealed_segment": {"segment": SEALED, "mentioned_in_any_report": False, "runs_on_it": 0, "opened_in": "E05"},
         "frozen_threshold": FROZEN_THRESHOLD,
-        "partner_tasks": {"branch": "e03-socio", "status": "in corso (S1-S2-S3), da integrare al passo 11"},
+        "partner_tasks": {
+            "branch": "e03-socio", "commit": "f579f5b", "executor": "Codex (gpt-5.6-sol) sul Mac del socio, procedura unica",
+            "S1_novelty": {"verdict": "trovato lavoro parziale",
+                           "sources": ["model card ink_9um (qualitativo)", "tutorial5 (qualitativo)",
+                                       "hilalitvak/inkalign @ c11177a: sweep Z di ink_9um su ROI w025 con punteggio senza etichette (line_score), migliore -4",
+                                       "flummoxjr/measure-before-you-hunt @ e508085 (2026-08-17): curva AUC(offset) -6..+5 di ink_9um seed 42 su w035, segmento di TRAINING; conclude 'depth-offset hypothesis refuted within +-6'"],
+                           "equivalent_on_held_out_pixels": False},
+            "S2_pooling": {"z13": "bc7423431221bf24b247a8ba80d264b0306f816c52b4ecc0d08115a82305ac52",
+                           "z1": "f73364dcb813487ab9c30d6f0292f90f6364059b28ce83dc82c1c2827f88407d",
+                           "z25": "8406e6150c306fd8ac5ac81fceefe290eabc1dd7f88ebc43ecf8bb630aeea85f",
+                           "identical_to_laptop_and_kaggle": True, "slice_equality": True,
+                           "script_sha256_identical": True},
+            "S3_blind_recomputation": {"auroc_table_max_abs_diff": 4.9e-07, "tolerance_identical": True,
+                                       "H1_identical": True, "H2_identical": True, "anomaly_identical": True,
+                                       "controls_identical": True, "ambiguities_recorded": 10},
+        },
     }
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(manifest, indent=1, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")

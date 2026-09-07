@@ -1,8 +1,8 @@
 {
  "commits_papyruslab": {
   "curve": "d85ee42",
-  "manifest_head": "8cfdc35",
-  "partner_start": "8cfdc35",
+  "manifest_head": "3e07bc8",
+  "partner_start": "f579f5b",
   "plan_frozen": "9e7f1d0",
   "review_R2_fixes": "4520815",
   "steps_0_5": "4c60e43"
@@ -853,8 +853,36 @@
   ]
  },
  "partner_tasks": {
+  "S1_novelty": {
+   "equivalent_on_held_out_pixels": false,
+   "sources": [
+    "model card ink_9um (qualitativo)",
+    "tutorial5 (qualitativo)",
+    "hilalitvak/inkalign @ c11177a: sweep Z di ink_9um su ROI w025 con punteggio senza etichette (line_score), migliore -4",
+    "flummoxjr/measure-before-you-hunt @ e508085 (2026-08-17): curva AUC(offset) -6..+5 di ink_9um seed 42 su w035, segmento di TRAINING; conclude 'depth-offset hypothesis refuted within +-6'"
+   ],
+   "verdict": "trovato lavoro parziale"
+  },
+  "S2_pooling": {
+   "identical_to_laptop_and_kaggle": true,
+   "script_sha256_identical": true,
+   "slice_equality": true,
+   "z1": "f73364dcb813487ab9c30d6f0292f90f6364059b28ce83dc82c1c2827f88407d",
+   "z13": "bc7423431221bf24b247a8ba80d264b0306f816c52b4ecc0d08115a82305ac52",
+   "z25": "8406e6150c306fd8ac5ac81fceefe290eabc1dd7f88ebc43ecf8bb630aeea85f"
+  },
+  "S3_blind_recomputation": {
+   "H1_identical": true,
+   "H2_identical": true,
+   "ambiguities_recorded": 10,
+   "anomaly_identical": true,
+   "auroc_table_max_abs_diff": 4.9e-07,
+   "controls_identical": true,
+   "tolerance_identical": true
+  },
   "branch": "e03-socio",
-  "status": "in corso (S1-S2-S3), da integrare al passo 11"
+  "commit": "f579f5b",
+  "executor": "Codex (gpt-5.6-sol) sul Mac del socio, procedura unica"
  },
  "plan": "docs/plans/2026-09-07-e03-tolleranza-offset-z.md",
  "points_validated": 24,
@@ -9234,7 +9262,7 @@
      ],
      "z_pool": "rounded mean of 4 centered source planes"
     },
-    "duration_s": null,
+    "duration_s": 5,
     "files": 462,
     "segment": "pherc0814-46527",
     "shape": [
@@ -9316,7 +9344,7 @@
      ],
      "z_pool": "rounded mean of 4 centered source planes"
     },
-    "duration_s": null,
+    "duration_s": 5,
     "files": 462,
     "segment": "pherc0814-46527",
     "shape": [
@@ -9407,7 +9435,7 @@
      ],
      "z_pool": "rounded mean of 4 centered source planes"
     },
-    "duration_s": null,
+    "duration_s": 35,
     "files": 3138,
     "segment": "pherc0139-w016",
     "shape": [
@@ -9490,7 +9518,7 @@
      ],
      "z_pool": "rounded mean of 4 centered source planes"
     },
-    "duration_s": null,
+    "duration_s": 35,
     "files": 3138,
     "segment": "pherc0139-w016",
     "shape": [
@@ -9572,7 +9600,7 @@
      ],
      "z_pool": "rounded mean of 4 centered source planes"
     },
-    "duration_s": null,
+    "duration_s": 35,
     "files": 3138,
     "segment": "pherc0139-w016",
     "shape": [
