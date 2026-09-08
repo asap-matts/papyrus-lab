@@ -2,7 +2,7 @@
 
 **Scritto da:** Claude Code · **Esecutore previsto:** Claude Code (writer), Codex (revisore), socio (riproduzione in cieco)
 **Data:** 2026-09-08 · **Branch:** `main` (socio su `e04-socio`) · **Commit di partenza:** *da compilare al congelamento*
-**Stato:** bozza v9, dopo co-progettazione e otto giri R1 (§10). In attesa del nono giro R1. **Nessun passo eseguito, e nessuno si esegue senza il "vai" esplicito di Matteo** (§9), compresi i passi a costo GPU zero.
+**Stato:** bozza v10, dopo co-progettazione e nove giri R1 (§10). In attesa del decimo giro R1. **Nessun passo eseguito, e nessuno si esegue senza il "vai" esplicito di Matteo** (§9), compresi i passi a costo GPU zero.
 
 > Verifica prima di iniziare: `git rev-parse --short HEAD` deve restituire il commit sopra. Se non corrisponde, **fermati**.
 
@@ -46,7 +46,7 @@ Ricerca di Claude (web, tre interrogazioni su "offset map / per-tile / local z o
 
 Ogni variante rifà davvero ciò che il suo nome dice, e i suoi input hanno impronte diverse da quelli della variante primaria; `validate-reports` **rifiuta** due report che dichiarino lo stesso mosaico. L'elenco completo dei comandi, con input e uscite per ciascuna delle quattro combinazioni segmento × seed, è in `configs/e04/commands.json` (`robustness_variants` e `artifacts_by_report`).
 
-**Tre varianti ricompongono davvero** (mosaici con impronte diverse) e **una cambia solo il dominio di valutazione** sul mosaico primario. Ogni report è identificato dalla coppia (impronta del mosaico, impronta della maschera di valutazione); `validate-reports` **rifiuta** due report che condividano la coppia.
+**Tre varianti ricompongono davvero** (mosaici con impronte diverse) e **una cambia solo il dominio di valutazione** sul mosaico primario. Ogni report è identificato dalla coppia (impronta del mosaico, impronta della maschera di valutazione); `validate-reports` **rifiuta** due report che condividano la coppia; `primary` e `inner8` condividono per costruzione l'impronta del mosaico e differiscono in quella della maschera, e il test lo verifica esplicitamente.
 
 | Variante | Tipo | Che cosa cambia | Artefatto |
 |---|---|---|---|
@@ -145,6 +145,7 @@ Il buffer b = max(96, RF) dipende dal campo ricettivo, calcolato al passo 0: **b
   - **r non è un p-value e non entra in HC né in HD.** Sotto un nullo osservazionale l'identità non è scambiabile con le traslazioni: la maschera held-out è irregolare, la difficoltà del modello non è stazionaria, e la posizione osservata della mappa non è uniforme sul gruppo. r dice soltanto quanto la coincidenza fra mappa e guadagno sia insolita rispetto a mappe con la stessa forma altrove: è un indizio, riportato come tale, ed è ciò che il disegno di E04 permette.
 - **(ii) Nullo marginale (secondario, riportato).** Permutazione dei k̂ fra le mattonelle coperte entro regione, 100 000 estrazioni (seed 20260908): preserva solo le frequenze, non l'autocorrelazione; serve a mostrare quanto il nullo spaziale sia più severo.
 - **(iii)** k = 0. **(iv)** miglior offset uniforme dell'**altro** segmento (non usa le label del target, ma non è disponibile su un rotolo nuovo: si dichiara). **(v)** miglior offset uniforme del **segmento target** scelto con le label (oracolo uniforme, valutativo).
+- **(vi) Controllo dei profili permutati (bloccante per HD).** Trentadue permutazioni deterministiche congelate (seed 20260908) che scambiano fra loro i **profili** delle mattonelle geometricamente valide, lasciando invariata la geometria: T viene rieseguito su ciascuna, si compone e si valuta come per la mappa vera. Una mappa determinata dalla sola posizione, o comunque indipendente dal contenuto dei profili, produce guadagni **della stessa entità** in questi controlli. Requisito preregistrato: la Δ della mappa vera deve superare la **migliore** delle 32 di almeno **0,01**, su tutte e quattro le combinazioni; altrimenti HD non è dichiarabile, quale che sia il resto. Test di equivarianza (`tests/test_e04_features.py`): permutando i profili, la mappa di T deve seguire la permutazione; se non cambia, T dipende dalle coordinate e non dai dati, e il test fallisce.
 - **Test obbligatori** (`tests/test_e04_nulls.py`): (a) con enumerazione completa r = a / |G| e l'identità è contata una volta sola (il minimo su un gruppo di 63 elementi è 1/63, non 2/64); (b) il gruppo è chiuso e nessuna trasformazione viene scartata; (c) la diagnostica di copertura è riportata e non influenza r; (d) su 200 mappe lisce generate da una caratteristica indipendente dalla profondità si riporta la distribuzione di r, per documentare quanto la diagnostica sia informativa **senza** trattarla come test.
 
 ### Decisioni già prese, e perché
@@ -177,7 +178,7 @@ Il buffer b = max(96, RF) dipende dal campo ricettivo, calcolato al passo 0: **b
 | File | Cosa fare |
 |---|---|
 | `configs/e04/grid.json` | tutte le costanti di §2.4 (geometria, gate, bootstrap, margine, buffer, calibrazione, T, generatore sintetico, τ dopo il passo 1b, seed); `schema_version` |
-| `configs/e04/commands.json` | **fonte unica dei comandi** (già scritta, schema 1.1): 95 comandi `dev` (staging, quattro combinazioni, tre griglie, quattro varianti ricomposte più `inner8`), 8 comandi `new_segment`, artefatti attesi per ogni report con la coppia (mosaico, dominio). Piano, contratto e smoke test ne derivano; un test confronta token e ordine |
+| `configs/e04/commands.json` | **fonte unica dei comandi** (già scritta, schema 1.2): 103 comandi `dev` (staging, quattro combinazioni, tre griglie, quattro varianti ricomposte più `inner8`), 8 comandi `new_segment`, artefatti attesi per ogni report con la coppia (mosaico, dominio). Piano, contratto e smoke test ne derivano; un test confronta token e ordine |
 | `scripts/e04_stage.py` | staging fail-closed di volumi e predizioni con verifica delle impronte (passo 0a) |
 | `configs/e04/tiles_<seg>.json` | inventario per mattonella e per blocco: validità geometrica, idoneità analitica, idoneità inferenziale, regione, conteggi |
 | `scripts/e04_guard.py` | guardia eseguibile: verifica che configurazioni, notebook, report e manifest di E04 nominino solo i due segmenti di sviluppo e le due impronte di `LABEL_ALLOWLIST`; che ogni caricatore di label di E04 passi da `check_labels_allowed`; rifiuto di link, rinomine e del dataset label di E02 |
@@ -218,9 +219,11 @@ $PY scripts/e04_stage.py volume --mode dev --seg pherc0814-46527 --grid configs/
 $PY scripts/e04_stage.py volume --mode dev --seg pherc0139-w016 --grid configs/e04/grid.json --out runs/E04-R01/local-input/pherc0139-w016_z13.zarr --verify-tree-sha256 configs/e03/datasets.json
 $PY scripts/e04_stage.py preds --mode dev --seg pherc0814-46527 --grid configs/e04/grid.json --out runs/E04-R01/preds/pherc0814-46527 --verify-manifest docs/reports/2026-09-07-e03-r01-manifest.json
 $PY scripts/e04_stage.py preds --mode dev --seg pherc0139-w016 --grid configs/e04/grid.json --out runs/E04-R01/preds/pherc0139-w016 --verify-manifest docs/reports/2026-09-07-e03-r01-manifest.json
+$PY scripts/e04_stage.py labels --mode dev --seg pherc0814-46527 --grid configs/e04/grid.json --out runs/E04-R01/labels/pherc0814-46527 --verify-allowlist scripts/e03_metrics.py
+$PY scripts/e04_stage.py labels --mode dev --seg pherc0139-w016 --grid configs/e04/grid.json --out runs/E04-R01/labels/pherc0139-w016 --verify-allowlist scripts/e03_metrics.py
 ```
 
-`volume` copia da `runs/E03-R01/local-input/` quando il volume è già in locale (0814, impronta `bc742343…`) e altrimenti lo **scarica dal dataset Kaggle** `papyruslab-e02-input-w016` (≈ 11 GB), confrontando in entrambi i casi l'albero SHA-256 con `configs/e03/datasets.json`. `preds` raccoglie i sette TIFF per seed dalle cartelle di download verificate di E02/E03 e confronta ogni impronta con il manifest E03. **Fatto quando:** i quattro comandi terminano con esito positivo e scrivono `runs/E04-R01/staging.json` con le impronte.
+`labels` copia le cartelle delle label dei **due soli segmenti di sviluppo** in `runs/E04-R01/labels/<seg>`, verificandone l'albero SHA-256 contro `LABEL_ALLOWLIST` di `scripts/e03_metrics.py`; da lì in poi **ogni comando che legge label riceve il percorso esplicito** `--labels`, e nessuno usa percorsi d'ambiente. `volume` copia da `runs/E03-R01/local-input/` quando il volume è già in locale (0814, impronta `bc742343…`) e altrimenti lo **scarica dal dataset Kaggle** `papyruslab-e02-input-w016` (≈ 11 GB), confrontando in entrambi i casi l'albero SHA-256 con `configs/e03/datasets.json`. `preds` raccoglie i sette TIFF per seed dalle cartelle di download verificate di E02/E03 e confronta ogni impronta con il manifest E03. **Fatto quando:** i quattro comandi terminano con esito positivo e scrivono `runs/E04-R01/staging.json` con le impronte.
 
 ### Passo 0b — Base verificata, campo ricettivo, preflight di numerosità
 
@@ -298,7 +301,7 @@ $PY scripts/e04_mosaic.py evaluate --mode dev --seg pherc0814-46527 --grid confi
 # le quattro varianti di robustezza (§2.6) ricostruiscono mappa e/o mosaico: i comandi per esteso sono in commands.json
 $PY scripts/e04_mosaic.py compose --mode dev --seg pherc0814-46527 --grid configs/e04/grid.json --grid-variant g64_o0 --map docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o0.json --preds runs/E03-R01/preds/pherc0814-46527 --seed 42 --out runs/E04-R01/mosaic/pherc0814-46527_s42_T_raw.tif
 $PY scripts/e04_mosaic.py evaluate --mode dev --seg pherc0814-46527 --grid configs/e04/grid.json --grid-variant g64_o0 --pred runs/E04-R01/mosaic/pherc0814-46527_s42_T_raw.tif --seed 42 --eval-scope full --out docs/reports/e04-r01/eval_pherc0814-46527_s42_T_raw.json
-$PY scripts/e04_mosaic.py validate-reports --mode dev --grid configs/e04/grid.json --reports docs/reports/e04-r01/   # rifiuta due report che dichiarino lo stesso mosaico
+$PY scripts/e04_mosaic.py validate-reports --mode dev --grid configs/e04/grid.json --reports docs/reports/e04-r01/   # rifiuta due report con la stessa coppia (impronta mosaico, impronta maschera di valutazione)
 ```
 `evaluate` produce, per segmento, seed e variante: AUROC e F1@91 del mosaico; Δ rispetto alle baseline `k0`, `uniform_oracle_target`, `uniform_other_segment`; rango nella distribuzione per traslazione e nel nullo marginale, con la loro risoluzione e la diagnostica di copertura; danno per regione; copertura, astensioni per motivo, entropia, mediana degli L\* prima e dopo il centraggio; intervalli indicativi dove il ramo di §2.5 li consente.
 
@@ -326,7 +329,7 @@ Misure sui pixel held-out del piano 10; conclusioni **per segmento**; i due seed
   - **HC2** (vs `uniform_oracle_target`, il miglior offset uniforme del **segmento valutato** scelto con le label), **bloccante per HD:** Δ ≥ **+0,005** come stima puntuale, cioè un vantaggio **strettamente positivo** preregistrato e non un pareggio: un pareggio è ciò che produrrebbe una mappa degenere, e non deve poter promuovere nulla. Anche qui rango e intervallo si riportano senza potere decisionale.
   - **HC3** (riportata, non bloccante) vs `uniform_other_segment`, voce (iv) di §2.4.
   - Copertura, astensioni per motivo e intervalli indicativi si riportano sempre. HC1 vera e HC2 falsa = "correzione locale utile ma inferiore a uno spostamento uniforme ben scelto".
-- **HD (candidato operativo su due casi, criterio descrittivo):** T **non degenere** (§2.4, punto 10) su entrambi i segmenti; HC1 e HC2 vere su **entrambi** i segmenti e **entrambi** i seed, con lo stesso algoritmo, gli stessi parametri e la stessa τ; per **ogni** regione held-out, Δ puntuale rispetto a k = 0 ≥ −0,02; F1@91 puntuale del mosaico calibrato ≥ −0,01 rispetto a k = 0; segno del guadagno invariato nelle **quattro letture di robustezza** di §2.6: le tre ricomposte (`raw`, `g128`, `o32`) e la sensibilità del dominio di valutazione (`inner8`). HD **non è** un'affermazione statistica di superiorità: è la congiunzione di condizioni preregistrate (non degenerazione, HC1 e HC2 su quattro combinazioni, danno per regione, F1, cinque letture di robustezza) su quattro combinazioni, e si scrive con questa etichetta ovunque, scheda e candidatura comprese.
+- **HD (candidato operativo su due casi, criterio descrittivo):** T **non degenere** (§2.4, punto 10) su entrambi i segmenti; T **supera di ≥ 0,01 il migliore dei 32 controlli a profili permutati** (§2.4, voce vi) su tutte e quattro le combinazioni; HC1 e HC2 vere su **entrambi** i segmenti e **entrambi** i seed, con lo stesso algoritmo, gli stessi parametri e la stessa τ; per **ogni** regione held-out, Δ puntuale rispetto a k = 0 ≥ −0,02; F1@91 puntuale del mosaico calibrato ≥ −0,01 rispetto a k = 0; segno del guadagno invariato nelle **quattro letture di robustezza** di §2.6: le tre ricomposte (`raw`, `g128`, `o32`) e la sensibilità del dominio di valutazione (`inner8`). HD **non è** un'affermazione statistica di superiorità: è la congiunzione di condizioni preregistrate (non degenerazione, HC1 e HC2 su quattro combinazioni, danno per regione, F1, cinque letture di robustezza) su quattro combinazioni, e si scrive con questa etichetta ovunque, scheda e candidatura comprese.
 - **Degenerazione:** T "uniforme" (§2.4, punto 10): si scrive, con entropia della mappa, copertura, mediana degli L\*.
 - **Arresti che chiudono il ramo strumento, conservando il diagnostico:** `estimator_disabled: true` in `grid.json` (nessun τ soddisfa accuratezza e copertura sui sintetici; un τ valido pari a 1,00 **non** è un arresto e il test di equivalenza distingue i due casi); sotto il gate di segmento di §2.5; `no_template` su entrambi i segmenti; mattonelle piatte + censurate + astenute > 50 % dell'area valida di un segmento ("profondità non identificabile con questa caratteristica"); segno del guadagno che cambia fra calibrato e grezzo o con l'origine; mappe dei due seed che non condividono alcun k\* su più della metà delle mattonelle coperte; C che funziona solo includendo pixel di training.
 - **Ciò che nessun numero dice qui:** la causa; il comportamento su altri rotoli; l'effetto di offset intermedi (E04b); la modalità efficiente (lavoro futuro); lo spostamento uniforme del segmento (fuori dalla portata di T).
@@ -487,7 +490,17 @@ Verdetto: NO-SHIP. **4 finding (3 P1, 1 P2), accettati 4.** Confermato che il ce
 | 3 | P1 | Il contratto ometteva `--grid-variant g64_o0` in tre comandi presenti nel registro: lo smoke test letterale sarebbe fallito | i tre comandi allineati al registro; il test confronta **token e ordine**, senza normalizzare i default |
 | 4 | P2 | Le sensibilita' di griglia del passo 2 (`maps` su g128 e o32) non erano nel registro | dodici invocazioni `maps` (due segmenti x due seed x tre griglie) materializzate con uscite distinte; il passo 2 le richiama |
 
-### Revisione R1, nono giro
+### Revisione R1, nono giro (8 settembre 2026, job `review-mtskttvy-10t0ne`, sessione `01a080be…`)
+
+Verdetto: NO-SHIP. **3 finding (2 P1, 1 P2), accettati 3.** Il secondo e' un controesempio piu' sottile di quello della mappa costante.
+
+| # | Sev. | Finding (sintesi) | Correzione in v10 |
+|---|---|---|---|
+| 1 | P1 | Le label erano una dipendenza d'ambiente: nessun comando le materializzava, quindi un clone pulito si sarebbe fermato e una macchina con residui avrebbe potuto usarne di vecchie | `e04_stage.py labels` copia le label dei due soli segmenti di sviluppo in `runs/E04-R01/labels/` verificandole contro la lista bianca; ogni consumatore riceve `--labels` esplicito; test del grafo che rifiuta input non prodotti o non dichiarati |
+| 2 | P1 | HC2 non smaschera necessariamente una mappa determinata dalla sola posizione: se due zone preferiscono offset opposti, una mappa posizionale batte sia lo zero sia ogni offset uniforme senza contenere informazione di profondita' | nuovo **controllo bloccante a profili permutati**: 32 permutazioni congelate che scambiano i profili fra mattonelle lasciando la geometria; T deve superare il migliore di questi di almeno 0,01 su tutte e quattro le combinazioni, altrimenti HD non e' dichiarabile; piu' un test di equivarianza che fallisce se la mappa non segue la permutazione |
+| 3 | P2 | `validate-reports` era descritto come rifiuto di due report con lo stesso mosaico, ma `primary` e `inner8` lo condividono per costruzione | regola uniformata alla coppia (impronta mosaico, impronta maschera di valutazione), con test che verifica che `primary` e `inner8` abbiano lo stesso mosaico e domini distinti |
+
+### Revisione R1, decimo giro
 
 *Da compilare.*
 

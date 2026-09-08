@@ -1,5 +1,5 @@
 {
- "schema_version": "e04-commands/1.1",
+ "schema_version": "e04-commands/1.2",
  "python": "./.venv/Scripts/python.exe",
  "note": "Fonte unica dei comandi di E04. Il piano §4, docs/e04-contratto-uso.md e tests/test_e04_smoke.py leggono questo file; un test confronta token e ordine, senza normalizzare i default. I comandi 'dev' girano sui due segmenti di sviluppo con le label in lista bianca; i comandi 'new_segment' non aprono mai label. Ogni report di valutazione e' identificato dalla coppia (impronta del mosaico, impronta della maschera di valutazione): due report non possono condividerla.",
  "grid_variants": {
@@ -51,11 +51,13 @@
  },
  "segments": {
   "pherc0814-46527": {
+   "labels": "runs/E04-R01/labels/pherc0814-46527",
    "volume": "runs/E04-R01/local-input/pherc0814-46527_z13.zarr",
    "volume_source": "locale, gia' presente in runs/E03-R01/local-input/ (impronta bc742343…): lo stage lo copia e ne verifica l'albero",
    "preds": "runs/E04-R01/preds/pherc0814-46527"
   },
   "pherc0139-w016": {
+   "labels": "runs/E04-R01/labels/pherc0139-w016",
    "volume": "runs/E04-R01/local-input/pherc0139-w016_z13.zarr",
    "volume_source": "dataset Kaggle papyruslab-e02-input-w016 (~11 GB; disco libero 27 GB): lo stage lo scarica e ne verifica l'albero contro configs/e03/datasets.json",
    "preds": "runs/E04-R01/preds/pherc0139-w016"
@@ -67,7 +69,8 @@
  ],
  "staging": {
   "why": "I volumi e le 28 predizioni vivono fuori da git. e04_stage.py li materializza in runs/E04-R01/ verificandone le impronte contro configs/e03/datasets.json e il manifest E03, e si ferma se una non coincide. Nessun comando successivo puo' partire senza.",
-  "disk_required_gb": 14
+  "disk_required_gb": 14,
+  "labels": "le cartelle delle label dei due soli segmenti di sviluppo, verificate contro LABEL_ALLOWLIST di scripts/e03_metrics.py e passate esplicitamente a ogni consumatore"
  },
  "dev": [
   {
@@ -113,6 +116,22 @@
   },
   {
    "script": "scripts/e04_stage.py",
+   "subcommand": "labels",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "runs/E04-R01/labels/pherc0814-46527",
+    "--verify-allowlist",
+    "scripts/e03_metrics.py"
+   ]
+  },
+  {
+   "script": "scripts/e04_stage.py",
    "subcommand": "volume",
    "args": [
     "--mode",
@@ -144,6 +163,22 @@
    ]
   },
   {
+   "script": "scripts/e04_stage.py",
+   "subcommand": "labels",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "runs/E04-R01/labels/pherc0139-w016",
+    "--verify-allowlist",
+    "scripts/e03_metrics.py"
+   ]
+  },
+  {
    "script": "scripts/e04_tiles.py",
    "subcommand": "base",
    "args": [
@@ -151,6 +186,8 @@
     "dev",
     "--grid",
     "configs/e04/grid.json",
+    "--labels-root",
+    "runs/E04-R01/labels",
     "--out",
     "docs/reports/e04-r01/base.json"
    ]
@@ -299,6 +336,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--seg",
     "pherc0814-46527",
     "--seed",
@@ -317,6 +356,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--seg",
     "pherc0814-46527",
     "--seed",
@@ -335,6 +376,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--seg",
     "pherc0814-46527",
     "--seed",
@@ -353,6 +396,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--seg",
     "pherc0814-46527",
     "--seed",
@@ -427,6 +472,8 @@
     "full",
     "--nulls",
     "100000",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--out",
     "docs/reports/e04-r01/eval_pherc0814-46527_s42_T_primary.json"
    ]
@@ -489,6 +536,8 @@
     "42",
     "--eval-scope",
     "full",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--out",
     "docs/reports/e04-r01/eval_pherc0814-46527_s42_T_raw.json"
    ]
@@ -553,6 +602,8 @@
     "42",
     "--eval-scope",
     "full",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--out",
     "docs/reports/e04-r01/eval_pherc0814-46527_s42_T_g128.json"
    ]
@@ -617,6 +668,8 @@
     "42",
     "--eval-scope",
     "full",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--out",
     "docs/reports/e04-r01/eval_pherc0814-46527_s42_T_o32.json"
    ]
@@ -639,6 +692,8 @@
     "42",
     "--eval-scope",
     "inner8",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--out",
     "docs/reports/e04-r01/eval_pherc0814-46527_s42_T_inner8.json"
    ]
@@ -671,6 +726,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--seg",
     "pherc0814-46527",
     "--seed",
@@ -689,6 +746,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--seg",
     "pherc0814-46527",
     "--seed",
@@ -707,6 +766,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--seg",
     "pherc0814-46527",
     "--seed",
@@ -725,6 +786,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--seg",
     "pherc0814-46527",
     "--seed",
@@ -799,6 +862,8 @@
     "full",
     "--nulls",
     "100000",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--out",
     "docs/reports/e04-r01/eval_pherc0814-46527_s43_T_primary.json"
    ]
@@ -861,6 +926,8 @@
     "43",
     "--eval-scope",
     "full",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--out",
     "docs/reports/e04-r01/eval_pherc0814-46527_s43_T_raw.json"
    ]
@@ -925,6 +992,8 @@
     "43",
     "--eval-scope",
     "full",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--out",
     "docs/reports/e04-r01/eval_pherc0814-46527_s43_T_g128.json"
    ]
@@ -989,6 +1058,8 @@
     "43",
     "--eval-scope",
     "full",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--out",
     "docs/reports/e04-r01/eval_pherc0814-46527_s43_T_o32.json"
    ]
@@ -1011,8 +1082,78 @@
     "43",
     "--eval-scope",
     "inner8",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--out",
     "docs/reports/e04-r01/eval_pherc0814-46527_s43_T_inner8.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_features.py",
+   "subcommand": "shuffle-control",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--profiles",
+    "docs/reports/e04-r01/profiles_pherc0814-46527.json",
+    "--n",
+    "32",
+    "--seed-rng",
+    "20260908",
+    "--out",
+    "docs/reports/e04-r01/shuffle_pherc0814-46527.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate-controls",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--shuffle",
+    "docs/reports/e04-r01/shuffle_pherc0814-46527.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0814-46527_s42/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0814-46527_s42.json",
+    "--seed",
+    "42",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
+    "--out",
+    "docs/reports/e04-r01/controls_pherc0814-46527_s42.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate-controls",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--shuffle",
+    "docs/reports/e04-r01/shuffle_pherc0814-46527.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0814-46527_s43/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0814-46527_s43.json",
+    "--seed",
+    "43",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
+    "--out",
+    "docs/reports/e04-r01/controls_pherc0814-46527_s43.json"
    ]
   },
   {
@@ -1021,6 +1162,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0814-46527",
     "--seg",
     "pherc0814-46527",
     "--grid",
@@ -1161,6 +1304,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--seg",
     "pherc0139-w016",
     "--seed",
@@ -1179,6 +1324,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--seg",
     "pherc0139-w016",
     "--seed",
@@ -1197,6 +1344,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--seg",
     "pherc0139-w016",
     "--seed",
@@ -1215,6 +1364,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--seg",
     "pherc0139-w016",
     "--seed",
@@ -1289,6 +1440,8 @@
     "full",
     "--nulls",
     "100000",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--out",
     "docs/reports/e04-r01/eval_pherc0139-w016_s42_T_primary.json"
    ]
@@ -1351,6 +1504,8 @@
     "42",
     "--eval-scope",
     "full",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--out",
     "docs/reports/e04-r01/eval_pherc0139-w016_s42_T_raw.json"
    ]
@@ -1415,6 +1570,8 @@
     "42",
     "--eval-scope",
     "full",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--out",
     "docs/reports/e04-r01/eval_pherc0139-w016_s42_T_g128.json"
    ]
@@ -1479,6 +1636,8 @@
     "42",
     "--eval-scope",
     "full",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--out",
     "docs/reports/e04-r01/eval_pherc0139-w016_s42_T_o32.json"
    ]
@@ -1501,6 +1660,8 @@
     "42",
     "--eval-scope",
     "inner8",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--out",
     "docs/reports/e04-r01/eval_pherc0139-w016_s42_T_inner8.json"
    ]
@@ -1533,6 +1694,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--seg",
     "pherc0139-w016",
     "--seed",
@@ -1551,6 +1714,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--seg",
     "pherc0139-w016",
     "--seed",
@@ -1569,6 +1734,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--seg",
     "pherc0139-w016",
     "--seed",
@@ -1587,6 +1754,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--seg",
     "pherc0139-w016",
     "--seed",
@@ -1661,6 +1830,8 @@
     "full",
     "--nulls",
     "100000",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--out",
     "docs/reports/e04-r01/eval_pherc0139-w016_s43_T_primary.json"
    ]
@@ -1723,6 +1894,8 @@
     "43",
     "--eval-scope",
     "full",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--out",
     "docs/reports/e04-r01/eval_pherc0139-w016_s43_T_raw.json"
    ]
@@ -1787,6 +1960,8 @@
     "43",
     "--eval-scope",
     "full",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--out",
     "docs/reports/e04-r01/eval_pherc0139-w016_s43_T_g128.json"
    ]
@@ -1851,6 +2026,8 @@
     "43",
     "--eval-scope",
     "full",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--out",
     "docs/reports/e04-r01/eval_pherc0139-w016_s43_T_o32.json"
    ]
@@ -1873,8 +2050,78 @@
     "43",
     "--eval-scope",
     "inner8",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--out",
     "docs/reports/e04-r01/eval_pherc0139-w016_s43_T_inner8.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_features.py",
+   "subcommand": "shuffle-control",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--profiles",
+    "docs/reports/e04-r01/profiles_pherc0139-w016.json",
+    "--n",
+    "32",
+    "--seed-rng",
+    "20260908",
+    "--out",
+    "docs/reports/e04-r01/shuffle_pherc0139-w016.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate-controls",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--shuffle",
+    "docs/reports/e04-r01/shuffle_pherc0139-w016.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0139-w016_s42/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0139-w016_s42.json",
+    "--seed",
+    "42",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
+    "--out",
+    "docs/reports/e04-r01/controls_pherc0139-w016_s42.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate-controls",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--shuffle",
+    "docs/reports/e04-r01/shuffle_pherc0139-w016.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0139-w016_s43/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0139-w016_s43.json",
+    "--seed",
+    "43",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
+    "--out",
+    "docs/reports/e04-r01/controls_pherc0139-w016_s43.json"
    ]
   },
   {
@@ -1883,6 +2130,8 @@
    "args": [
     "--mode",
     "dev",
+    "--labels",
+    "runs/E04-R01/labels/pherc0139-w016",
     "--seg",
     "pherc0139-w016",
     "--grid",
