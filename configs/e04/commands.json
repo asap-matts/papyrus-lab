@@ -1,0 +1,2231 @@
+{
+ "schema_version": "e04-commands/1.1",
+ "python": "./.venv/Scripts/python.exe",
+ "note": "Fonte unica dei comandi di E04. Il piano §4, docs/e04-contratto-uso.md e tests/test_e04_smoke.py leggono questo file; un test confronta token e ordine, senza normalizzare i default. I comandi 'dev' girano sui due segmenti di sviluppo con le label in lista bianca; i comandi 'new_segment' non aprono mai label. Ogni report di valutazione e' identificato dalla coppia (impronta del mosaico, impronta della maschera di valutazione): due report non possono condividerla.",
+ "grid_variants": {
+  "g64_o0": {
+   "tile": 64,
+   "origin": [
+    0,
+    0
+   ]
+  },
+  "g128_o0": {
+   "tile": 128,
+   "origin": [
+    0,
+    0
+   ]
+  },
+  "g64_o32": {
+   "tile": 64,
+   "origin": [
+    32,
+    32
+   ]
+  }
+ },
+ "recomposed_variants": {
+  "primary": {
+   "grid": "g64_o0",
+   "preds": "cal"
+  },
+  "raw": {
+   "grid": "g64_o0",
+   "preds": "raw"
+  },
+  "g128": {
+   "grid": "g128_o0",
+   "preds": "cal"
+  },
+  "o32": {
+   "grid": "g64_o32",
+   "preds": "cal"
+  }
+ },
+ "evaluation_scope_variants": {
+  "inner8": {
+   "on": "primary",
+   "eval_scope": "inner8"
+  }
+ },
+ "segments": {
+  "pherc0814-46527": {
+   "volume": "runs/E04-R01/local-input/pherc0814-46527_z13.zarr",
+   "volume_source": "locale, gia' presente in runs/E03-R01/local-input/ (impronta bc742343…): lo stage lo copia e ne verifica l'albero",
+   "preds": "runs/E04-R01/preds/pherc0814-46527"
+  },
+  "pherc0139-w016": {
+   "volume": "runs/E04-R01/local-input/pherc0139-w016_z13.zarr",
+   "volume_source": "dataset Kaggle papyruslab-e02-input-w016 (~11 GB; disco libero 27 GB): lo stage lo scarica e ne verifica l'albero contro configs/e03/datasets.json",
+   "preds": "runs/E04-R01/preds/pherc0139-w016"
+  }
+ },
+ "seeds": [
+  42,
+  43
+ ],
+ "staging": {
+  "why": "I volumi e le 28 predizioni vivono fuori da git. e04_stage.py li materializza in runs/E04-R01/ verificandone le impronte contro configs/e03/datasets.json e il manifest E03, e si ferma se una non coincide. Nessun comando successivo puo' partire senza.",
+  "disk_required_gb": 14
+ },
+ "dev": [
+  {
+   "script": "scripts/e04_guard.py",
+   "subcommand": null,
+   "args": [
+    "--mode",
+    "dev",
+    "--check"
+   ]
+  },
+  {
+   "script": "scripts/e04_stage.py",
+   "subcommand": "volume",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "runs/E04-R01/local-input/pherc0814-46527_z13.zarr",
+    "--verify-tree-sha256",
+    "configs/e03/datasets.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_stage.py",
+   "subcommand": "preds",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "runs/E04-R01/preds/pherc0814-46527",
+    "--verify-manifest",
+    "docs/reports/2026-09-07-e03-r01-manifest.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_stage.py",
+   "subcommand": "volume",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "runs/E04-R01/local-input/pherc0139-w016_z13.zarr",
+    "--verify-tree-sha256",
+    "configs/e03/datasets.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_stage.py",
+   "subcommand": "preds",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "runs/E04-R01/preds/pherc0139-w016",
+    "--verify-manifest",
+    "docs/reports/2026-09-07-e03-r01-manifest.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "base",
+   "args": [
+    "--mode",
+    "dev",
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "docs/reports/e04-r01/base.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_synth.py",
+   "subcommand": null,
+   "args": [
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "docs/reports/e04-r01/synth.json",
+    "--write-tau",
+    "configs/e04/grid.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "inventory",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "configs/e04/tiles_pherc0814-46527.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_features.py",
+   "subcommand": "profiles",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--volume",
+    "runs/E04-R01/local-input/pherc0814-46527_z13.zarr",
+    "--out",
+    "docs/reports/e04-r01/profiles_pherc0814-46527.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_features.py",
+   "subcommand": "estimate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--profiles",
+    "docs/reports/e04-r01/profiles_pherc0814-46527.json",
+    "--out",
+    "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o0.json",
+    "--maps",
+    "runs/E04-R01/maps_pherc0814-46527_g64_o0/"
+   ]
+  },
+  {
+   "script": "scripts/e04_features.py",
+   "subcommand": "estimate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--profiles",
+    "docs/reports/e04-r01/profiles_pherc0814-46527.json",
+    "--out",
+    "docs/reports/e04-r01/offsets_T_pherc0814-46527_g128_o0.json",
+    "--maps",
+    "runs/E04-R01/maps_pherc0814-46527_g128_o0/"
+   ]
+  },
+  {
+   "script": "scripts/e04_features.py",
+   "subcommand": "estimate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--profiles",
+    "docs/reports/e04-r01/profiles_pherc0814-46527.json",
+    "--out",
+    "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o32.json",
+    "--maps",
+    "runs/E04-R01/maps_pherc0814-46527_g64_o32/"
+   ]
+  },
+  {
+   "script": "scripts/e04_features.py",
+   "subcommand": "diagnostics",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "docs/reports/e04-r01/diag_pherc0814-46527.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_calibrate.py",
+   "subcommand": null,
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--volume",
+    "runs/E04-R01/local-input/pherc0814-46527_z13.zarr",
+    "--preds",
+    "runs/E04-R01/preds/pherc0814-46527",
+    "--seed",
+    "42",
+    "--out",
+    "docs/reports/e04-r01/cal_pherc0814-46527_s42.json",
+    "--out-tifs",
+    "runs/E04-R01/cal/pherc0814-46527_s42/"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "maps",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--seed",
+    "42",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--out",
+    "docs/reports/e04-r01/tiles_pherc0814-46527_s42_g64_o0.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "maps",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--seed",
+    "42",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--out",
+    "docs/reports/e04-r01/tiles_pherc0814-46527_s42_g128_o0.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "maps",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--seed",
+    "42",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--out",
+    "docs/reports/e04-r01/tiles_pherc0814-46527_s42_g64_o32.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "envelope",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--seed",
+    "42",
+    "--grid",
+    "configs/e04/grid.json",
+    "--calibrated",
+    "runs/E04-R01/cal/pherc0814-46527_s42/",
+    "--out",
+    "docs/reports/e04-r01/envelope_pherc0814-46527_s42.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--preds",
+    "runs/E04-R01/cal/pherc0814-46527_s42/",
+    "--seed",
+    "42"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o0.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0814-46527_s42/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0814-46527_s42.json",
+    "--seed",
+    "42",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0814-46527_s42_T_primary.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0814-46527_s42_T_primary.tif",
+    "--seed",
+    "42",
+    "--eval-scope",
+    "full",
+    "--nulls",
+    "100000",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0814-46527_s42_T_primary.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--preds",
+    "runs/E04-R01/preds/pherc0814-46527",
+    "--seed",
+    "42"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o0.json",
+    "--preds",
+    "runs/E04-R01/preds/pherc0814-46527",
+    "--seed",
+    "42",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0814-46527_s42_T_raw.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0814-46527_s42_T_raw.tif",
+    "--seed",
+    "42",
+    "--eval-scope",
+    "full",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0814-46527_s42_T_raw.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--preds",
+    "runs/E04-R01/cal/pherc0814-46527_s42/",
+    "--seed",
+    "42"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0814-46527_g128_o0.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0814-46527_s42/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0814-46527_s42.json",
+    "--seed",
+    "42",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0814-46527_s42_T_g128.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0814-46527_s42_T_g128.tif",
+    "--seed",
+    "42",
+    "--eval-scope",
+    "full",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0814-46527_s42_T_g128.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--preds",
+    "runs/E04-R01/cal/pherc0814-46527_s42/",
+    "--seed",
+    "42"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o32.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0814-46527_s42/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0814-46527_s42.json",
+    "--seed",
+    "42",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0814-46527_s42_T_o32.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0814-46527_s42_T_o32.tif",
+    "--seed",
+    "42",
+    "--eval-scope",
+    "full",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0814-46527_s42_T_o32.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0814-46527_s42_T_primary.tif",
+    "--seed",
+    "42",
+    "--eval-scope",
+    "inner8",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0814-46527_s42_T_inner8.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_calibrate.py",
+   "subcommand": null,
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--volume",
+    "runs/E04-R01/local-input/pherc0814-46527_z13.zarr",
+    "--preds",
+    "runs/E04-R01/preds/pherc0814-46527",
+    "--seed",
+    "43",
+    "--out",
+    "docs/reports/e04-r01/cal_pherc0814-46527_s43.json",
+    "--out-tifs",
+    "runs/E04-R01/cal/pherc0814-46527_s43/"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "maps",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--seed",
+    "43",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--out",
+    "docs/reports/e04-r01/tiles_pherc0814-46527_s43_g64_o0.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "maps",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--seed",
+    "43",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--out",
+    "docs/reports/e04-r01/tiles_pherc0814-46527_s43_g128_o0.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "maps",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--seed",
+    "43",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--out",
+    "docs/reports/e04-r01/tiles_pherc0814-46527_s43_g64_o32.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "envelope",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--seed",
+    "43",
+    "--grid",
+    "configs/e04/grid.json",
+    "--calibrated",
+    "runs/E04-R01/cal/pherc0814-46527_s43/",
+    "--out",
+    "docs/reports/e04-r01/envelope_pherc0814-46527_s43.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--preds",
+    "runs/E04-R01/cal/pherc0814-46527_s43/",
+    "--seed",
+    "43"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o0.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0814-46527_s43/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0814-46527_s43.json",
+    "--seed",
+    "43",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0814-46527_s43_T_primary.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0814-46527_s43_T_primary.tif",
+    "--seed",
+    "43",
+    "--eval-scope",
+    "full",
+    "--nulls",
+    "100000",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0814-46527_s43_T_primary.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--preds",
+    "runs/E04-R01/preds/pherc0814-46527",
+    "--seed",
+    "43"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o0.json",
+    "--preds",
+    "runs/E04-R01/preds/pherc0814-46527",
+    "--seed",
+    "43",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0814-46527_s43_T_raw.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0814-46527_s43_T_raw.tif",
+    "--seed",
+    "43",
+    "--eval-scope",
+    "full",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0814-46527_s43_T_raw.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--preds",
+    "runs/E04-R01/cal/pherc0814-46527_s43/",
+    "--seed",
+    "43"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0814-46527_g128_o0.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0814-46527_s43/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0814-46527_s43.json",
+    "--seed",
+    "43",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0814-46527_s43_T_g128.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0814-46527_s43_T_g128.tif",
+    "--seed",
+    "43",
+    "--eval-scope",
+    "full",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0814-46527_s43_T_g128.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--preds",
+    "runs/E04-R01/cal/pherc0814-46527_s43/",
+    "--seed",
+    "43"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o32.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0814-46527_s43/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0814-46527_s43.json",
+    "--seed",
+    "43",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0814-46527_s43_T_o32.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0814-46527_s43_T_o32.tif",
+    "--seed",
+    "43",
+    "--eval-scope",
+    "full",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0814-46527_s43_T_o32.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0814-46527_s43_T_primary.tif",
+    "--seed",
+    "43",
+    "--eval-scope",
+    "inner8",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0814-46527_s43_T_inner8.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "crossfit",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0814-46527",
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "docs/reports/e04-r01/crossfit_pherc0814-46527.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "inventory",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "configs/e04/tiles_pherc0139-w016.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_features.py",
+   "subcommand": "profiles",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--volume",
+    "runs/E04-R01/local-input/pherc0139-w016_z13.zarr",
+    "--out",
+    "docs/reports/e04-r01/profiles_pherc0139-w016.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_features.py",
+   "subcommand": "estimate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--profiles",
+    "docs/reports/e04-r01/profiles_pherc0139-w016.json",
+    "--out",
+    "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o0.json",
+    "--maps",
+    "runs/E04-R01/maps_pherc0139-w016_g64_o0/"
+   ]
+  },
+  {
+   "script": "scripts/e04_features.py",
+   "subcommand": "estimate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--profiles",
+    "docs/reports/e04-r01/profiles_pherc0139-w016.json",
+    "--out",
+    "docs/reports/e04-r01/offsets_T_pherc0139-w016_g128_o0.json",
+    "--maps",
+    "runs/E04-R01/maps_pherc0139-w016_g128_o0/"
+   ]
+  },
+  {
+   "script": "scripts/e04_features.py",
+   "subcommand": "estimate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--profiles",
+    "docs/reports/e04-r01/profiles_pherc0139-w016.json",
+    "--out",
+    "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o32.json",
+    "--maps",
+    "runs/E04-R01/maps_pherc0139-w016_g64_o32/"
+   ]
+  },
+  {
+   "script": "scripts/e04_features.py",
+   "subcommand": "diagnostics",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "docs/reports/e04-r01/diag_pherc0139-w016.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_calibrate.py",
+   "subcommand": null,
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--volume",
+    "runs/E04-R01/local-input/pherc0139-w016_z13.zarr",
+    "--preds",
+    "runs/E04-R01/preds/pherc0139-w016",
+    "--seed",
+    "42",
+    "--out",
+    "docs/reports/e04-r01/cal_pherc0139-w016_s42.json",
+    "--out-tifs",
+    "runs/E04-R01/cal/pherc0139-w016_s42/"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "maps",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--seed",
+    "42",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--out",
+    "docs/reports/e04-r01/tiles_pherc0139-w016_s42_g64_o0.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "maps",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--seed",
+    "42",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--out",
+    "docs/reports/e04-r01/tiles_pherc0139-w016_s42_g128_o0.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "maps",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--seed",
+    "42",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--out",
+    "docs/reports/e04-r01/tiles_pherc0139-w016_s42_g64_o32.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "envelope",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--seed",
+    "42",
+    "--grid",
+    "configs/e04/grid.json",
+    "--calibrated",
+    "runs/E04-R01/cal/pherc0139-w016_s42/",
+    "--out",
+    "docs/reports/e04-r01/envelope_pherc0139-w016_s42.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--preds",
+    "runs/E04-R01/cal/pherc0139-w016_s42/",
+    "--seed",
+    "42"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o0.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0139-w016_s42/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0139-w016_s42.json",
+    "--seed",
+    "42",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0139-w016_s42_T_primary.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0139-w016_s42_T_primary.tif",
+    "--seed",
+    "42",
+    "--eval-scope",
+    "full",
+    "--nulls",
+    "100000",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0139-w016_s42_T_primary.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--preds",
+    "runs/E04-R01/preds/pherc0139-w016",
+    "--seed",
+    "42"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o0.json",
+    "--preds",
+    "runs/E04-R01/preds/pherc0139-w016",
+    "--seed",
+    "42",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0139-w016_s42_T_raw.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0139-w016_s42_T_raw.tif",
+    "--seed",
+    "42",
+    "--eval-scope",
+    "full",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0139-w016_s42_T_raw.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--preds",
+    "runs/E04-R01/cal/pherc0139-w016_s42/",
+    "--seed",
+    "42"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0139-w016_g128_o0.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0139-w016_s42/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0139-w016_s42.json",
+    "--seed",
+    "42",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0139-w016_s42_T_g128.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0139-w016_s42_T_g128.tif",
+    "--seed",
+    "42",
+    "--eval-scope",
+    "full",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0139-w016_s42_T_g128.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--preds",
+    "runs/E04-R01/cal/pherc0139-w016_s42/",
+    "--seed",
+    "42"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o32.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0139-w016_s42/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0139-w016_s42.json",
+    "--seed",
+    "42",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0139-w016_s42_T_o32.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0139-w016_s42_T_o32.tif",
+    "--seed",
+    "42",
+    "--eval-scope",
+    "full",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0139-w016_s42_T_o32.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0139-w016_s42_T_primary.tif",
+    "--seed",
+    "42",
+    "--eval-scope",
+    "inner8",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0139-w016_s42_T_inner8.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_calibrate.py",
+   "subcommand": null,
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--volume",
+    "runs/E04-R01/local-input/pherc0139-w016_z13.zarr",
+    "--preds",
+    "runs/E04-R01/preds/pherc0139-w016",
+    "--seed",
+    "43",
+    "--out",
+    "docs/reports/e04-r01/cal_pherc0139-w016_s43.json",
+    "--out-tifs",
+    "runs/E04-R01/cal/pherc0139-w016_s43/"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "maps",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--seed",
+    "43",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--out",
+    "docs/reports/e04-r01/tiles_pherc0139-w016_s43_g64_o0.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "maps",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--seed",
+    "43",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--out",
+    "docs/reports/e04-r01/tiles_pherc0139-w016_s43_g128_o0.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "maps",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--seed",
+    "43",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--out",
+    "docs/reports/e04-r01/tiles_pherc0139-w016_s43_g64_o32.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "envelope",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--seed",
+    "43",
+    "--grid",
+    "configs/e04/grid.json",
+    "--calibrated",
+    "runs/E04-R01/cal/pherc0139-w016_s43/",
+    "--out",
+    "docs/reports/e04-r01/envelope_pherc0139-w016_s43.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--preds",
+    "runs/E04-R01/cal/pherc0139-w016_s43/",
+    "--seed",
+    "43"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o0.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0139-w016_s43/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0139-w016_s43.json",
+    "--seed",
+    "43",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0139-w016_s43_T_primary.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0139-w016_s43_T_primary.tif",
+    "--seed",
+    "43",
+    "--eval-scope",
+    "full",
+    "--nulls",
+    "100000",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0139-w016_s43_T_primary.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--preds",
+    "runs/E04-R01/preds/pherc0139-w016",
+    "--seed",
+    "43"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o0.json",
+    "--preds",
+    "runs/E04-R01/preds/pherc0139-w016",
+    "--seed",
+    "43",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0139-w016_s43_T_raw.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0139-w016_s43_T_raw.tif",
+    "--seed",
+    "43",
+    "--eval-scope",
+    "full",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0139-w016_s43_T_raw.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--preds",
+    "runs/E04-R01/cal/pherc0139-w016_s43/",
+    "--seed",
+    "43"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0139-w016_g128_o0.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0139-w016_s43/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0139-w016_s43.json",
+    "--seed",
+    "43",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0139-w016_s43_T_g128.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g128_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0139-w016_s43_T_g128.tif",
+    "--seed",
+    "43",
+    "--eval-scope",
+    "full",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0139-w016_s43_T_g128.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--preds",
+    "runs/E04-R01/cal/pherc0139-w016_s43/",
+    "--seed",
+    "43"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--map",
+    "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o32.json",
+    "--preds",
+    "runs/E04-R01/cal/pherc0139-w016_s43/",
+    "--calibration",
+    "docs/reports/e04-r01/cal_pherc0139-w016_s43.json",
+    "--seed",
+    "43",
+    "--out",
+    "runs/E04-R01/mosaic/pherc0139-w016_s43_T_o32.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o32",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0139-w016_s43_T_o32.tif",
+    "--seed",
+    "43",
+    "--eval-scope",
+    "full",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0139-w016_s43_T_o32.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "evaluate",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--pred",
+    "runs/E04-R01/mosaic/pherc0139-w016_s43_T_primary.tif",
+    "--seed",
+    "43",
+    "--eval-scope",
+    "inner8",
+    "--out",
+    "docs/reports/e04-r01/eval_pherc0139-w016_s43_T_inner8.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "crossfit",
+   "args": [
+    "--mode",
+    "dev",
+    "--seg",
+    "pherc0139-w016",
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "docs/reports/e04-r01/crossfit_pherc0139-w016.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "validate-reports",
+   "args": [
+    "--mode",
+    "dev",
+    "--grid",
+    "configs/e04/grid.json",
+    "--reports",
+    "docs/reports/e04-r01"
+   ]
+  },
+  {
+   "script": "scripts/e04_manifest.py",
+   "subcommand": null,
+   "args": [
+    "--mode",
+    "dev",
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "docs/reports/2026-09-XX-e04-r01-manifest.json"
+   ]
+  }
+ ],
+ "new_segment": [
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "base",
+   "args": [
+    "--mode",
+    "new-segment",
+    "--seg",
+    "${SEG}",
+    "--grid",
+    "configs/e04/grid.json",
+    "--volume",
+    "${VOL}",
+    "--preds",
+    "${PREDS}",
+    "--out",
+    "out/e04/${SEG}/base.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_tiles.py",
+   "subcommand": "inventory",
+   "args": [
+    "--mode",
+    "new-segment",
+    "--seg",
+    "${SEG}",
+    "--grid",
+    "configs/e04/grid.json",
+    "--volume",
+    "${VOL}",
+    "--out",
+    "out/e04/${SEG}/tiles.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_calibrate.py",
+   "subcommand": null,
+   "args": [
+    "--mode",
+    "new-segment",
+    "--seg",
+    "${SEG}",
+    "--grid",
+    "configs/e04/grid.json",
+    "--volume",
+    "${VOL}",
+    "--preds",
+    "${PREDS}",
+    "--seed",
+    "${SEED}",
+    "--out",
+    "out/e04/${SEG}/cal_s${SEED}.json",
+    "--out-tifs",
+    "out/e04/${SEG}/cal_s${SEED}/"
+   ]
+  },
+  {
+   "script": "scripts/e04_features.py",
+   "subcommand": "profiles",
+   "args": [
+    "--mode",
+    "new-segment",
+    "--seg",
+    "${SEG}",
+    "--grid",
+    "configs/e04/grid.json",
+    "--volume",
+    "${VOL}",
+    "--out",
+    "out/e04/${SEG}/profiles.json"
+   ]
+  },
+  {
+   "script": "scripts/e04_features.py",
+   "subcommand": "estimate",
+   "args": [
+    "--mode",
+    "new-segment",
+    "--seg",
+    "${SEG}",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--profiles",
+    "out/e04/${SEG}/profiles.json",
+    "--out",
+    "out/e04/${SEG}/offsets_T_${SEG}.json",
+    "--maps",
+    "out/e04/${SEG}/maps/"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "equivalence",
+   "args": [
+    "--mode",
+    "new-segment",
+    "--seg",
+    "${SEG}",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--preds",
+    "out/e04/${SEG}/cal_s${SEED}/",
+    "--seed",
+    "${SEED}"
+   ]
+  },
+  {
+   "script": "scripts/e04_mosaic.py",
+   "subcommand": "compose",
+   "args": [
+    "--mode",
+    "new-segment",
+    "--seg",
+    "${SEG}",
+    "--grid",
+    "configs/e04/grid.json",
+    "--grid-variant",
+    "g64_o0",
+    "--map",
+    "out/e04/${SEG}/offsets_T_${SEG}.json",
+    "--preds",
+    "out/e04/${SEG}/cal_s${SEED}/",
+    "--calibration",
+    "out/e04/${SEG}/cal_s${SEED}.json",
+    "--seed",
+    "${SEED}",
+    "--out",
+    "out/e04/${SEG}/mosaic_${SEG}_s${SEED}_T.tif"
+   ]
+  },
+  {
+   "script": "scripts/e04_manifest.py",
+   "subcommand": null,
+   "args": [
+    "--mode",
+    "new-segment",
+    "--seg",
+    "${SEG}",
+    "--grid",
+    "configs/e04/grid.json",
+    "--out",
+    "out/e04/${SEG}/manifest.json"
+   ]
+  }
+ ],
+ "artifacts_by_report": {
+  "eval_pherc0814-46527_s42_T_primary": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0814-46527_s42_T_primary.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o0.json",
+   "preds": "runs/E04-R01/cal/pherc0814-46527_s42/",
+   "grid_variant": "g64_o0",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0814-46527_s42_T_raw": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0814-46527_s42_T_raw.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o0.json",
+   "preds": "runs/E04-R01/preds/pherc0814-46527",
+   "grid_variant": "g64_o0",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0814-46527_s42_T_g128": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0814-46527_s42_T_g128.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0814-46527_g128_o0.json",
+   "preds": "runs/E04-R01/cal/pherc0814-46527_s42/",
+   "grid_variant": "g128_o0",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0814-46527_s42_T_o32": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0814-46527_s42_T_o32.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o32.json",
+   "preds": "runs/E04-R01/cal/pherc0814-46527_s42/",
+   "grid_variant": "g64_o32",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0814-46527_s42_T_inner8": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0814-46527_s42_T_primary.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o0.json",
+   "preds": "runs/E04-R01/cal/pherc0814-46527_s42/",
+   "grid_variant": "g64_o0",
+   "eval_scope": "inner8",
+   "kind": "evaluation_scope"
+  },
+  "eval_pherc0814-46527_s43_T_primary": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0814-46527_s43_T_primary.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o0.json",
+   "preds": "runs/E04-R01/cal/pherc0814-46527_s43/",
+   "grid_variant": "g64_o0",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0814-46527_s43_T_raw": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0814-46527_s43_T_raw.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o0.json",
+   "preds": "runs/E04-R01/preds/pherc0814-46527",
+   "grid_variant": "g64_o0",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0814-46527_s43_T_g128": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0814-46527_s43_T_g128.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0814-46527_g128_o0.json",
+   "preds": "runs/E04-R01/cal/pherc0814-46527_s43/",
+   "grid_variant": "g128_o0",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0814-46527_s43_T_o32": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0814-46527_s43_T_o32.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o32.json",
+   "preds": "runs/E04-R01/cal/pherc0814-46527_s43/",
+   "grid_variant": "g64_o32",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0814-46527_s43_T_inner8": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0814-46527_s43_T_primary.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0814-46527_g64_o0.json",
+   "preds": "runs/E04-R01/cal/pherc0814-46527_s43/",
+   "grid_variant": "g64_o0",
+   "eval_scope": "inner8",
+   "kind": "evaluation_scope"
+  },
+  "eval_pherc0139-w016_s42_T_primary": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0139-w016_s42_T_primary.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o0.json",
+   "preds": "runs/E04-R01/cal/pherc0139-w016_s42/",
+   "grid_variant": "g64_o0",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0139-w016_s42_T_raw": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0139-w016_s42_T_raw.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o0.json",
+   "preds": "runs/E04-R01/preds/pherc0139-w016",
+   "grid_variant": "g64_o0",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0139-w016_s42_T_g128": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0139-w016_s42_T_g128.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0139-w016_g128_o0.json",
+   "preds": "runs/E04-R01/cal/pherc0139-w016_s42/",
+   "grid_variant": "g128_o0",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0139-w016_s42_T_o32": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0139-w016_s42_T_o32.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o32.json",
+   "preds": "runs/E04-R01/cal/pherc0139-w016_s42/",
+   "grid_variant": "g64_o32",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0139-w016_s42_T_inner8": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0139-w016_s42_T_primary.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o0.json",
+   "preds": "runs/E04-R01/cal/pherc0139-w016_s42/",
+   "grid_variant": "g64_o0",
+   "eval_scope": "inner8",
+   "kind": "evaluation_scope"
+  },
+  "eval_pherc0139-w016_s43_T_primary": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0139-w016_s43_T_primary.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o0.json",
+   "preds": "runs/E04-R01/cal/pherc0139-w016_s43/",
+   "grid_variant": "g64_o0",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0139-w016_s43_T_raw": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0139-w016_s43_T_raw.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o0.json",
+   "preds": "runs/E04-R01/preds/pherc0139-w016",
+   "grid_variant": "g64_o0",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0139-w016_s43_T_g128": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0139-w016_s43_T_g128.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0139-w016_g128_o0.json",
+   "preds": "runs/E04-R01/cal/pherc0139-w016_s43/",
+   "grid_variant": "g128_o0",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0139-w016_s43_T_o32": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0139-w016_s43_T_o32.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o32.json",
+   "preds": "runs/E04-R01/cal/pherc0139-w016_s43/",
+   "grid_variant": "g64_o32",
+   "eval_scope": "full",
+   "kind": "recomposed"
+  },
+  "eval_pherc0139-w016_s43_T_inner8": {
+   "mosaic": "runs/E04-R01/mosaic/pherc0139-w016_s43_T_primary.tif",
+   "map": "docs/reports/e04-r01/offsets_T_pherc0139-w016_g64_o0.json",
+   "preds": "runs/E04-R01/cal/pherc0139-w016_s43/",
+   "grid_variant": "g64_o0",
+   "eval_scope": "inner8",
+   "kind": "evaluation_scope"
+  }
+ }
+}
