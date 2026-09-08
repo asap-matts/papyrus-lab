@@ -29,6 +29,6 @@ Account Kaggle e telefono verificati. Il [preflight dell'ambiente Kaggle](docs/r
 
 GitHub conserva documentazione e, in seguito, codice, configurazioni e rapporti piccoli. Scansioni, pesi dei modelli e risultati voluminosi restano fuori da Git: per riprodurli conserveremo provenienza, versione e impronte dei file.
 
-Il repository parte privato. La licenza del futuro codice e l'eventuale pubblicazione saranno decise prima di distribuire il lavoro, tenendo conto delle licenze delle risorse e delle condizioni del premio. Non è un progetto ufficiale della Vesuvius Challenge.
+**Licenza e pubblicazione (decisione di Matteo, 8 settembre 2026).** Il repository è pubblico e il suo contenuto (codice, configurazioni, documentazione, rapporti) è rilasciato con licenza [MIT](LICENSE). Il repository **non ridistribuisce dati dei rotoli**: scansioni, volumi, label e pesi restano sui server della Vesuvius Challenge e su Kaggle sotto le loro condizioni (i dataset del concorso sono CC BY-NC 4.0; i pesi `ink_9um` secondo la loro model card); qui se ne conservano provenienza, versione e impronte SHA-256. Non è un progetto ufficiale della Vesuvius Challenge. La pubblicazione anticipata è anche il primo criterio dichiarato dei Progress Prizes ("released or open-sourced early").
 
 Le istruzioni comuni per gli agenti sono in [AGENTS.md](AGENTS.md). Per registrare il lavoro useremo la [scheda esperimento](docs/templates/esperimento.md) e la [scheda di revisione](docs/templates/revisione.md).
